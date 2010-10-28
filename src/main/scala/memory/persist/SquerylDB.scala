@@ -66,9 +66,7 @@ object SquerylDB extends Schema with DB
         if (e.getMessage.indexOf("Table \"DATUMROW\" not found") == 0) {
           e.printStackTrace // TODO
         } else transaction {
-          // create the initial database and insert a root datum
-          create
-          data.insert(DatumRow(0, 0, 1, "", "Welcome to Memory.", System.currentTimeMillis))
+          create // create the initial database
         }
       }
     }
@@ -78,43 +76,63 @@ object SquerylDB extends Schema with DB
     // nada for now?
   }
 
-  def loadRoot (userId: Long) :Datum = transaction {
+  def loadRoot (userId: Long) = transaction {
     // in our single-user test setup, the first datum is the root
-    data.lookup(1L) map(toJava) get
+    data.lookup(1L) map(toJava)
   }
 
-  def loadDatum (id :Long) :Datum = transaction {
+  def loadDatum (id :Long) = transaction {
     data.lookup(id) map(toJava) getOrElse(null)
   }
 
-  def loadChildren (id :Long) :Array[Datum] = transaction {
+  def loadChildren (id :Long) = transaction {
     data.where(d => d.parentId === id) map(toJava) toArray
   }
 
-  def loadData (ids :Set[Long]) :Array[Datum] = transaction {
+  def loadData (ids :Set[Long]) = transaction {
     data.where(d => d.id in ids) map(toJava) toArray
   }
 
   def updateDatum (id :Long, parentId :Option[Long], access :Option[Access], typ :Option[Type],
-                   meta :Option[String], text :Option[String], when :Option[Long]) {
-    error("Not implemented.")
+                   meta :Option[String], title :Option[String], text :Option[String],
+                   when :Option[Long]) {
+    transaction {
+      // don't know of a good way to construct a set() with optional elements
+      parentId foreach(value => data.update(d => where(d.id === id) set(d.parentId := value)))
+      access foreach(value =>
+        data.update(d => where(d.id === id) set(d.access := accessToCode(value))))
+      typ foreach(
+        value => data.update(d => where(d.id === id) set(d.`type` := typeToCode(value))))
+      meta foreach(value => data.update(d => where(d.id === id) set(d.meta := value)))
+      title foreach(value => data.update(d => where(d.id === id) set(d.title := value)))
+      text foreach(value => data.update(d => where(d.id === id) set(d.text := Some(value))))
+      when foreach(value => data.update(d => where(d.id === id) set(d.when := value)))
+    }
   }
 
-  def createDatum (datum :Datum) {
-    error("Not implemented.")
+  def createDatum (datum :Datum) = transaction {
+    val row = fromJava(datum)
+    data.insert(row)
+    datum.id = row.id
+    row.id
   }
 
-  protected def toJava (row :DatumRow) :Datum = {
+  protected def toJava (row :DatumRow) = {
     val datum = new Datum
     datum.id = row.id
     datum.parentId = row.parentId
     datum.access = codeToAccess(row.access)
     datum.`type` = codeToType(row.`type`)
     datum.meta = row.meta
-    datum.text = row.text
+    datum.title = row.title
+    datum.text = row.text.getOrElse(null)
     datum.when = row.when
     datum
   }
+
+  protected def fromJava (datum :Datum) =
+    DatumRow(datum.parentId, accessToCode(datum.access), typeToCode(datum.`type`),
+             datum.meta, datum.title, Option(datum.text), datum.when)
 }
 
 /**
@@ -129,8 +147,10 @@ case class DatumRow (
   `type` :Int,
   /** Metadata for this datum. */
   meta :String,
+  /** The title of this datum. */
+  title :String,
   /** The primary contents of this datum. */
-  text :String,
+  text :Option[String],
   /** A timestamp associated with this datum (usually when it was last modified). */
   when :Long
 ) extends KeyedEntity[Long] {
@@ -138,7 +158,7 @@ case class DatumRow (
   val id :Long = 0L
 
   /** Zero args ctor for use when unserializing. */
-  def this () = this(0L, 0, 0, "", "", 0L)
+  def this () = this(0L, 0, 0, "", "", Some(""), 0L)
 
   override def toString = "[id=" + id + ", type=" + `type` + "]"
 }

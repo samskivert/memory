@@ -10,6 +10,9 @@ import java.io.Serializable;
  */
 public class Datum implements Serializable
 {
+    /** The maximum allowed length of a title. */
+    public static final int MAX_TITLE_LENGTH = 256;
+
     /** The unique identifier for this datum. */
     public long id;
 
@@ -25,7 +28,10 @@ public class Datum implements Serializable
     /** Metadata for this datum. */
     public String meta;
 
-    /** The primary contents of this datum. */
+    /** The title of this datum. */
+    public String title;
+
+    /** The primary contents of this datum (null for container types). */
     public String text;
 
     /** A timestamp associated with this datum (usually when it was last modified). */

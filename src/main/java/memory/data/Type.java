@@ -11,18 +11,29 @@ public enum Type
     // leaf types
 
     /** A datum that contains markdown text. */
-    MARKDOWN,
+    MARKDOWN(true),
     /** A datum that contains HTML text. */
-    HTML,
+    HTML(true),
     /** A datum that contains a URL to content to be embedded. */
-    EMBED,
+    EMBED(false),
 
     // container types
 
     /** A list of items that can be checked off. */
-    CHECKLIST,
+    CHECKLIST(false),
     /** A log of completed activities that is rolled over daily/weekly/monthly. */
-    JOURNAL,
+    JOURNAL(false),
     /** A collection of data that is displayed in some number of columns. */
-    PAGE;
+    PAGE(false);
+
+    public boolean hasText ()
+    {
+        return _hasText;
+    }
+
+    Type (boolean hasText) {
+        _hasText = hasText;
+    }
+
+    protected boolean _hasText;
 }

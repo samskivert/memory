@@ -14,11 +14,11 @@
 
   <servlet-mapping>
     <servlet-name>getServlet</servlet-name>
-    <url-pattern>/d/*</url-pattern>
+    <url-pattern>/memory/d/*</url-pattern>
   </servlet-mapping>
   <servlet-mapping>
     <servlet-name>dataServlet</servlet-name>
-    <url-pattern>/data</url-pattern>
+    <url-pattern>/memory/data</url-pattern>
   </servlet-mapping>
   <!-- TODO: handle index.html with an auth-servlet -->
   <servlet-mapping>

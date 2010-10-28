@@ -8,7 +8,7 @@ import scala.xml.{Node, NodeSeq, XML}
 import javax.servlet.ServletConfig
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
-import memory.data.{Datum, Type}
+import memory.data.{Access, Datum, Type}
 import memory.persist.DB
 
 /**
@@ -29,12 +29,46 @@ class GetServlet extends HttpServlet
 
   override protected def doGet (req :HttpServletRequest, rsp :HttpServletResponse) {
     val userId = 0 // TODO
-    val dat = resolveChildren(db.loadRoot(userId))
+    val dat = resolveChildren(loadUserRoot(userId))
     val out = rsp.getWriter
     val contents = <div id="root">{toXML(dat)}</div>
     out.println(Header)
     XML.write(out, contents, null, false, null)
     out.println(Footer)
+  }
+
+  protected def loadUserRoot (userId :Long) = {
+    db.loadRoot(userId) match {
+      case None => {
+        val root = createUserPage(userId)
+        db.createDatum(root)
+        db.createDatum(createUserPageContents(root))
+        root
+      }
+      case Some(root) => root
+    }
+  }
+
+  protected def createUserPage (userId :Long) = {
+    val root = new Datum
+    root.access = Access.GNONE_WNONE
+    root.`type` = Type.PAGE
+    root.meta = ""
+    root.title = "Welcome to Memory"
+    root.when = System.currentTimeMillis
+    root
+  }
+
+  protected def createUserPageContents (root :Datum) = {
+    val contents = new Datum
+    contents.parentId = root.id
+    contents.access = Access.GNONE_WNONE
+    contents.`type` = Type.MARKDOWN
+    contents.meta = ""
+    contents.title = ""
+    contents.text = "This is your first page. Click the edit button to the right to edit it."
+    contents.when = System.currentTimeMillis
+    contents
   }
 
   protected def resolveChildren (rootId :Long) :Datum = resolveChildren(db.loadDatum(rootId))
@@ -50,8 +84,8 @@ class GetServlet extends HttpServlet
   }
 
   protected def toXML (datum :Datum) :Node = {
-    <def id={datum.id.toString} x:meta={datum.meta} x:type={datum.`type`.toString}
-         x:when={datum.when.toString}>{datum.text}
+    <def id={datum.id.toString} x:type={datum.`type`.toString} x:meta={datum.meta}
+         title={datum.title} x:when={datum.when.toString}>{datum.text}
       {datum.children match {
         case null => Array[Node]()
         case children => children map(toXML)

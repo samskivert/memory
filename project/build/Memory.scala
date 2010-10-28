@@ -45,6 +45,9 @@ class Memory (info :ProjectInfo) extends DefaultWebProject(info) {
     compileClasspath +++ depPath("gwt-dev") +++ mainJavaSourcePath +++ mainResourcesPath,
     List("-war", "target/scala_2.8.0/webapp", "memory")) dependsOn(copyResources)
 
-  // regenerate our i18n classes every time we compile
-  override def compileAction = super.compileAction dependsOn(i18nsync)
+  // copy our compiled classes to WEB-INF/classes after compiling
+  override def compileAction = task {
+    mainCompileConditional.run
+    FileUtilities.copy(mainClasses.get, jettyWebappPath / "WEB-INF" / "classes", log).left.toOption
+  } dependsOn(i18nsync) // regenerate our i18n classes every time we compile
 }

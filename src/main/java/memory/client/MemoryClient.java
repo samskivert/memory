@@ -30,9 +30,10 @@ public class MemoryClient implements EntryPoint
             RootPanel.get(CLIENT_DIV).add(new Label("Missing data?"));
         } else {
             Element relem = root.getElement();
-            Datum data = parseDatum((Element)relem.getChild(0));
+            Datum rdata = parseDatum((Element)relem.getChild(0));
             relem.removeFromParent();
-            RootPanel.get(CLIENT_DIV).add(new Label("Parsed: " + data.text));
+            GWT.log("Adding panel for " + rdata.text);
+            RootPanel.get(CLIENT_DIV).add(DatumPanel.create(rdata));
         }
     }
 
@@ -41,10 +42,13 @@ public class MemoryClient implements EntryPoint
         // parse the data for this element
         Datum datum = new Datum();
         datum.id = Long.parseLong(elem.getId());
-        datum.meta = elem.getAttribute("x:meta");
-        datum.text = elem.getInnerHTML();
-        datum.when = Long.parseLong(elem.getAttribute("x:when"));
         datum.type = Enum.valueOf(Type.class, elem.getAttribute("x:type"));
+        datum.meta = elem.getAttribute("x:meta");
+        datum.title = elem.getTitle();
+        if (datum.type.hasText()) {
+            datum.text = elem.getInnerText().trim();
+        }
+        datum.when = Long.parseLong(elem.getAttribute("x:when"));
 
         // then parse any children
         List<Datum> children = new ArrayList<Datum>();

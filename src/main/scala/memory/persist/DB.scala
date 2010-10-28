@@ -19,7 +19,7 @@ trait DB
   def shutdown :Unit
 
   /** Loads the root datum for the specified user. */
-  def loadRoot (userId: Long) :Datum
+  def loadRoot (userId: Long) :Option[Datum]
 
   /** Loads the specified datum. Throws an excepton if it does not exist. */
   def loadDatum (id :Long) :Datum
@@ -32,8 +32,10 @@ trait DB
 
   /** Updates the supplied fields of the specified datum. */
   def updateDatum (id :Long, parentId :Option[Long], access :Option[Access], typ :Option[Type],
-                   meta :Option[String], text :Option[String], when :Option[Long]) :Unit
+                   meta :Option[String], title :Option[String], text :Option[String],
+                   when :Option[Long]) :Unit
 
-  /** Creates a new datum and assigns it a unique id. */
-  def createDatum (datum :Datum)
+  /** Creates a new datum and fills in its {@link Datum#id} field.
+   * @return the id assigned to the newly created datum. */
+  def createDatum (datum :Datum) :Long
 }

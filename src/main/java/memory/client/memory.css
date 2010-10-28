@@ -1,0 +1,30 @@
+/** Memory client stylings. */
+
+body {
+  font-family: Helvetica, Arial, sans-serif;
+}
+
+.cornerButton {
+  float: right;
+}
+
+.editor {
+  border: 1px solid;
+}
+
+.view {
+}
+
+.pageTitle {
+  font-size: large;
+  border-bottom: 1px solid;
+  margin-bottom: 5px;
+}
+
+.textTitle {
+  font-weight: bold;
+}
+
+.stretchWide {
+  width: 100%;
+}

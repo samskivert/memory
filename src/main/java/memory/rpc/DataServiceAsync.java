@@ -16,10 +16,10 @@ public interface DataServiceAsync
     /**
      * The async version of {@link DataService#createDatum}.
      */
-    void createDatum (Datum datum, AsyncCallback<Void> callback);
+    void createDatum (Datum datum, AsyncCallback<Long> callback);
 
     /**
      * The async version of {@link DataService#updateDatum}.
      */
-    void updateDatum (long id, Long parentId, Access access, String meta, String text, Type type, Long when, Boolean archived, AsyncCallback<Void> callback);
+    void updateDatum (long id, Long parentId, Access access, Type type, String meta, String title, String text, Long when, Boolean archived, AsyncCallback<Void> callback);
 }
