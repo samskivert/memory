@@ -12,17 +12,23 @@ import memory.data.Type
  */
 trait DB
 {
+  /** Initializes the database component. */
+  def init :Unit
+
+  /** Shuts down the database component. */
+  def shutdown :Unit
+
   /** Loads the root datum for the specified user. */
   def loadRoot (userId: Long) :Datum
 
-  /** Loads the specified datum. */
+  /** Loads the specified datum. Throws an excepton if it does not exist. */
   def loadDatum (id :Long) :Datum
 
   /** Loads the children of the specified datum. */
-  def loadChildren (id :Long) :Seq[Datum]
+  def loadChildren (id :Long) :Array[Datum]
 
   /** Loads the specified data. */
-  def loadData (ids :Set[Long]) :Seq[Datum]
+  def loadData (ids :Set[Long]) :Array[Datum]
 
   /** Updates the supplied fields of the specified datum. */
   def updateDatum (id :Long, parentId :Option[Long], access :Option[Access], typ :Option[Type],

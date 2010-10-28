@@ -1,7 +1,7 @@
 //
 // $Id$
 
-package memory.ui;
+package memory.client;
 
 /**
  * Does something extraordinary.

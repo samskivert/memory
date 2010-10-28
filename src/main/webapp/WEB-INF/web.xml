@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+          "http://java.sun.com/dtd/web-app_2_3.dtd">
+<web-app>
+  <servlet>
+    <servlet-name>getServlet</servlet-name>
+    <servlet-class>memory.server.GetServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  <servlet>
+    <servlet-name>dataServlet</servlet-name>
+    <servlet-class>memory.server.DataServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>getServlet</servlet-name>
+    <url-pattern>/d/*</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>dataServlet</servlet-name>
+    <url-pattern>/data</url-pattern>
+  </servlet-mapping>
+  <!-- TODO: handle index.html with an auth-servlet -->
+  <servlet-mapping>
+    <servlet-name>getServlet</servlet-name>
+    <url-pattern>/index.html</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>getServlet</servlet-name>
+    <url-pattern>/</url-pattern>
+  </servlet-mapping>
+
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+  </welcome-file-list>
+</web-app>

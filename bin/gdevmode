@@ -1,0 +1,25 @@
+#!/bin/sh
+
+ROOT=`dirname $0`
+ROOT=`cd $ROOT/.. ; pwd`
+
+# if we have gwt-utils checked out in a known location; add its source and
+# classes directly to GWT devmode's classpath so that we get magical page
+# reload change detection
+GWT_UTILS_HOME=$HOME/projects/gwt-utils
+if [ -d $GWT_UTILS_HOME ]; then
+    GWT_UTILS_CPATH="$GWT_UTILS_HOME/src/main/java $GWT_UTILS_HOME/target/classes"
+else
+    GWT_UTILS_CPATH="$ROOT/lib_managed/scala_2.8.0/compile/gwt-utils-*.jar"
+fi
+
+CLASSPATH=`echo $ROOT/lib_managed/scala_2.8.0/system/gwt-dev-*.jar \
+    $ROOT/lib_managed/scala_2.8.0/compile/gwt-user-*.jar \
+    $ROOT/lib_managed/scala_2.8.0/compile/samskivert-*.jar \
+    $GWT_UTILS_CPATH \
+    $ROOT/src/main/resources \
+    $ROOT/src/main/java | sed 's/ /:/g'`
+
+java -classpath $CLASSPATH -Xmx256M com.google.gwt.dev.DevMode \
+    -noserver -port 8080 \
+    -startupUrl index.html -war target/scala_2.8.0/webapp memory &

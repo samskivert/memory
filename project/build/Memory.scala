@@ -1,6 +1,6 @@
 import sbt._
 
-class Memory (info :ProjectInfo) extends DefaultProject(info) {
+class Memory (info :ProjectInfo) extends DefaultWebProject(info) {
   // need our local repository for gwt-utils snapshot
   val mavenLocal = "Local Maven Repository" at "file://"+Path.userHome+"/.m2/repository"
 
@@ -11,7 +11,11 @@ class Memory (info :ProjectInfo) extends DefaultProject(info) {
   // HTTP and GWT depends
   val gwtUser = "com.google.gwt" % "gwt-user" % "2.0.4"
   val gwtUtils = "com.threerings" % "gwt-utils" % "1.2-SNAPSHOT"
-  val jetty = "org.mortbay.jetty" % "jetty" % "6.1.25"
+
+  override def libraryDependencies = Set(
+    "org.eclipse.jetty" % "jetty-server" % "7.0.0.v20091005" % "test",
+    "org.eclipse.jetty" % "jetty-webapp" % "7.0.0.v20091005" % "test"
+  ) ++ super.libraryDependencies
 
   // we don't want these on any of our classpaths, so we make them "system" deps
   val gwtDev = "com.google.gwt" % "gwt-dev" % "2.0.4" % "system"
@@ -21,9 +25,6 @@ class Memory (info :ProjectInfo) extends DefaultProject(info) {
   // database depends
   val h2db = "com.h2database" % "h2" % "1.2.142"
   val squeryl = "org.squeryl" % "squeryl_2.8.0" % "0.9.4-RC2"
-
-  // specify our main class
-  override def mainClass = Some("memory.server.Memory")
 
   // used to obtain the path for a specific dependency jar file
   def depPath (name :String) = managedDependencyRootPath ** (name+"*")
@@ -54,16 +55,4 @@ class Memory (info :ProjectInfo) extends DefaultProject(info) {
 
   // regenerate our i18n classes every time we compile
   override def compileAction = super.compileAction dependsOn(i18nsync)
-
-  // to cooperate nicely with GWT devmode when we run the server from within SBT, we copy (not
-  // sync) all of our resources to a target/../war directory and remove target/../resources to
-  // avoid seeing everything twice
-  def warResourcesOutputPath = outputPath / "war"
-  def copyWarResourcesAction = copyTask(mainResources, warResourcesOutputPath)
-  override def runClasspath =
-    super.runClasspath --- mainResourcesOutputPath +++ warResourcesOutputPath
-  override protected def runAction = task { args =>
-    runTask(getMainClass(true), runClasspath, args) dependsOn(
-      compile, copyResources, copyWarResourcesAction)
-  }
 }

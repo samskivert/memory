@@ -1,2 +1,4 @@
+.ensime
 project/boot/
 lib_managed/
+database.*.db

@@ -9,6 +9,8 @@ package memory.data;
  */
 public enum Access
 {
+    /** Groups have no access, world has no access. */
+    GNONE_WNONE,
     /** Groups can read, world has no access. */
     GREAD_WNONE,
     /** Groups can write, world has no access. */
