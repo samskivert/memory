@@ -12,10 +12,10 @@ class Memory (info :ProjectInfo) extends DefaultWebProject(info) {
   val gwtUser = "com.google.gwt" % "gwt-user" % "2.0.4"
   val gwtUtils = "com.threerings" % "gwt-utils" % "1.2-SNAPSHOT"
 
-  override def libraryDependencies = Set(
-    "org.eclipse.jetty" % "jetty-server" % "7.0.0.v20091005" % "test",
-    "org.eclipse.jetty" % "jetty-webapp" % "7.0.0.v20091005" % "test"
-  ) ++ super.libraryDependencies
+  // override def libraryDependencies = Set(
+  //   "org.eclipse.jetty" % "jetty-server" % "7.0.0.v20091005" % "test",
+  //   "org.eclipse.jetty" % "jetty-webapp" % "7.0.0.v20091005" % "test"
+  // ) ++ super.libraryDependencies
 
   // we don't want these on any of our classpaths, so we make them "system" deps
   val gwtDev = "com.google.gwt" % "gwt-dev" % "2.0.4" % "system"
@@ -43,15 +43,7 @@ class Memory (info :ProjectInfo) extends DefaultWebProject(info) {
   lazy val gwtc = runTask(
     Some("com.google.gwt.dev.Compiler"),
     compileClasspath +++ depPath("gwt-dev") +++ mainJavaSourcePath +++ mainResourcesPath,
-    List("-war", "target/scala_2.8.0/gwtc", "memory")) dependsOn(copyResources)
-
-  // packages the output of our GWT client into a jar file
-  def packageGwtJar = outputPath / "memory-gwt.jar"
-  lazy val gwtjar = packageTask(mainResources +++ (outputPath / "gwtc" ##) ** "*",
-                                packageGwtJar, Nil) dependsOn(gwtc)
-
-  // we include our resources in the -gwt.jar so we exclude them from the main jar
-  override def packagePaths = super.packagePaths --- mainResources
+    List("-war", "target/scala_2.8.0/webapp", "memory")) dependsOn(copyResources)
 
   // regenerate our i18n classes every time we compile
   override def compileAction = super.compileAction dependsOn(i18nsync)

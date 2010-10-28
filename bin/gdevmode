@@ -21,5 +21,4 @@ CLASSPATH=`echo $ROOT/lib_managed/scala_2.8.0/system/gwt-dev-*.jar \
     $ROOT/src/main/java | sed 's/ /:/g'`
 
 java -classpath $CLASSPATH -Xmx256M com.google.gwt.dev.DevMode \
-    -noserver -port 8080 \
-    -startupUrl index.html -war target/scala_2.8.0/webapp memory &
+    -startupUrl memory/index.html -war target/scala_2.8.0/webapp memory &

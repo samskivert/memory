@@ -4,6 +4,6 @@
   <!--<inherits name="com.google.gwt.i18n.I18N"/>-->
   <inherits name="com.threerings.gwt.Utils"/>
 
-  <source path="coreen"/>
+  <source path="memory"/>
   <entry-point class="memory.client.MemoryClient"/>
 </module>

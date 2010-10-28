@@ -30,4 +30,7 @@ public class Datum implements Serializable
 
     /** A timestamp associated with this datum (usually when it was last modified). */
     public long when;
+
+    /** Descendents of this datum, may be null. */
+    public Datum[] children;
 }

@@ -23,12 +23,14 @@
   <!-- TODO: handle index.html with an auth-servlet -->
   <servlet-mapping>
     <servlet-name>getServlet</servlet-name>
-    <url-pattern>/index.html</url-pattern>
+    <url-pattern>/memory/index.html</url-pattern>
   </servlet-mapping>
+<!--
   <servlet-mapping>
     <servlet-name>getServlet</servlet-name>
     <url-pattern>/</url-pattern>
   </servlet-mapping>
+-->
 
   <welcome-file-list>
     <welcome-file>index.html</welcome-file>
