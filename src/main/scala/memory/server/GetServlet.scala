@@ -63,7 +63,7 @@ class GetServlet extends HttpServlet
     val contents = new Datum
     contents.parentId = root.id
     contents.access = Access.GNONE_WNONE
-    contents.`type` = Type.MARKDOWN
+    contents.`type` = Type.WIKI
     contents.meta = ""
     contents.title = ""
     contents.text = "This is your first page. Click the edit button to the right to edit it."

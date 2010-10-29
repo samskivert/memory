@@ -10,8 +10,8 @@ public enum Type
 {
     // leaf types
 
-    /** A datum that contains markdown text. */
-    MARKDOWN(true),
+    /** A datum that contains wiki formatted text. */
+    WIKI(true),
     /** A datum that contains HTML text. */
     HTML(true),
     /** A datum that contains a URL to content to be embedded. */

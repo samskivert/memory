@@ -178,7 +178,7 @@ public abstract class DatumPanel extends FlowPanel
     protected static DatumPanel createPanel (Type type)
     {
         switch (type) {
-        case MARKDOWN: return new MarkdownDatumPanel();
+        case WIKI: return new WikiDatumPanel();
         default:
         case HTML: return new HTMLDatumPanel();
         case EMBED: return new HTMLDatumPanel();

@@ -9,6 +9,7 @@ import java.sql.DriverManager
 
 import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.adapters.H2Adapter
+import org.squeryl.annotations.Column
 import org.squeryl.{KeyedEntity, Schema, Session, SessionFactory}
 
 import memory.data.{Access, Datum, Type}
@@ -23,7 +24,7 @@ object SquerylDB extends Schema with DB
 
   /** Maps {@link Type} elements to an Int that can be used in the DB. */
   val typeToCode = Map(
-    Type.MARKDOWN -> 1,
+    Type.WIKI -> 1,
     Type.HTML -> 2,
     Type.EMBED -> 3,
     Type.LIST -> 4,
@@ -147,11 +148,11 @@ case class DatumRow (
   /** Indicates the type of this datum. */
   `type` :Int,
   /** Metadata for this datum. */
-  meta :String,
+  @Column(length=1024) meta :String,
   /** The title of this datum. */
-  title :String,
+  @Column(length=Datum.MAX_TITLE_LENGTH) title :String,
   /** The primary contents of this datum. */
-  text :Option[String],
+  @Column(length=65536) text :Option[String],
   /** A timestamp associated with this datum (usually when it was last modified). */
   when :Long
 ) extends KeyedEntity[Long] {

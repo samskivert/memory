@@ -34,7 +34,7 @@ public class ListDatumPanel extends DatumPanel
         add(Widgets.newRow(item, add));
         new ClickCallback<Long>(add, item) {
             protected boolean callService () {
-                _item = createChildDatum(Type.MARKDOWN, "", item.getText().trim());
+                _item = createChildDatum(Type.WIKI, "", item.getText().trim());
                 _datasvc.createDatum(_item, this);
                 return true;
             }
