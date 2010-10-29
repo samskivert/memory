@@ -22,6 +22,7 @@ import com.threerings.gwt.util.ClickCallback;
 import com.threerings.gwt.util.StringUtil;
 
 import memory.data.Datum;
+import memory.data.MetaData;
 import memory.data.Type;
 import memory.rpc.DataService;
 import memory.rpc.DataServiceAsync;
@@ -41,6 +42,7 @@ public abstract class DatumPanel extends FlowPanel
     public void init (Datum datum)
     {
         _datum = datum;
+        _meta = new MetaData(_datum.meta);
         showContents();
     }
 
@@ -169,6 +171,7 @@ public abstract class DatumPanel extends FlowPanel
     protected abstract void createContents ();
 
     protected Datum _datum;
+    protected MetaData _meta;
 
     protected static String getTitle (Datum datum)
     {
