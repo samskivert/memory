@@ -54,4 +54,9 @@ public class ListDatumPanel extends DatumPanel
     {
         items.add(Widgets.newLabel(item.text));
     }
+
+    protected void addEditor (FlowPanel editor)
+    {
+        addTitleEditor(editor);
+    }
 }

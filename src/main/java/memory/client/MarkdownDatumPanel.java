@@ -6,13 +6,13 @@ package memory.client;
 import com.google.gwt.user.client.ui.HTMLPanel;
 
 /**
- * Displays an HTML datum.
+ * Displays a Markdown datum.
  */
-public class HTMLDatumPanel extends TextDatumPanel
+public class MarkdownDatumPanel extends TextDatumPanel
 {
     @Override protected void createContents ()
     {
         addTextTitle();
-        add(new HTMLPanel(_datum.text));
+        add(new HTMLPanel(Showdown.toHTML(_datum.text)));
     }
 }
