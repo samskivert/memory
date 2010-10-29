@@ -4,6 +4,7 @@
 package memory.data;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Contains information on a single datum.
@@ -38,5 +39,5 @@ public class Datum implements Serializable
     public long when;
 
     /** Descendents of this datum, may be null. */
-    public Datum[] children;
+    public List<Datum> children;
 }

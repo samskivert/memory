@@ -4,7 +4,6 @@
 package memory.client;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -53,18 +52,17 @@ public class MemoryClient implements EntryPoint
         datum.when = Long.parseLong(elem.getAttribute("x:when"));
 
         // then parse any children
-        List<Datum> children = new ArrayList<Datum>();
+        datum.children = new ArrayList<Datum>();
         for (int ii = 0, ll = elem.getChildCount(); ii < ll; ii++) {
             Node node = elem.getChild(ii);
             if (node.getNodeType() == Node.ELEMENT_NODE) {
                 try {
-                    children.add(parseDatum((Element)node));
+                    datum.children.add(parseDatum((Element)node));
                 } catch (Exception e) {
                     GWT.log("Failed to parse datum " + node, e);
                 }
             }
         }
-        datum.children = children.toArray(new Datum[children.size()]);
 
         return datum;
     }

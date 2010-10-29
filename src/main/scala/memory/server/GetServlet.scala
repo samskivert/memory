@@ -75,20 +75,25 @@ class GetServlet extends HttpServlet
 
   protected def resolveChildren (root :Datum) :Datum = {
     root.children = root.`type` match {
-      case Type.CHECKLIST => db.loadChildren(root.id) map(resolveChildren) // TODO: archive old bits
-      case Type.JOURNAL => db.loadChildren(root.id) map(resolveChildren) // TODO: just today's data
-      case Type.PAGE => db.loadChildren(root.id) map(resolveChildren)
+      case Type.LIST => resolveChildList(root.id) // TODO: archive old bits
+      case Type.CHECKLIST => resolveChildList(root.id) // TODO: archive old bits
+      case Type.JOURNAL => resolveChildList(root.id) // TODO: just today's data
+      case Type.PAGE => resolveChildList(root.id)
       case _ => null
     }
     root
   }
 
+  protected def resolveChildList (id :Long) =
+    java.util.Arrays.asList(db.loadChildren(id) map(resolveChildren) :_*)
+
   protected def toXML (datum :Datum) :Node = {
+    import scalaj.collection.Imports._
     <def id={datum.id.toString} x:access={datum.access.toString} x:type={datum.`type`.toString}
          x:meta={datum.meta} title={datum.title} x:when={datum.when.toString}>{datum.text}
       {datum.children match {
         case null => Array[Node]()
-        case children => children map(toXML)
+        case children => children.asScala map(toXML)
       }}
     </def>
   }

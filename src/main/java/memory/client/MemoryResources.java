@@ -16,6 +16,7 @@ public interface MemoryResources extends ClientBundle
     public interface Styles extends CssResource {
         String cornerButton ();
         String editor ();
+        String editorTitle ();
         String view ();
         String pageTitle ();
         String pageDatum ();

@@ -26,9 +26,10 @@ object SquerylDB extends Schema with DB
     Type.MARKDOWN -> 1,
     Type.HTML -> 2,
     Type.EMBED -> 3,
-    Type.CHECKLIST -> 4,
-    Type.JOURNAL -> 5,
-    Type.PAGE -> 6
+    Type.LIST -> 4,
+    Type.CHECKLIST -> 5,
+    Type.JOURNAL -> 6,
+    Type.PAGE -> 7
   ) // these mappings must never change (but can be extended)
 
   /** Maps an Int code back to a {@link Type}. */

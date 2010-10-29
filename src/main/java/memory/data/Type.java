@@ -19,7 +19,9 @@ public enum Type
 
     // container types
 
-    /** A list of items that can be checked off. */
+    /** A list of items that can be easily extended. */
+    LIST(false),
+    /** Like a list but with checkboxes and auto-archival of completed items. */
     CHECKLIST(false),
     /** A log of completed activities that is rolled over daily/weekly/monthly. */
     JOURNAL(false),

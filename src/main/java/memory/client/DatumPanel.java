@@ -57,6 +57,13 @@ public abstract class DatumPanel extends FlowPanel
         createContents();
     }
 
+    protected void addTextTitle ()
+    {
+        if (!StringUtil.isBlank(_datum.title)) {
+            add(Widgets.newLabel(_datum.title, _rsrc.styles().textTitle()));
+        }
+    }
+
     protected void showEditor ()
     {
         clear();
@@ -74,8 +81,6 @@ public abstract class DatumPanel extends FlowPanel
 
     protected void addEditor (FlowPanel editor)
     {
-        editor.add(Widgets.newLabel("Type: " + _datum.type + ", Access: " + _datum.access +
-                                    ", When: " + _datum.when));
         addTitleEditor(editor);
         addChildrenEditor(editor);
     }
@@ -105,14 +110,14 @@ public abstract class DatumPanel extends FlowPanel
 
     protected void addChildrenEditor (FlowPanel editor)
     {
-        editor.add(Widgets.newLabel("Children:"));
+        editor.add(Widgets.newLabel("Children:", _rsrc.styles().editorTitle()));
         final FlowPanel kids = new FlowPanel();
         for (Datum child : _datum.children) {
             kids.add(Widgets.newLabel(getTitle(child)));
         }
         editor.add(kids);
 
-        editor.add(Widgets.newLabel("Add child:"));
+        editor.add(Widgets.newLabel("Add child:", _rsrc.styles().editorTitle()));
         FluentTable table = new FluentTable(0, 5);
         final EnumListBox<Type> type = new EnumListBox<Type>(Type.class);
         table.add().setText("Type:").right().setWidget(type);
@@ -124,29 +129,33 @@ public abstract class DatumPanel extends FlowPanel
 
         new ClickCallback<Long>(add) {
             protected boolean callService () {
-                _child = new Datum();
-                _child.parentId = _datum.id;
-                _child.type = type.getSelectedValue();
-                _child.access = _datum.access;
-                _child.meta = "";
-                _child.title = title.getText();
-                _child.when = System.currentTimeMillis();
+                _child = createChildDatum(type.getSelectedValue(), title.getText(), null);
                 _datasvc.createDatum(_child, this);
                 return true;
             }
             protected boolean gotResult (Long datumId) {
                 _child.id = datumId;
+                _datum.children.add(_child);
                 kids.add(Widgets.newLabel(getTitle(_child)));
+                title.setText("");
                 Popups.infoNear(_msgs.datumCreated(), getPopupNear());
-                // yay for arrays in Java
-                Datum[] nchildren = new Datum[_datum.children.length+1];
-                System.arraycopy(_datum.children, 0, nchildren, 0, _datum.children.length);
-                nchildren[_datum.children.length] = _child;
-                _datum.children = nchildren;
                 return true;
             }
             protected Datum _child;
         };
+    }
+
+    protected Datum createChildDatum (Type type, String title, String text)
+    {
+        Datum child = new Datum();
+        child.parentId = _datum.id;
+        child.type = type;
+        child.access = _datum.access;
+        child.meta = "";
+        child.title = title;
+        child.text = text;
+        child.when = System.currentTimeMillis();
+        return child;
     }
 
     protected PushButton createCornerButton (ImageResource image, String tip, ClickHandler onClick)
@@ -173,6 +182,7 @@ public abstract class DatumPanel extends FlowPanel
         default:
         case HTML: return new HTMLDatumPanel();
         case EMBED: return new HTMLDatumPanel();
+        case LIST: return new ListDatumPanel();
         case CHECKLIST: return new HTMLDatumPanel();
         case JOURNAL: return new HTMLDatumPanel();
         case PAGE: return new PageDatumPanel();

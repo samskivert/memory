@@ -13,7 +13,6 @@ import com.threerings.gwt.ui.FluentTable;
 import com.threerings.gwt.ui.Popups;
 import com.threerings.gwt.ui.Widgets;
 import com.threerings.gwt.util.ClickCallback;
-import com.threerings.gwt.util.StringUtil;
 
 /**
  * Displays an HTML datum.
@@ -22,9 +21,7 @@ public class HTMLDatumPanel extends DatumPanel
 {
     @Override protected void createContents ()
     {
-        if (!StringUtil.isBlank(_datum.title)) {
-            add(Widgets.newLabel(_datum.title, _rsrc.styles().textTitle()));
-        }
+        addTextTitle();
         add(new HTMLPanel(_datum.text));
     }
 
