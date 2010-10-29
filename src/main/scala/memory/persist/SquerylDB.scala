@@ -36,12 +36,12 @@ object SquerylDB extends Schema with DB
 
   /** Maps {@link Access} elements to an Int that can be used in the DB. */
   val accessToCode = Map(
-    Access.GNONE_WNONE -> 0,
-    Access.GREAD_WNONE -> 1,
-    Access.GWRITE_WNONE -> 2,
-    Access.GREAD_WREAD -> 3,
-    Access.GWRITE_WREAD -> 4,
-    Access.GWRITE_WWRITE -> 5
+    Access.GNONE_WNONE -> 1,
+    Access.GREAD_WNONE -> 2,
+    Access.GWRITE_WNONE -> 3,
+    Access.GREAD_WREAD -> 4,
+    Access.GWRITE_WREAD -> 5,
+    Access.GWRITE_WWRITE -> 6
   ) // these mappings must never change (but can be extended)
 
   /** Maps an Int code back to a {@link Access}. */
@@ -160,5 +160,5 @@ case class DatumRow (
   /** Zero args ctor for use when unserializing. */
   def this () = this(0L, 0, 0, "", "", Some(""), 0L)
 
-  override def toString = "[id=" + id + ", type=" + `type` + "]"
+  // override def toString = "[id=" + id + ", type=" + `type` + "]"
 }

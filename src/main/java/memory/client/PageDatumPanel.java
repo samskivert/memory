@@ -3,6 +3,8 @@
 
 package memory.client;
 
+import com.google.gwt.user.client.ui.Widget;
+
 import com.threerings.gwt.ui.Widgets;
 
 import memory.data.Datum;
@@ -17,7 +19,9 @@ public class PageDatumPanel extends DatumPanel
         add(Widgets.newLabel(_datum.title, _rsrc.styles().pageTitle()));
         // TODO: support multiple columns
         for (Datum child : _datum.children) {
-            add(DatumPanel.create(child));
+            Widget cpanel = DatumPanel.create(child);
+            cpanel.addStyleName(_rsrc.styles().pageDatum());
+            add(cpanel);
         }
     }
 }

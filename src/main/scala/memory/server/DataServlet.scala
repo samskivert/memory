@@ -7,7 +7,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet
 
 import memory.data.{Access, Datum, Type}
 import memory.persist.DB
-import memory.rpc.DataService
+import memory.rpc.{DataService, ServiceException}
 
 /**
  * Implements the {@link DataService}.
@@ -33,5 +33,10 @@ class DataServlet extends RemoteServiceServlet with DataService
     db.updateDatum(id, Option(parentId) map(_.longValue), Option(access), Option(`type`),
                    Option(meta), Option(title), Option(text), Option(when) map(_.longValue))
     // TODO: handle archived
+  }
+
+  override def doUnexpectedFailure (e :Throwable) {
+    e.printStackTrace(System.err)
+    super.doUnexpectedFailure(e)
   }
 }

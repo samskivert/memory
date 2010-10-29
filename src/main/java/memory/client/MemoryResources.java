@@ -18,8 +18,10 @@ public interface MemoryResources extends ClientBundle
         String editor ();
         String view ();
         String pageTitle ();
+        String pageDatum ();
         String textTitle ();
         String stretchWide ();
+        String insetBox ();
     }
 
     @Source("memory.css")

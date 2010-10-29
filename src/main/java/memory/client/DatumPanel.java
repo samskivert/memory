@@ -4,9 +4,9 @@
 package memory.client;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
@@ -14,10 +14,12 @@ import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
+import com.threerings.gwt.ui.EnumListBox;
 import com.threerings.gwt.ui.FluentTable;
 import com.threerings.gwt.ui.Popups;
 import com.threerings.gwt.ui.Widgets;
 import com.threerings.gwt.util.ClickCallback;
+import com.threerings.gwt.util.StringUtil;
 
 import memory.data.Datum;
 import memory.data.Type;
@@ -65,16 +67,23 @@ public abstract class DatumPanel extends FlowPanel
                 showContents();
             }
         }));
-        add(createEditor());
+        FlowPanel editor = Widgets.newFlowPanel(_rsrc.styles().insetBox());
+        addEditor(editor);
+        add(editor);
     }
 
-    protected Widget createEditor ()
+    protected void addEditor (FlowPanel editor)
     {
-        FluentTable editor = new FluentTable(0, 5);
+        editor.add(Widgets.newLabel("Type: " + _datum.type + ", Access: " + _datum.access +
+                                    ", When: " + _datum.when));
+        addTitleEditor(editor);
+        addChildrenEditor(editor);
+    }
 
-        final TextBox title = Widgets.newTextBox(_datum.title, Datum.MAX_TITLE_LENGTH, 40);
+    protected void addTitleEditor (FlowPanel editor)
+    {
+        final TextBox title = Widgets.newTextBox(_datum.title, Datum.MAX_TITLE_LENGTH, 20);
         Button update = new Button("Update");
-        editor.add().setWidget(title).right().setWidget(update);
         new ClickCallback<Void>(update, title) {
             protected boolean callService () {
                 _title = title.getText().trim();
@@ -91,7 +100,53 @@ public abstract class DatumPanel extends FlowPanel
             protected String _title;
         };
 
-        return editor;
+        editor.add(Widgets.newRow(Widgets.newLabel("Title:"), title, update));
+    }
+
+    protected void addChildrenEditor (FlowPanel editor)
+    {
+        editor.add(Widgets.newLabel("Children:"));
+        final FlowPanel kids = new FlowPanel();
+        for (Datum child : _datum.children) {
+            kids.add(Widgets.newLabel(getTitle(child)));
+        }
+        editor.add(kids);
+
+        editor.add(Widgets.newLabel("Add child:"));
+        FluentTable table = new FluentTable(0, 5);
+        final EnumListBox<Type> type = new EnumListBox<Type>(Type.class);
+        table.add().setText("Type:").right().setWidget(type);
+        final TextBox title = Widgets.newTextBox("", Datum.MAX_TITLE_LENGTH, 20);
+        table.add().setText("Title:").right().setWidget(title);
+        final Button add = new Button("Add");
+        table.add().right().setWidget(add);
+        editor.add(table);
+
+        new ClickCallback<Long>(add) {
+            protected boolean callService () {
+                _child = new Datum();
+                _child.parentId = _datum.id;
+                _child.type = type.getSelectedValue();
+                _child.access = _datum.access;
+                _child.meta = "";
+                _child.title = title.getText();
+                _child.when = System.currentTimeMillis();
+                _datasvc.createDatum(_child, this);
+                return true;
+            }
+            protected boolean gotResult (Long datumId) {
+                _child.id = datumId;
+                kids.add(Widgets.newLabel(getTitle(_child)));
+                Popups.infoNear(_msgs.datumCreated(), getPopupNear());
+                // yay for arrays in Java
+                Datum[] nchildren = new Datum[_datum.children.length+1];
+                System.arraycopy(_datum.children, 0, nchildren, 0, _datum.children.length);
+                nchildren[_datum.children.length] = _child;
+                _datum.children = nchildren;
+                return true;
+            }
+            protected Datum _child;
+        };
     }
 
     protected PushButton createCornerButton (ImageResource image, String tip, ClickHandler onClick)
@@ -105,6 +160,11 @@ public abstract class DatumPanel extends FlowPanel
     protected abstract void createContents ();
 
     protected Datum _datum;
+
+    protected static String getTitle (Datum datum)
+    {
+        return StringUtil.isBlank(datum.title) ? "<no title>" : datum.title;
+    }
 
     protected static DatumPanel createPanel (Type type)
     {

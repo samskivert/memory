@@ -84,8 +84,8 @@ class GetServlet extends HttpServlet
   }
 
   protected def toXML (datum :Datum) :Node = {
-    <def id={datum.id.toString} x:type={datum.`type`.toString} x:meta={datum.meta}
-         title={datum.title} x:when={datum.when.toString}>{datum.text}
+    <def id={datum.id.toString} x:access={datum.access.toString} x:type={datum.`type`.toString}
+         x:meta={datum.meta} title={datum.title} x:when={datum.when.toString}>{datum.text}
       {datum.children match {
         case null => Array[Node]()
         case children => children map(toXML)

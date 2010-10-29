@@ -4,6 +4,7 @@
 package memory.client;
 
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.Widget;
@@ -22,20 +23,21 @@ public class HTMLDatumPanel extends DatumPanel
     @Override protected void createContents ()
     {
         if (!StringUtil.isBlank(_datum.title)) {
-            add(Widgets.newLabel(_rsrc.styles().textTitle()));
+            add(Widgets.newLabel(_datum.title, _rsrc.styles().textTitle()));
         }
         add(new HTMLPanel(_datum.text));
     }
 
-    protected Widget createEditor ()
+    protected void addEditor (FlowPanel editor)
     {
-        FluentTable editor = new FluentTable(0, 5, _rsrc.styles().stretchWide());
+        addTitleEditor(editor);
+        editor.add(Widgets.newShim(5, 5));
 
         final TextArea text = Widgets.newTextArea(_datum.text, -1, 30);
         text.addStyleName(_rsrc.styles().stretchWide());
-        editor.add().setWidget(text);
+        editor.add(text);
+
         Button update = new Button("Update");
-        editor.add().setWidget(update).alignRight();
         new ClickCallback<Void>(update) {
             protected boolean callService () {
                 _text = text.getText().trim();
@@ -51,7 +53,6 @@ public class HTMLDatumPanel extends DatumPanel
             }
             protected String _text;
         };
-
-        return editor;
+        editor.add(update);
     }
 }

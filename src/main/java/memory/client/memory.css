@@ -6,6 +6,8 @@ body {
 
 .cornerButton {
   float: right;
+  margin: 2px 2px 0px 0px;
+  cursor: pointer;
 }
 
 .editor {
@@ -18,7 +20,10 @@ body {
 .pageTitle {
   font-size: large;
   border-bottom: 1px solid;
-  margin-bottom: 5px;
+}
+
+.pageDatum {
+  margin: 5px 0px;
 }
 
 .textTitle {
@@ -26,5 +31,9 @@ body {
 }
 
 .stretchWide {
-  width: 100%;
+  width: 98%;
+}
+
+.insetBox {
+  padding: 5px;
 }

@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 
+import memory.data.Access;
 import memory.data.Datum;
 import memory.data.Type;
 
@@ -42,6 +43,7 @@ public class MemoryClient implements EntryPoint
         // parse the data for this element
         Datum datum = new Datum();
         datum.id = Long.parseLong(elem.getId());
+        datum.access = Enum.valueOf(Access.class, elem.getAttribute("x:access"));
         datum.type = Enum.valueOf(Type.class, elem.getAttribute("x:type"));
         datum.meta = elem.getAttribute("x:meta");
         datum.title = elem.getTitle();
