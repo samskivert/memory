@@ -15,6 +15,6 @@ public class WikiDatumPanel extends TextDatumPanel
     @Override protected void createContents ()
     {
         addTextTitle();
-        add(new HTMLPanel(WikiParser.renderXHTML(_datum.text)));
+        add(new HTMLPanel(WikiParser.render(_datum.text)));
     }
 }

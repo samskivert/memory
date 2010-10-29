@@ -113,7 +113,7 @@ public abstract class DatumPanel extends FlowPanel
         editor.add(Widgets.newLabel("Children:", _rsrc.styles().editorTitle()));
         final FlowPanel kids = new FlowPanel();
         for (Datum child : _datum.children) {
-            kids.add(Widgets.newLabel(getTitle(child)));
+            kids.add(Widgets.newLabel(child.type + ": " + getTitle(child)));
         }
         editor.add(kids);
 
@@ -172,7 +172,9 @@ public abstract class DatumPanel extends FlowPanel
 
     protected static String getTitle (Datum datum)
     {
-        return StringUtil.isBlank(datum.title) ? "<no title>" : datum.title;
+        return !StringUtil.isBlank(datum.title) ? datum.title :
+            (StringUtil.isBlank(datum.text) ? "<no title>" :
+             StringUtil.truncate(datum.text, 30, "..."));
     }
 
     protected static DatumPanel createPanel (Type type)

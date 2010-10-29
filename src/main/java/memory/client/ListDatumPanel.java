@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.threerings.gwt.ui.Popups;
 import com.threerings.gwt.ui.Widgets;
 import com.threerings.gwt.util.ClickCallback;
+import com.threerings.gwt.util.WikiParser;
 
 import memory.data.Datum;
 import memory.data.Type;
@@ -52,7 +53,17 @@ public class ListDatumPanel extends DatumPanel
 
     protected void addItem (FlowPanel items, Datum item)
     {
-        items.add(Widgets.newLabel(item.text));
+        switch (item.type) {
+        case WIKI:
+            items.add(Widgets.newHTML(WikiParser.renderSnippet(item.text)));
+            break;
+        case HTML:
+            items.add(Widgets.newHTML(item.text));
+            break;
+        default:
+            items.add(Widgets.newLabel(item.text));
+            break;
+        }
     }
 
     protected void addEditor (FlowPanel editor)
