@@ -120,14 +120,10 @@ public abstract class DatumPanel extends FlowPanel
         editor.add(kids);
 
         editor.add(Widgets.newLabel("Add child:", _rsrc.styles().editorTitle()));
-        FluentTable table = new FluentTable(0, 5);
         final EnumListBox<Type> type = new EnumListBox<Type>(Type.class);
-        table.add().setText("Type:").right().setWidget(type);
         final TextBox title = Widgets.newTextBox("", Datum.MAX_TITLE_LENGTH, 20);
-        table.add().setText("Title:").right().setWidget(title);
         final Button add = new Button("Add");
-        table.add().right().setWidget(add);
-        editor.add(table);
+        editor.add(Widgets.newRow(Widgets.newLabel("Title:"), title, type, add));
 
         new ClickCallback<Long>(add) {
             protected boolean callService () {

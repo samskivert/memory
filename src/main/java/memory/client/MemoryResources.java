@@ -23,6 +23,14 @@ public interface MemoryResources extends ClientBundle
         String textTitle ();
         String stretchWide ();
         String insetBox ();
+
+        String columnCont ();
+        String column ();
+        String column12 ();
+        String column22 ();
+        String column13 ();
+        String column23 ();
+        String column33 ();
     }
 
     @Source("memory.css")

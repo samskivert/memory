@@ -42,3 +42,39 @@ body {
 .insetBox {
   padding: 5px;
 }
+
+.columnCont {
+  clear: both;
+  float: left;
+  width: 100%;
+  overflow: hidden;
+}
+
+.column {
+  float: left;
+  position: relative;
+  padding: 0 0 1em 0;
+  overflow: hidden;
+}
+
+.column12 {
+  width: 49%;
+  left: 0%;
+}
+.column22 {
+  width: 49%;
+  left: 2%;
+}
+
+.column13 {
+  width: 33%;
+  left: 0%;
+}
+.column23 {
+  width: 33%;
+  left: 2%;
+}
+.column33 {
+  width: 33%;
+  left: 2%;
+}
