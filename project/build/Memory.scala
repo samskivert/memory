@@ -22,6 +22,9 @@ class Memory (info :ProjectInfo) extends DefaultWebProject(info) {
   val gwtServlet = "com.google.gwt" % "gwt-servlet" % "2.0.4" % "system"
   val gwtAsyncGen = "com.samskivert" % "gwt-asyncgen" % "1.0" % "system"
 
+  // appengine depends
+  val gae = "com.google.appengine" % "appengine-api-1.0-sdk" % "1.3.8"
+
   // database depends
   val h2db = "com.h2database" % "h2" % "1.2.142"
   val squeryl = "org.squeryl" % "squeryl_2.8.0" % "0.9.4-RC2"

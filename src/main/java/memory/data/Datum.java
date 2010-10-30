@@ -20,9 +20,6 @@ public class Datum implements Serializable
     /** The id of this datum's parent, or 0 if it is a root datum. */
     public long parentId;
 
-    /** Indicates the access controls for this datum. */
-    public Access access;
-
     /** Indicates the type of this datum. */
     public Type type;
 

@@ -88,7 +88,7 @@ public class PageDatumPanel extends DatumPanel
         new ClickCallback<Void>(update) {
             protected boolean callService () {
                 _meta.set(COLS_KEY, columns.getSelectedItem());
-                _datasvc.updateDatum(_datum.id, null, null, null, _meta.toMetaString(),
+                _datasvc.updateDatum(_datum.id, null, null, _meta.toMetaString(),
                                      null, null, null, null, this);
                 return true;
             }
@@ -111,7 +111,7 @@ public class PageDatumPanel extends DatumPanel
         new ClickCallback<Void>(update, order) {
             protected boolean callService () {
                 _meta.set("order", order.getText().trim());
-                _datasvc.updateDatum(_datum.id, null, null, null, _meta.toMetaString(),
+                _datasvc.updateDatum(_datum.id, null, null, _meta.toMetaString(),
                                      null, null, null, null, this);
                 return true;
             }

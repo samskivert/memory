@@ -8,6 +8,8 @@ import scala.xml.{Node, NodeSeq, XML}
 import javax.servlet.ServletConfig
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
+import com.google.appengine.api.users.{User, UserService, UserServiceFactory}
+
 import memory.data.{Access, Datum, Type}
 import memory.persist.DB
 
@@ -28,52 +30,33 @@ class GetServlet extends HttpServlet
   }
 
   override protected def doGet (req :HttpServletRequest, rsp :HttpServletResponse) {
-    val userId = 0 // TODO
-    val dat = resolveChildren(loadUserRoot(userId))
+    // val userId = 0 // TODO
+    // val dat = resolveChildren(loadUserRoot(userId))
     val out = rsp.getWriter
-    val contents = <div id="root">{toXML(dat)}</div>
-    out.println(Header)
-    XML.write(out, contents, null, false, null)
-    out.println(Footer)
+    // val contents = <div id="root">{toXML(dat)}</div>
+    // out.println(Header)
+    // XML.write(out, contents, null, false, null)
+    // out.println(Footer)
+    out.println("TODO!")
   }
 
-  protected def loadUserRoot (userId :Long) = {
-    db.loadRoot(userId) match {
-      case None => {
-        val root = createUserPage(userId)
-        db.createDatum(root)
-        db.createDatum(createUserPageContents(root))
-        root
-      }
-      case Some(root) => root
-    }
-  }
+  private def getCurrentUser () = _usvc.getCurrentUser
 
-  protected def createUserPage (userId :Long) = {
-    val root = new Datum
-    root.access = Access.GNONE_WNONE
-    root.`type` = Type.PAGE
-    root.meta = ""
-    root.title = "Welcome to Memory"
-    root.when = System.currentTimeMillis
-    root
-  }
+  // private def loadUserRoot (userId :Long) = {
+  //   db.loadRoot(userId) match {
+  //     case None => {
+  //       val root = createUserPage(userId)
+  //       db.createDatum(root)
+  //       db.createDatum(createUserPageContents(root))
+  //       root
+  //     }
+  //     case Some(root) => root
+  //   }
+  // }
 
-  protected def createUserPageContents (root :Datum) = {
-    val contents = new Datum
-    contents.parentId = root.id
-    contents.access = Access.GNONE_WNONE
-    contents.`type` = Type.WIKI
-    contents.meta = ""
-    contents.title = ""
-    contents.text = "This is your first page. Click the edit button to the right to edit it."
-    contents.when = System.currentTimeMillis
-    contents
-  }
+  private def resolveChildren (rootId :Long) :Datum = resolveChildren(db.loadDatum(rootId))
 
-  protected def resolveChildren (rootId :Long) :Datum = resolveChildren(db.loadDatum(rootId))
-
-  protected def resolveChildren (root :Datum) :Datum = {
+  private def resolveChildren (root :Datum) :Datum = {
     root.children = root.`type` match {
       case Type.LIST => resolveChildList(root.id) // TODO: archive old bits
       case Type.CHECKLIST => resolveChildList(root.id) // TODO: archive old bits
@@ -84,13 +67,13 @@ class GetServlet extends HttpServlet
     root
   }
 
-  protected def resolveChildList (id :Long) =
+  private def resolveChildList (id :Long) =
     java.util.Arrays.asList(db.loadChildren(id) map(resolveChildren) :_*)
 
-  protected def toXML (datum :Datum) :Node = {
+  private def toXML (datum :Datum) :Node = {
     import scalaj.collection.Imports._
-    <def id={datum.id.toString} x:access={datum.access.toString} x:type={datum.`type`.toString}
-         x:meta={datum.meta} title={datum.title} x:when={datum.when.toString}>{datum.text}
+    <def id={datum.id.toString} x:type={datum.`type`.toString} x:meta={datum.meta}
+         title={datum.title} x:when={datum.when.toString}>{datum.text}
       {datum.children match {
         case null => Array[Node]()
         case children => children.asScala map(toXML)
@@ -98,7 +81,9 @@ class GetServlet extends HttpServlet
     </def>
   }
 
-  val Header = """
+  private val _usvc = UserServiceFactory.getUserService
+
+  private val Header = """
   |<?xml version="1.0" encoding="UTF-8" ?>
   |<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
   |<html xmlns="http://www.w3.org/1999/xhtml">
@@ -106,7 +91,7 @@ class GetServlet extends HttpServlet
   |<body>
   """.stripMargin
 
-  val Footer = """
+  private val Footer = """
   |  <div id="client" style="min-height: 600px"></div>
   |  <iframe id="__gwt_historyFrame" style="width:0;height:0;border:0"></iframe>
   |  <script src="memory.nocache.js" type="text/javascript"></script>

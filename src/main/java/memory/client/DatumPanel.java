@@ -94,8 +94,7 @@ public abstract class DatumPanel extends FlowPanel
         new ClickCallback<Void>(update, title) {
             protected boolean callService () {
                 _title = title.getText().trim();
-                _datasvc.updateDatum(
-                    _datum.id, null, null, null, null, _title, null, null, null, this);
+                _datasvc.updateDatum(_datum.id, null, null, null, _title, null, null, null, this);
                 return true;
             }
             protected boolean gotResult (Void result) {
@@ -148,7 +147,6 @@ public abstract class DatumPanel extends FlowPanel
         Datum child = new Datum();
         child.parentId = _datum.id;
         child.type = type;
-        child.access = _datum.access;
         child.meta = "";
         child.title = title;
         child.text = text;

@@ -30,8 +30,7 @@ public abstract class TextDatumPanel extends DatumPanel
         new ClickCallback<Void>(update) {
             protected boolean callService () {
                 _text = text.getText().trim();
-                _datasvc.updateDatum(
-                    _datum.id, null, null, null, null, null, _text, null, null, this);
+                _datasvc.updateDatum(_datum.id, null, null, null, null, _text, null, null, this);
                 return true;
             }
             protected boolean gotResult (Void result) {

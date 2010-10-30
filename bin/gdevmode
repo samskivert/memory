@@ -24,10 +24,18 @@ CLASSPATH=`echo \
     $ROOT/src/main/resources \
     $ROOT/src/main/java | sed 's/ /:/g'`
 
+if [ "$1" = "account" ]; then
+    START_URL="account"
+    CLIENT="account"
+else
+    START_URL="memory/index.html"
+    CLIENT="memory"
+fi
+
 java -Xmx256M -classpath $CLASSPATH \
     -javaagent:$GAE/lib/agent/appengine-agent.jar \
     com.google.gwt.dev.DevMode \
     -server com.google.appengine.tools.development.gwt.AppEngineLauncher \
-    -startupUrl memory/index.html \
+    -startupUrl $START_URL \
     -war target/scala_2.8.0/webapp \
-    memory &
+    $CLIENT &

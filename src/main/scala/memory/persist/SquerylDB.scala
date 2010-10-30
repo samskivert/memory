@@ -10,6 +10,7 @@ import java.sql.DriverManager
 import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.adapters.H2Adapter
 import org.squeryl.annotations.Column
+import org.squeryl.dsl.CompositeKey2
 import org.squeryl.{KeyedEntity, Schema, Session, SessionFactory}
 
 import memory.data.{Access, Datum, Type}
@@ -19,8 +20,21 @@ import memory.data.{Access, Datum, Type}
  */
 object SquerylDB extends Schema with DB
 {
-  /** Provides access to datums. */
+  /** Provides cortices. */
+  val cortexen = table[CortexRow]
+  // TODO: uncomment this and KeyedEntity[String] below when Max fixes Squeryl
+  // on(cortexen)(c => declare(
+  //   c.id is (primaryKey)
+  // ))
+
+  /** Provides datums. */
   val data = table[DatumRow]
+
+  /** Provices cortex access control data. */
+  val cortexAccess = table[CortexAccess]
+
+  /** Provices datum access control data. */
+  val datumAccess = table[DatumAccess]
 
   /** Maps {@link Type} elements to an Int that can be used in the DB. */
   val typeToCode = Map(
@@ -38,12 +52,9 @@ object SquerylDB extends Schema with DB
 
   /** Maps {@link Access} elements to an Int that can be used in the DB. */
   val accessToCode = Map(
-    Access.GNONE_WNONE -> 1,
-    Access.GREAD_WNONE -> 2,
-    Access.GWRITE_WNONE -> 3,
-    Access.GREAD_WREAD -> 4,
-    Access.GWRITE_WREAD -> 5,
-    Access.GWRITE_WWRITE -> 6
+    Access.NONE -> 0,
+    Access.READ -> 1,
+    Access.WRITE -> 2
   ) // these mappings must never change (but can be extended)
 
   /** Maps an Int code back to a {@link Access}. */
@@ -62,12 +73,16 @@ object SquerylDB extends Schema with DB
       sess
     })
 
-    // make sure the root datum exists
+    // make sure our schema is created
+    checkCreate
+  }
+
+  def checkCreate {
     try {
-      loadRoot(0)
+      loadAccess("", "")
     } catch {
       case e => {
-        if (e.getMessage.indexOf("Table \"DATUMROW\" not found") == 0) {
+        if (e.getMessage.indexOf("Table \"CORTEXACCESS\" not found") == 0) {
           e.printStackTrace // TODO
         } else transaction {
           create // create the initial database
@@ -80,9 +95,55 @@ object SquerylDB extends Schema with DB
     // nada for now?
   }
 
-  def loadRoot (userId: Long) = transaction {
-    // in our single-user test setup, the first datum is the root
-    data.lookup(1L) map(toJava)
+  def createCortex (cortexId :String, ownerId :String, root :Datum, contents :Datum) {
+    transaction {
+      createDatum(root)
+      contents.parentId = root.id
+      createDatum(contents)
+      cortexen.insert(CortexRow(cortexId, root.id))
+      cortexAccess.insert(CortexAccess(cortexId, ownerId, accessToCode(Access.WRITE)))
+    }
+  }
+
+  def loadRoot (cortexId: String) :Option[Datum] = transaction {
+    cortexen.where(_.id === cortexId).headOption flatMap(c => data.lookup(c.rootId)) map(toJava)
+  }
+
+  def loadAccess (cortexId :String, userId :String) = transaction {
+    from(cortexAccess)(ca =>
+      where(ca.id === (cortexId, userId))
+      select(ca.access)).headOption map(codeToAccess) getOrElse(Access.NONE)
+  }
+
+  def loadAccess (datumId :Long, userId :String) = transaction {
+    from(datumAccess)(da =>
+      where(da.id === (datumId, userId))
+      select(da.access)).headOption map(codeToAccess) getOrElse(Access.NONE)
+  }
+
+  def loadCortexAccess (userId :String) :Seq[(Access,String)] = transaction {
+    from(cortexAccess)(ca => where(ca.userId === userId) select(ca.access, ca.cortexId)) map(
+      pr => (codeToAccess(pr._1), pr._2)) toSeq
+  }
+
+  def updateAccess (cortexId :String, userId :String, access :Access) {
+    transaction {
+      if (update(cortexAccess)(ca =>
+        where(ca.id === (cortexId, userId))
+        set(ca.access := accessToCode(access))) == 0) {
+          cortexAccess.insert(CortexAccess(cortexId, userId, accessToCode(access)))
+       }
+    }
+  }
+
+  def updateAccess (datumId :Long, userId :String, access :Access) {
+    transaction {
+      if (update(datumAccess)(da =>
+        where(da.id === (datumId, userId))
+        set(da.access := accessToCode(access))) == 0) {
+          datumAccess.insert(DatumAccess(datumId, userId, accessToCode(access)))
+       }
+    }
   }
 
   def loadDatum (id :Long) = transaction {
@@ -97,14 +158,11 @@ object SquerylDB extends Schema with DB
     data.where(d => d.id in ids) map(toJava) toArray
   }
 
-  def updateDatum (id :Long, parentId :Option[Long], access :Option[Access], typ :Option[Type],
-                   meta :Option[String], title :Option[String], text :Option[String],
-                   when :Option[Long]) {
+  def updateDatum (id :Long, parentId :Option[Long], typ :Option[Type], meta :Option[String],
+                   title :Option[String], text :Option[String], when :Option[Long]) {
     transaction {
       // don't know of a good way to construct a set() with optional elements
       parentId foreach(value => data.update(d => where(d.id === id) set(d.parentId := value)))
-      access foreach(value =>
-        data.update(d => where(d.id === id) set(d.access := accessToCode(value))))
       typ foreach(
         value => data.update(d => where(d.id === id) set(d.`type` := typeToCode(value))))
       meta foreach(value => data.update(d => where(d.id === id) set(d.meta := value)))
@@ -125,7 +183,6 @@ object SquerylDB extends Schema with DB
     val datum = new Datum
     datum.id = row.id
     datum.parentId = row.parentId
-    datum.access = codeToAccess(row.access)
     datum.`type` = codeToType(row.`type`)
     datum.meta = row.meta
     datum.title = row.title
@@ -135,24 +192,20 @@ object SquerylDB extends Schema with DB
   }
 
   protected def fromJava (datum :Datum) =
-    DatumRow(datum.parentId, accessToCode(datum.access), typeToCode(datum.`type`),
-             datum.meta, datum.title, Option(datum.text), datum.when)
+    DatumRow(datum.parentId, typeToCode(datum.`type`), datum.meta,
+             datum.title, Option(datum.text), datum.when)
 }
 
-/**
- * Models the data for a single datum as a database row.
- */
+/** Models the data for a single datum as a database row. */
 case class DatumRow (
   /** The id of this datum's parent, or 0 if it is a root datum. */
   parentId :Long,
-  /** Indicates the access controls for this datum. */
-  access :Int,
   /** Indicates the type of this datum. */
   `type` :Int,
   /** Metadata for this datum. */
   @Column(length=1024) meta :String,
   /** The title of this datum. */
-  @Column(length=Datum.MAX_TITLE_LENGTH) title :String,
+  @Column(length=256) title :String, // TODO: fix scalac: @Column(length=Datum.MAX_TITLE_LENGTH)
   /** The primary contents of this datum. */
   @Column(length=65536) text :Option[String],
   /** A timestamp associated with this datum (usually when it was last modified). */
@@ -162,7 +215,48 @@ case class DatumRow (
   val id :Long = 0L
 
   /** Zero args ctor for use when unserializing. */
-  def this () = this(0L, 0, 0, "", "", Some(""), 0L)
+  def this () = this(0L, 0, "", "", Some(""), 0L)
 
   // override def toString = "[id=" + id + ", type=" + `type` + "]"
+}
+
+/** Contains the data for a Cortex. */
+case class CortexRow (
+  /** The id of this cortex. */
+  id :String,
+  /** The id of the root datum for this cortex. */
+  rootId :Long
+) /*extends KeyedEntity[String]*/ {
+  /** Zero args ctor for use when unserializing. */
+  def this () = this("", 0L)
+}
+
+/** Maintains access control mappings for cortices. */
+case class CortexAccess (
+  /** The cortex in question. */
+  cortexId :String,
+  /** The user in question. */
+  userId :String,
+  /** The user's access to the cortex. */
+  access :Int
+) extends KeyedEntity[CompositeKey2[String,String]] {
+  /** Defines our composite primary key. */
+  def id = compositeKey(cortexId, userId)
+  /** Zero args ctor for use when unserializing. */
+  def this () = this("", "", 0)
+}
+
+/** Maintains access control mappings for data. */
+case class DatumAccess (
+  /** The datum in question. */
+  datumId :Long,
+  /** The user in question. */
+  userId :String,
+  /** The user's access to the datum. */
+  access :Int
+) extends KeyedEntity[CompositeKey2[Long,String]] {
+  /** Defines our composite primary key. */
+  def id = compositeKey(datumId, userId)
+  /** Zero args ctor for use when unserializing. */
+  def this () = this(0L, "", 0)
 }

@@ -18,8 +18,29 @@ trait DB
   /** Shuts down the database component. */
   def shutdown :Unit
 
-  /** Loads the root datum for the specified user. */
-  def loadRoot (userId: Long) :Option[Datum]
+  /** Creates a cortex, populates it with the supplied root and contents data and grants the
+   * specified owner read/write access. */
+  def createCortex (cortexId :String, ownerId :String, root :Datum, contents :Datum) :Unit
+
+  /** Loads the root datum for the specified cortex. */
+  def loadRoot (cortexId: String) :Option[Datum]
+
+  /** Returns the access permissions for the specified user for the specified cortex.
+   * @param userId the id of the user to be checked or 0 to check public access. */
+  def loadAccess (cortexId :String, userId :String) :Access
+
+  /** Returns the access permissions for the specified user for the specified datum.
+   * @param userId the id of the user to be checked or 0 to check public access. */
+  def loadAccess (datumId :Long, userId :String) :Access
+
+  /** Returns the cortices to which the supplied user has access. */
+  def loadCortexAccess (userId :String) :Seq[(Access,String)]
+
+  /** Updates the access permissions for the specified user for the specified cortex. */
+  def updateAccess (cortexId :String, userId :String, access :Access) :Unit
+
+  /** Updates the access permissions for the specified user for the specified datum. */
+  def updateAccess (datumId :Long, userId :String, access :Access) :Unit
 
   /** Loads the specified datum. Throws an excepton if it does not exist. */
   def loadDatum (id :Long) :Datum
@@ -31,9 +52,8 @@ trait DB
   def loadData (ids :Set[Long]) :Array[Datum]
 
   /** Updates the supplied fields of the specified datum. */
-  def updateDatum (id :Long, parentId :Option[Long], access :Option[Access], typ :Option[Type],
-                   meta :Option[String], title :Option[String], text :Option[String],
-                   when :Option[Long]) :Unit
+  def updateDatum (id :Long, parentId :Option[Long], typ :Option[Type], meta :Option[String],
+                   title :Option[String], text :Option[String], when :Option[Long]) :Unit
 
   /** Creates a new datum and fills in its {@link Datum#id} field.
    * @return the id assigned to the newly created datum. */

@@ -18,7 +18,7 @@ import memory.data.Datum;
 import memory.data.Type;
 
 /**
- * The main entry point for the Memory client.
+ * The main entry point for a data page.
  */
 public class MemoryClient implements EntryPoint
 {
@@ -42,7 +42,6 @@ public class MemoryClient implements EntryPoint
         // parse the data for this element
         Datum datum = new Datum();
         datum.id = Long.parseLong(elem.getId());
-        datum.access = Enum.valueOf(Access.class, elem.getAttribute("x:access"));
         datum.type = Enum.valueOf(Type.class, elem.getAttribute("x:type"));
         datum.meta = elem.getAttribute("x:meta");
         datum.title = elem.getTitle();
