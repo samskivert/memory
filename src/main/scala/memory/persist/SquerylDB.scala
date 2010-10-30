@@ -52,7 +52,9 @@ object SquerylDB extends Schema with DB
   def init {
     // initialize the H2 database
     Class.forName("org.h2.Driver")
-    val dburl = "jdbc:h2:database" // TODO: make configurable
+    // TODO: make configurable
+    // val dburl = "jdbc:h2:database"
+    val dburl = "jdbc:h2:mem:database;DB_CLOSE_DELAY=-1" // TEMP while testing GAE
     SessionFactory.concreteFactory = Some(() => {
       // TODO: use connection pools as Squeryl creates and closes a connection on every query
       val sess = Session.create(DriverManager.getConnection(dburl, "sa", ""), new H2Adapter)

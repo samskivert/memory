@@ -13,12 +13,21 @@ else
     GWT_UTILS_CPATH="$ROOT/lib_managed/scala_2.8.0/compile/gwt-utils-*.jar"
 fi
 
-CLASSPATH=`echo $ROOT/lib_managed/scala_2.8.0/system/gwt-dev-*.jar \
+GAE=/home/mdb/ops/appengine-java-sdk-1.3.8
+
+CLASSPATH=`echo \
+    $GAE/lib/appengine-tools-api.jar \
+    $ROOT/lib_managed/scala_2.8.0/system/gwt-dev-*.jar \
     $ROOT/lib_managed/scala_2.8.0/compile/gwt-user-*.jar \
     $ROOT/lib_managed/scala_2.8.0/compile/samskivert-*.jar \
     $GWT_UTILS_CPATH \
     $ROOT/src/main/resources \
     $ROOT/src/main/java | sed 's/ /:/g'`
 
-java -classpath $CLASSPATH -Xmx256M com.google.gwt.dev.DevMode \
-    -startupUrl memory/index.html -war target/scala_2.8.0/webapp memory &
+java -Xmx256M -classpath $CLASSPATH \
+    -javaagent:$GAE/lib/agent/appengine-agent.jar \
+    com.google.gwt.dev.DevMode \
+    -server com.google.appengine.tools.development.gwt.AppEngineLauncher \
+    -startupUrl memory/index.html \
+    -war target/scala_2.8.0/webapp \
+    memory &
