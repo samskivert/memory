@@ -31,8 +31,6 @@ class Memory (info :ProjectInfo) extends DefaultWebProject(info) {
   val gaeLabs = "com.google.appengine" % "appengine-api-labs" % "1.3.8" % "test"
 
   // database depends
-  val h2db = "com.h2database" % "h2" % "1.2.142"
-  val squeryl = "org.squeryl" % "squeryl_2.8.0" % "0.9.4-RC2"
   val objectify = "com.googlecode.objectify" % "objectify" % "2.2.1"
   val jpa = "javax.persistence" % "persistence-api" % "1.0"
 
