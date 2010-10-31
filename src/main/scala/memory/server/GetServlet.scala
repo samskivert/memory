@@ -50,7 +50,7 @@ class GetServlet extends HttpServlet
       if (access == Access.NONE) {
         if (user == null)
           throw new RedirectException(
-            _usvc.createLoginURL(req.getServletPath + "/" + req.getPathInfo))
+            _usvc.createLoginURL(req.getServletPath + req.getPathInfo))
         else
           throw new Exception("You lack access to '" + cortexId + "'.")
       }
