@@ -63,8 +63,8 @@ class GetServlet extends HttpServlet
         case _ => throw new Error("Invalid path " + req.getPathInfo)
       }
 
-      val xml = 
-        <div id="root" x:cortex={cortexId}>{toXML(resolveChildren(cortexId)(contents))}</div>
+      val xml = <div style="display: none" id="root" x:cortex={cortexId}>
+        {toXML(resolveChildren(cortexId)(contents))}</div>
       val out = rsp.getWriter
       out.println(ServletUtil.htmlHeader(cortexId + " - " + contents.title))
       XML.write(out, xml, null, false, null)
