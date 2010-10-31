@@ -63,8 +63,9 @@ object ObjectifyDB extends DB
   }
 
   // from trait DB
-  def loadAccess (userId :String, cortexId :String) = {
-    error("unimplemented")
+  def loadAccess (userId :String, cortexId :String) = transaction { obj =>
+    Option(obj.query(classOf[CortexAccess]).ancestor(
+      userKey(userId)).filter("cortexId", cortexId).get) map(_.access) getOrElse(Access.NONE)
   }
 
   // from trait DB
@@ -73,8 +74,9 @@ object ObjectifyDB extends DB
   }
 
   // from trait DB
-  def loadCortexAccess (userId :String) :Seq[(Access,String)] = {
-    error("unimplemented")
+  def loadCortexAccess (userId :String) :Seq[(Access,String)] = transaction { obj =>
+    obj.query(classOf[CortexAccess]).ancestor(userKey(userId)).list.asScala map(
+      ca => (ca.access, ca.cortexId))
   }
 
   // from trait DB

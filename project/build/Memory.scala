@@ -50,10 +50,12 @@ class Memory (info :ProjectInfo) extends DefaultWebProject(info) {
                                 mainJavaSourcePath ** "*Messages.properties" getPaths).toList)
 
   // compiles our GWT client
-  lazy val gwtc = runTask(
+  def gwtc (module :String) = runTask(
     Some("com.google.gwt.dev.Compiler"),
     compileClasspath +++ depPath("gwt-dev") +++ mainJavaSourcePath +++ mainResourcesPath,
-    List("-war", "target/scala_2.8.0/webapp", "memory")) dependsOn(copyResources)
+    List("-war", "target/scala_2.8.0/webapp", module))
+  lazy val memoryc = gwtc("memory") dependsOn(copyResources)
+  lazy val accountc = gwtc("account") dependsOn(copyResources)
 
   // copy our compiled classes to WEB-INF/classes after compiling
   override def compileAction = task {

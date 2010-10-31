@@ -44,7 +44,8 @@ class GetServlet extends HttpServlet
       db.loadRoot(cortexId) match {
         case None => throw new Exception("No such cortex '" + cortexId + "'.")
         case Some(root) => {
-          val contents = <div id="root">{toXML(resolveChildren(cortexId)(root))}</div>
+          val contents = <div id="root" x:cortex={cortexId}>
+            {toXML(resolveChildren(cortexId)(root))}</div>
           val out = rsp.getWriter
           out.println(Header)
           XML.write(out, contents, null, false, null)

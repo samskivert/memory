@@ -13,14 +13,9 @@ import memory.data.Type;
 public interface DataServiceAsync
 {
     /**
-     * The async version of {@link DataService#createDatum}.
+     * The async version of {@link DataService#loadAccountInfo}.
      */
-    void createDatum (Datum datum, AsyncCallback<Long> callback);
-
-    /**
-     * The async version of {@link DataService#updateDatum}.
-     */
-    void updateDatum (long id, Long parentId, Type type, String meta, String title, String text, Long when, Boolean archived, AsyncCallback<Void> callback);
+    void loadAccountInfo (AsyncCallback<DataService.AccountResult> callback);
 
     /**
      * The async version of {@link DataService#createCortex}.
@@ -28,7 +23,12 @@ public interface DataServiceAsync
     void createCortex (String cortexId, AsyncCallback<Void> callback);
 
     /**
-     * The async version of {@link DataService#loadAccountInfo}.
+     * The async version of {@link DataService#createDatum}.
      */
-    void loadAccountInfo (AsyncCallback<DataService.AccountResult> callback);
+    void createDatum (String cortexId, Datum datum, AsyncCallback<Long> callback);
+
+    /**
+     * The async version of {@link DataService#updateDatum}.
+     */
+    void updateDatum (String cortexId, long id, Long parentId, Type type, String meta, String title, String text, Long when, Boolean archived, AsyncCallback<Void> callback);
 }

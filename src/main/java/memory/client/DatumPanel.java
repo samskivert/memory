@@ -32,15 +32,16 @@ import memory.rpc.DataServiceAsync;
  */
 public abstract class DatumPanel extends FlowPanel
 {
-    public static DatumPanel create (Datum datum)
+    public static DatumPanel create (String cortexId, Datum datum)
     {
         DatumPanel panel = createPanel(datum.type);
-        panel.init(datum);
+        panel.init(cortexId, datum);
         return panel;
     }
 
-    public void init (Datum datum)
+    public void init (String cortexId, Datum datum)
     {
+        _cortexId = cortexId;
         _datum = datum;
         _meta = new MetaData(_datum.meta);
         showContents();
@@ -94,7 +95,8 @@ public abstract class DatumPanel extends FlowPanel
         new ClickCallback<Void>(update, title) {
             protected boolean callService () {
                 _title = title.getText().trim();
-                _datasvc.updateDatum(_datum.id, null, null, null, _title, null, null, null, this);
+                _datasvc.updateDatum(
+                    _cortexId, _datum.id, null, null, null, _title, null, null, null, this);
                 return true;
             }
             protected boolean gotResult (Void result) {
@@ -127,7 +129,7 @@ public abstract class DatumPanel extends FlowPanel
         new ClickCallback<Long>(add) {
             protected boolean callService () {
                 _child = createChildDatum(type.getSelectedValue(), title.getText(), null);
-                _datasvc.createDatum(_child, this);
+                _datasvc.createDatum(_cortexId, _child, this);
                 return true;
             }
             protected boolean gotResult (Long datumId) {
@@ -164,6 +166,7 @@ public abstract class DatumPanel extends FlowPanel
 
     protected abstract void createContents ();
 
+    protected String _cortexId;
     protected Datum _datum;
     protected MetaData _meta;
 

@@ -30,10 +30,10 @@ public class MemoryClient implements EntryPoint
             RootPanel.get(CLIENT_DIV).add(new Label("Missing data?"));
         } else {
             Element relem = root.getElement();
+            String cortexId = relem.getAttribute("x:cortex");
             Datum rdata = parseDatum((Element)relem.getChild(0));
             relem.removeFromParent();
-            GWT.log("Adding panel for " + rdata.text);
-            RootPanel.get(CLIENT_DIV).add(DatumPanel.create(rdata));
+            RootPanel.get(CLIENT_DIV).add(DatumPanel.create(cortexId, rdata));
         }
     }
 

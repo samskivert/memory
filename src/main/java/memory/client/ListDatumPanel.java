@@ -36,7 +36,7 @@ public class ListDatumPanel extends DatumPanel
         new ClickCallback<Long>(add, item) {
             protected boolean callService () {
                 _item = createChildDatum(Type.WIKI, "", item.getText().trim());
-                _datasvc.createDatum(_item, this);
+                _datasvc.createDatum(_cortexId, _item, this);
                 return true;
             }
             protected boolean gotResult (Long itemId) {
