@@ -36,7 +36,6 @@ public abstract class TextDatumPanel extends DatumPanel
             }
             protected boolean gotResult (Void result) {
                 _datum.text = _text;
-                Popups.infoNear(_msgs.datumUpdated(), getPopupNear());
                 showContents();
                 return true;
             }
