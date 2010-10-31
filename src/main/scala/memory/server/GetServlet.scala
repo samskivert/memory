@@ -13,6 +13,9 @@ import com.google.appengine.api.users.{User, UserService, UserServiceFactory}
 import memory.data.{Access, Datum, Type}
 import memory.persist.DB
 
+// used to redireect servlet requesters elsewhere
+class RedirectException (url :String) extends Exception(url)
+
 /**
  * Serves up REST data.
  */
@@ -43,8 +46,14 @@ class GetServlet extends HttpServlet
       val cortexId = bits(1)
 
       val user = _usvc.getCurrentUser
-      val access = db.loadAccess(if (user == null) "" else user.getUserId, cortexId)
-      require(access != Access.NONE, "You lack access to '" + cortexId + "'.")
+      val access = db.loadAccess(if (user == null) db.NO_USER else user.getUserId, cortexId)
+      if (access == Access.NONE) {
+        if (user == null)
+          throw new RedirectException(
+            _usvc.createLoginURL(req.getServletPath + "/" + req.getPathInfo))
+        else
+          throw new Exception("You lack access to '" + cortexId + "'.")
+      }
 
       val root = db.loadRoot(cortexId) getOrElse(
         throw new Exception("No such cortex '" + cortexId + "'."))
@@ -65,8 +74,8 @@ class GetServlet extends HttpServlet
       out.println(Footer)
 
     } catch {
-      case e => 
-      rsp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage)
+      case re :RedirectException => rsp.sendRedirect(re.getMessage)
+      case e => rsp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage)
     }
   }
 

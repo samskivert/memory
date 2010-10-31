@@ -12,6 +12,9 @@ import memory.data.Type
  */
 trait DB
 {
+  /** Supplied for userId when checking access for unauthenticated viewers. */
+  val NO_USER = "<global>"
+
   /** Initializes the database component. */
   def init :Unit
 
