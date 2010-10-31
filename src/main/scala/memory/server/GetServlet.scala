@@ -38,7 +38,7 @@ class GetServlet extends HttpServlet
       val cortexId = bits(1)
 
       val user = _usvc.getCurrentUser
-      val access = db.loadAccess(cortexId, if (user == null) "" else user.getUserId)
+      val access = db.loadAccess(if (user == null) "" else user.getUserId, cortexId)
       require(access != Access.NONE, "You lack access to '" + cortexId + "'.")
 
       db.loadRoot(cortexId) match {
