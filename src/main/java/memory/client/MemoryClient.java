@@ -4,6 +4,7 @@
 package memory.client;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -12,6 +13,8 @@ import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
+
+import com.threerings.gwt.ui.Widgets;
 
 import memory.data.Access;
 import memory.data.Datum;
@@ -30,18 +33,27 @@ public class MemoryClient implements EntryPoint
             RootPanel.get(CLIENT_DIV).add(new Label("Missing data?"));
         } else {
             Element relem = root.getElement();
-            String cortexId = relem.getAttribute("x:cortex");
-            Datum rdata = parseDatum((Element)relem.getChild(0));
             relem.removeFromParent();
-            RootPanel.get(CLIENT_DIV).add(DatumPanel.create(cortexId, rdata));
+            String cortexId = relem.getAttribute("x:cortex");
+            try {
+                for (Datum data : parseChildren(relem)) {
+                    RootPanel.get(CLIENT_DIV).add(DatumPanel.create(cortexId, data));
+                }
+            } catch (Exception e) {
+                RootPanel.get(CLIENT_DIV).add(Widgets.newLabel("Error " + e));
+            }
         }
     }
 
-    protected Datum parseDatum (Element elem)
+    protected static Datum parseDatum (Element elem)
     {
-        // parse the data for this element
         Datum datum = new Datum();
-        datum.id = Long.parseLong(elem.getId());
+        try {
+            datum.id = Long.parseLong(elem.getId());
+        } catch (NumberFormatException nfe) {
+            GWT.log("Failed to parse id (" + elem.getId() + ").");
+            throw nfe;
+        }
         datum.type = Enum.valueOf(Type.class, elem.getAttribute("x:type"));
         datum.meta = elem.getAttribute("x:meta");
         datum.title = elem.getTitle();
@@ -49,21 +61,24 @@ public class MemoryClient implements EntryPoint
             datum.text = elem.getInnerText().trim();
         }
         datum.when = Long.parseLong(elem.getAttribute("x:when"));
+        datum.children = parseChildren(elem);
+        return datum;
+    }
 
-        // then parse any children
-        datum.children = new ArrayList<Datum>();
+    protected static List<Datum> parseChildren (Element elem)
+    {
+        List<Datum> children = new ArrayList<Datum>();
         for (int ii = 0, ll = elem.getChildCount(); ii < ll; ii++) {
             Node node = elem.getChild(ii);
             if (node.getNodeType() == Node.ELEMENT_NODE) {
                 try {
-                    datum.children.add(parseDatum((Element)node));
+                    children.add(parseDatum((Element)node));
                 } catch (Exception e) {
                     GWT.log("Failed to parse datum " + node, e);
                 }
             }
         }
-
-        return datum;
+        return children;
     }
 
     protected static final String CLIENT_DIV = "client";
