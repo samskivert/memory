@@ -26,7 +26,12 @@ public enum Type
     /** A log of completed activities that is rolled over daily/weekly/monthly. */
     JOURNAL(false),
     /** A collection of data that is displayed in some number of columns. */
-    PAGE(false);
+    PAGE(false),
+
+    // other types
+
+    /** A type for a datum that does not yet exist. */
+    NONEXISTENT(false);
 
     public boolean hasText ()
     {

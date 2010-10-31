@@ -1,0 +1,55 @@
+//
+// $Id$
+
+package memory.client;
+
+import java.util.ArrayList;
+
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Panel;
+
+import com.threerings.gwt.ui.EnumListBox;
+import com.threerings.gwt.ui.Widgets;
+import com.threerings.gwt.util.ClickCallback;
+
+import memory.data.Datum;
+import memory.data.Type;
+
+/**
+ * Displays an interface for creating a datum when a non-existent datum is encountered.
+ */
+public class NonExistentDatumPanel extends DatumPanel
+{
+    @Override protected void addEditButton () {
+        // no edit button here
+    }
+
+    @Override protected void createContents () {
+        addTextTitle();
+        add(Widgets.newLabel("This page does not exist. You can create it if you like. " +
+                             "Or click the back button to return from whence you came. " + _datum.parentId,
+                             _rsrc.styles().nonExistNote()));
+        final EnumListBox<Type> type = new EnumListBox<Type>(Type.class);
+        final Button create = new Button("Create");
+        add(Widgets.newRow(Widgets.newLabel("Type:"), type, create));
+
+        new ClickCallback<Long>(create) {
+            protected boolean callService () {
+                _datum.type = type.getSelectedValue();
+                if (_datum.type.hasText()) {
+                    _datum.text = "Click the button at right to edit this item.";
+                }
+                _datasvc.createDatum(_cortexId, _datum, this);
+                return true;
+            }
+            protected boolean gotResult (Long datumId) {
+                _datum.id = datumId;
+                _datum.children = new ArrayList<Datum>();
+                Panel parent = (Panel)getParent();
+                parent.remove(NonExistentDatumPanel.this);
+                parent.add(DatumPanel.create(_cortexId, _datum));
+                return false;
+            }
+        };
+    }
+}

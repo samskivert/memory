@@ -11,7 +11,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.threerings.gwt.ui.Popups;
 import com.threerings.gwt.ui.Widgets;
 import com.threerings.gwt.util.ClickCallback;
-import com.threerings.gwt.util.WikiParser;
 
 import memory.data.Datum;
 import memory.data.Type;
@@ -57,7 +56,7 @@ public class ListDatumPanel extends DatumPanel
         Widget ilabel;
         switch (item.type) {
         case WIKI:
-            ilabel = Widgets.newHTML(WikiParser.renderSnippet(item.text));
+            ilabel = Widgets.newHTML(WikiUtil.formatSnippet(_cortexId, _datum, item.text));
             break;
         case HTML:
             ilabel = Widgets.newHTML(item.text);

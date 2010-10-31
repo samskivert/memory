@@ -60,4 +60,7 @@ class Memory (info :ProjectInfo) extends DefaultWebProject(info) {
     mainCompileConditional.run
     FileUtilities.copy(mainClasses.get, jettyWebappPath / "WEB-INF" / "classes", log).left.toOption
   } dependsOn(i18nsync) // regenerate our i18n classes every time we compile
+
+  // prepares our webapp for shipping
+  lazy val prepShip = prepareWebappAction && memoryc && accountc
 }

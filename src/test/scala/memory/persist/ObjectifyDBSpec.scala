@@ -37,7 +37,7 @@ class ObjectifyDBSpec extends FlatSpec with BeforeAndAfterAll with ShouldMatcher
     val contents = new Datum
     contents.`type` = Type.WIKI
     contents.meta = ""
-    contents.title = ""
+    contents.title = "Howdy"
     contents.text = "Hello"
 
     // test cortex creation and root loading
@@ -54,5 +54,10 @@ class ObjectifyDBSpec extends FlatSpec with BeforeAndAfterAll with ShouldMatcher
 
     // test loading children
     db.loadChildren("test", root.id).head.text should equal("Hello")
+
+    // test loading by parent + title (with matching and non-matching case)
+    db.loadDatum("test", 1, "Howdy") map(_.text) should equal(Some("Hello"))
+    db.loadDatum("test", 1, "howdy") map(_.text) should equal(Some("Hello"))
+    db.loadDatum("test", 1, "HOWDY") map(_.text) should equal(Some("Hello"))
   }
 }

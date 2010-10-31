@@ -83,3 +83,7 @@ body {
   width: 33%;
   left: 2%;
 }
+
+.nonExistNote {
+  margin: 10px 0px;
+}

@@ -48,6 +48,9 @@ trait DB
   /** Loads the specified datum. Throws an excepton if it does not exist. */
   def loadDatum (cortexId :String, id :Long) :Datum
 
+  /** Loads the specified datum. */
+  def loadDatum (cortexId :String, parentId :Long, title :String) :Option[Datum]
+
   /** Loads the children of the specified datum. */
   def loadChildren (cortexId :String, id :Long) :Array[Datum]
 

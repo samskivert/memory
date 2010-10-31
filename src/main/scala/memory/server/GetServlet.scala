@@ -33,6 +33,11 @@ class GetServlet extends HttpServlet
     try {
       require(req.getPathInfo != null, "Missing path.")
 
+      // the path info will be one of:
+      // cortexId
+      // cortexId/datumId
+      // cortexId/parentId/title
+
       val bits = req.getPathInfo.split("/")
       require(bits.length >= 2, "Missing cortex name.")
       val cortexId = bits(1)
@@ -41,17 +46,23 @@ class GetServlet extends HttpServlet
       val access = db.loadAccess(if (user == null) "" else user.getUserId, cortexId)
       require(access != Access.NONE, "You lack access to '" + cortexId + "'.")
 
-      db.loadRoot(cortexId) match {
-        case None => throw new Exception("No such cortex '" + cortexId + "'.")
-        case Some(root) => {
-          val contents = <div id="root" x:cortex={cortexId}>
-            {toXML(resolveChildren(cortexId)(root))}</div>
-          val out = rsp.getWriter
-          out.println(Header)
-          XML.write(out, contents, null, false, null)
-          out.println(Footer)
-        }
+      val root = db.loadRoot(cortexId) getOrElse(
+        throw new Exception("No such cortex '" + cortexId + "'."))
+
+      val contents = bits.length match {
+        case 2 => root
+        case 3 => db.loadDatum(cortexId, bits(2).toInt)
+        case 4 => db.loadDatum(cortexId, bits(2).toInt, bits(3)) getOrElse(
+          mkStub(bits(2).toInt, bits(3)))
+        case _ => throw new Error("Invalid path " + req.getPathInfo)
       }
+
+      val xml = 
+        <div id="root" x:cortex={cortexId}>{toXML(resolveChildren(cortexId)(contents))}</div>
+      val out = rsp.getWriter
+      out.println(Header)
+      XML.write(out, xml, null, false, null)
+      out.println(Footer)
 
     } catch {
       case e => 
@@ -82,13 +93,24 @@ class GetServlet extends HttpServlet
 
   private def toXML (datum :Datum) :Node = {
     import scalaj.collection.Imports._
-    <def id={datum.id.toString} x:type={datum.`type`.toString} x:meta={datum.meta}
-         title={datum.title} x:when={datum.when.toString}>{datum.text}
+    <def id={datum.id.toString} x:parentId={datum.parentId.toString}
+         x:type={datum.`type`.toString} x:meta={datum.meta} title={datum.title}
+         x:when={datum.when.toString}>{datum.text}
       {datum.children match {
         case null => Array[Node]()
         case children => children.asScala map(toXML)
       }}
     </def>
+  }
+
+  private def mkStub (parentId :Int, title :String) = {
+    val datum = new Datum
+    datum.parentId = parentId;
+    datum.meta = ""
+    datum.title = title
+    datum.`type` = Type.NONEXISTENT
+    datum.when = System.currentTimeMillis
+    datum
   }
 
   private val _usvc = UserServiceFactory.getUserService

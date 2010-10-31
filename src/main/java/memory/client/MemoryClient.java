@@ -48,12 +48,8 @@ public class MemoryClient implements EntryPoint
     protected static Datum parseDatum (Element elem)
     {
         Datum datum = new Datum();
-        try {
-            datum.id = Long.parseLong(elem.getId());
-        } catch (NumberFormatException nfe) {
-            GWT.log("Failed to parse id (" + elem.getId() + ").");
-            throw nfe;
-        }
+        datum.id = Long.parseLong(elem.getId());
+        datum.parentId = Long.parseLong(elem.getAttribute("x:parentId"));
         datum.type = Enum.valueOf(Type.class, elem.getAttribute("x:type"));
         datum.meta = elem.getAttribute("x:meta");
         datum.title = elem.getTitle();

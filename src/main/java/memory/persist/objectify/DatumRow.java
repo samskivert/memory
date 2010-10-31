@@ -31,8 +31,12 @@ public class DatumRow
     /** Metadata for this datum. */
     @Unindexed public String meta;
 
+    /** The title of this datum converted to lowercase because GAE doesn't support case-insensitive
+     * indexes. Sheesh. */
+    public String titleKey;
+
     /** The title of this datum. */
-    public String title;
+    @Unindexed public String title;
 
     /** The primary contents of this datum. */
     @Unindexed public String text;

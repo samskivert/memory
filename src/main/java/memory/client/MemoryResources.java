@@ -32,6 +32,8 @@ public interface MemoryResources extends ClientBundle
         String column13 ();
         String column23 ();
         String column33 ();
+
+        String nonExistNote ();
     }
 
     @Source("memory.css")

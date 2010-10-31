@@ -54,11 +54,7 @@ public abstract class DatumPanel extends FlowPanel
         clear();
         removeStyleName(_rsrc.styles().editor());
         addStyleName(_rsrc.styles().view());
-        add(createCornerButton(_rsrc.editImage(), _msgs.editTip(), new ClickHandler() {
-            public void onClick (ClickEvent event) {
-                showEditor();
-            }
-        }));
+        addEditButton();
         createContents();
     }
 
@@ -82,6 +78,15 @@ public abstract class DatumPanel extends FlowPanel
         FlowPanel editor = Widgets.newFlowPanel(_rsrc.styles().insetBox());
         addEditor(editor);
         add(editor);
+    }
+
+    protected void addEditButton ()
+    {
+        add(createCornerButton(_rsrc.editImage(), _msgs.editTip(), new ClickHandler() {
+            public void onClick (ClickEvent event) {
+                showEditor();
+            }
+        }));
     }
 
     protected void addEditor (FlowPanel editor)
@@ -192,6 +197,7 @@ public abstract class DatumPanel extends FlowPanel
         case CHECKLIST: return new HTMLDatumPanel();
         case JOURNAL: return new HTMLDatumPanel();
         case PAGE: return new PageDatumPanel();
+        case NONEXISTENT: return new NonExistentDatumPanel();
         }
     }
 

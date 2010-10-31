@@ -102,6 +102,13 @@ object ObjectifyDB extends DB
   }
 
   // from trait DB
+  def loadDatum (cortexId :String, parentId :Long, title :String) :Option[Datum] = {
+    val obj = ObjectifyService.begin
+    Option(obj.query(classOf[DatumRow]).ancestor(cortexKey(cortexId)).filter(
+      "parentId", parentId).filter("titleKey", title.toLowerCase).get) map(toJava)
+  }
+
+  // from trait DB
   def loadChildren (cortexId :String, id :Long) :Array[Datum] = {
     val obj = ObjectifyService.begin
     val l = obj.query(classOf[DatumRow]).ancestor(cortexKey(cortexId)).filter("parentId", id).list
@@ -123,7 +130,10 @@ object ObjectifyDB extends DB
       parentId foreach(datum.parentId = _)
       typ foreach(datum.`type` = _)
       meta foreach(datum.meta = _)
-      title foreach(datum.title = _)
+      title foreach(t => {
+        datum.titleKey = t.toLowerCase
+        datum.title = t
+      })
       text foreach(datum.text = _)
       when foreach(datum.when = _)
       obj.put(datum) :Key[DatumRow]
@@ -154,6 +164,7 @@ object ObjectifyDB extends DB
     row.parentId = parentId
     row.`type` = type_
     row.meta = meta
+    row.titleKey = title.toLowerCase
     row.title = title
     row.text = text
     row.when = when
