@@ -16,21 +16,17 @@ class AccountServlet extends HttpServlet
     if (_usvc.getCurrentUser == null) {
       rsp.sendRedirect(_usvc.createLoginURL("/account"))
     } else {
-      rsp.getWriter.println(Contents)
+      val out = rsp.getWriter
+      out.println(ServletUtil.htmlHeader("Memory Account"))
+      out.println(GwitBits)
+      out.println(ServletUtil.htmlFooter)
     }
   }
 
   private val _usvc = UserServiceFactory.getUserService
 
-  private val Contents = """
-  |<?xml version="1.0" encoding="UTF-8" ?>
-  |<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
-  |<html xmlns="http://www.w3.org/1999/xhtml">
-  |<head><title>Memory Account</title></head>
-  |<body>
+  private val GwitBits = """
   |  <div id="client"><div>Loading...</div></div>
   |  <script src="account/account.nocache.js" type="text/javascript"></script>
-  |</body>
-  |</html>
   """.stripMargin
 }

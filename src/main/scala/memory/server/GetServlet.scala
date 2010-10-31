@@ -13,9 +13,6 @@ import com.google.appengine.api.users.{User, UserService, UserServiceFactory}
 import memory.data.{Access, Datum, Type}
 import memory.persist.DB
 
-// used to redireect servlet requesters elsewhere
-class RedirectException (url :String) extends Exception(url)
-
 /**
  * Serves up REST data.
  */
@@ -69,9 +66,10 @@ class GetServlet extends HttpServlet
       val xml = 
         <div id="root" x:cortex={cortexId}>{toXML(resolveChildren(cortexId)(contents))}</div>
       val out = rsp.getWriter
-      out.println(Header)
+      out.println(ServletUtil.htmlHeader(cortexId + " - " + contents.title))
       XML.write(out, xml, null, false, null)
-      out.println(Footer)
+      out.println(GwitBits)
+      out.println(ServletUtil.htmlFooter)
 
     } catch {
       case re :RedirectException => rsp.sendRedirect(re.getMessage)
@@ -128,15 +126,13 @@ class GetServlet extends HttpServlet
   |<?xml version="1.0" encoding="UTF-8" ?>
   |<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
   |<html xmlns="http://www.w3.org/1999/xhtml">
-  |<head><title>Memory</title></head>
+  |<head><title>Memory</title>
+  |<meta name="viewport" content="width = device-width, user-scalable = no"/></head>
   |<body>
   """.stripMargin
 
-  private val Footer = """
-  |  <div id="client" style="min-height: 600px"></div>
-  |  <iframe id="__gwt_historyFrame" style="width:0;height:0;border:0"></iframe>
+  private val GwitBits = """
+  |  <div id="client"></div>
   |  <script src="/memory/memory.nocache.js" type="text/javascript"></script>
-  |</body>
-  |</html>
   """.stripMargin
 }
