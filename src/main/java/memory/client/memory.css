@@ -35,6 +35,11 @@ body {
   font-weight: bold;
 }
 
+.listItem {
+  margin-left: 20px;
+  display: list-item;
+}
+
 .stretchWide {
   width: 98%;
 }

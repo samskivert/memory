@@ -6,6 +6,7 @@ package memory.client;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
 
 import com.threerings.gwt.ui.Popups;
 import com.threerings.gwt.ui.Widgets;
@@ -53,17 +54,20 @@ public class ListDatumPanel extends DatumPanel
 
     protected void addItem (FlowPanel items, Datum item)
     {
+        Widget ilabel;
         switch (item.type) {
         case WIKI:
-            items.add(Widgets.newHTML(WikiParser.renderSnippet(item.text)));
+            ilabel = Widgets.newHTML(WikiParser.renderSnippet(item.text));
             break;
         case HTML:
-            items.add(Widgets.newHTML(item.text));
+            ilabel = Widgets.newHTML(item.text);
             break;
         default:
-            items.add(Widgets.newLabel(item.text));
+            ilabel = Widgets.newLabel(item.text);
             break;
         }
+        ilabel.addStyleName(_rsrc.styles().listItem());
+        items.add(ilabel);
     }
 
     protected void addEditor (FlowPanel editor)

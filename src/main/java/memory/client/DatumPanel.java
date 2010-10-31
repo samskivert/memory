@@ -118,7 +118,8 @@ public abstract class DatumPanel extends FlowPanel
         editor.add(Widgets.newLabel("Children:", _rsrc.styles().editorTitle()));
         final FlowPanel kids = new FlowPanel();
         for (Datum child : _datum.children) {
-            kids.add(Widgets.newLabel(child.type + ": " + getTitle(child)));
+            kids.add(Widgets.newLabel(child.type + ": " + getTitle(child),
+                                      _rsrc.styles().listItem()));
         }
         editor.add(kids);
 

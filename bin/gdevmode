@@ -28,7 +28,7 @@ if [ "$1" = "account" ]; then
     START_URL="account"
     CLIENT="account"
 else
-    START_URL="memory/index.html"
+    START_URL="c/samskivert"
     CLIENT="memory"
 fi
 
