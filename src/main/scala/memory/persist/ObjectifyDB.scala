@@ -53,7 +53,7 @@ object ObjectifyDB extends DB
     }
     transaction { obj =>
       // we have to force the return type below to resolve pesky overload of put()
-      obj.put(cortexAccess(cortexId, ownerId, Access.WRITE)) :Key[CortexAccess]
+      obj.put(cortexAccess(ownerId, cortexId, Access.WRITE)) :Key[CortexAccess]
     }
   }
 
