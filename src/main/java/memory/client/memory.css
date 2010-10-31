@@ -4,6 +4,14 @@ body {
   font-family: Helvetica, Arial, sans-serif;
 }
 
+pre {
+ max-width: 100%;
+ overflow: auto;
+ border-top: 1px solid;
+ border-bottom: 1px solid;
+ padding: 5px 0px;
+}
+
 .cornerButton {
   float: right;
   margin: 2px 2px 0px 0px;
