@@ -17,13 +17,11 @@ import memory.data.{Datum, Type}
 class ObjectifyDBSpec extends FlatSpec with BeforeAndAfterAll with ShouldMatchers
 {
   val db = objectify.ObjectifyDB
-
-  { db.init } // ctor
-
   val helper = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig())
 
   override def beforeAll {
     helper.setUp
+    db.init
   }
 
   override def afterAll {

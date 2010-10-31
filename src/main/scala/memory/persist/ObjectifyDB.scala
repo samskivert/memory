@@ -58,50 +58,59 @@ object ObjectifyDB extends DB
   }
 
   // from trait DB
-  def loadRoot (cortexId: String) :Option[Datum] = transaction { obj =>
+  def loadRoot (cortexId: String) :Option[Datum] = {
+    val obj = ObjectifyService.begin
     Option(obj.get(cortexKey(cortexId))) map(c => obj.get(datumKey(cortexId, c.rootId))) map(toJava)
   }
 
   // from trait DB
-  def loadAccess (userId :String, cortexId :String) = transaction { obj =>
+  def loadAccess (userId :String, cortexId :String) = {
+    val obj = ObjectifyService.begin
     Option(obj.query(classOf[CortexAccess]).ancestor(
       userKey(userId)).filter("cortexId", cortexId).get) map(_.access) getOrElse(Access.NONE)
   }
 
   // from trait DB
   def loadAccess (userId :String, datumId :Long) = {
+    val obj = ObjectifyService.begin
     error("unimplemented")
   }
 
   // from trait DB
-  def loadCortexAccess (userId :String) :Seq[(Access,String)] = transaction { obj =>
+  def loadCortexAccess (userId :String) :Seq[(Access,String)] = {
+    val obj = ObjectifyService.begin
     obj.query(classOf[CortexAccess]).ancestor(userKey(userId)).list.asScala map(
       ca => (ca.access, ca.cortexId))
   }
 
   // from trait DB
   def updateAccess (userId :String, cortexId :String, access :Access) :Unit = {
+    val obj = ObjectifyService.begin
     error("unimplemented")
   }
 
   // from trait DB
   def updateAccess (userId :String, datumId :Long, access :Access) {
+    val obj = ObjectifyService.begin
     error("unimplemented")
   }
 
   // from trait DB
-  def loadDatum (cortexId :String, id :Long) :Datum = transaction { obj =>
+  def loadDatum (cortexId :String, id :Long) :Datum = {
+    val obj = ObjectifyService.begin
     Option(obj.get(datumKey(cortexId, id))) map(toJava) getOrElse(error("No such datum " + id))
   }
 
   // from trait DB
-  def loadChildren (cortexId :String, id :Long) :Array[Datum] = transaction { obj =>
+  def loadChildren (cortexId :String, id :Long) :Array[Datum] = {
+    val obj = ObjectifyService.begin
     val l = obj.query(classOf[DatumRow]).ancestor(cortexKey(cortexId)).filter("parentId", id).list
     (0 until l.size) map(ii => l.get(ii)) map(toJava) toArray
   }
 
   // from trait DB
-  def loadData (cortexId :String, ids :Set[Long]) :Array[Datum] = transaction { obj =>
+  def loadData (cortexId :String, ids :Set[Long]) :Array[Datum] = {
+    val obj = ObjectifyService.begin
     obj.get(ids.map(id => datumKey(cortexId, id)).asJava).values.asScala.map(toJava).toArray
   }
 
@@ -127,7 +136,6 @@ object ObjectifyDB extends DB
       val key :Key[DatumRow] = obj.put(
         datumRow(cortexId, d.parentId, d.`type`, d.meta, d.title, d.text, d.when))
       d.id = key.getId
-      println("Created datum in cortex " + cortexId + ": " + d.id)
       d.id
     }
   }
@@ -143,6 +151,7 @@ object ObjectifyDB extends DB
                         meta :String, title :String, text :String, when :Long) = {
     val row = new DatumRow
     row.cortex = cortexKey(cortexId)
+    row.parentId = parentId
     row.`type` = type_
     row.meta = meta
     row.title = title

@@ -5,6 +5,8 @@ package memory.persist.objectify;
 
 import javax.persistence.Id;
 
+import com.googlecode.objectify.annotation.Unindexed;
+
 /**
  * Contains the data for a Cortex.
  */
@@ -14,7 +16,7 @@ public class CortexRow
     @Id public String id;
 
     /** The id of the root datum for this cortex. */
-    public long rootId;
+    @Unindexed public long rootId;
 
     @Override // from Object
     public String toString ()
