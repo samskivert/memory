@@ -3,6 +3,7 @@ import sbt._
 class Memory (info :ProjectInfo) extends DefaultWebProject(info) {
   // need our local repository for gwt-utils snapshot
   val mavenLocal = "Local Maven Repository" at "file://"+Path.userHome+"/.m2/repository"
+  val objectifySvn = "Objectify repo" at "http://objectify-appengine.googlecode.com/svn/maven"
 
   // general depends
   val scalatest = "org.scalatest" % "scalatest" % "1.2" % "test"
@@ -24,10 +25,16 @@ class Memory (info :ProjectInfo) extends DefaultWebProject(info) {
 
   // appengine depends
   val gae = "com.google.appengine" % "appengine-api-1.0-sdk" % "1.3.8"
+  // val gaeTools = "com.google.appengine" % "appengine-tools-sdk" % "1.3.8" % "test"
+  val gaeTesting = "com.google.appengine" % "appengine-testing" % "1.3.8" % "test"
+  val gaeStubs = "com.google.appengine" % "appengine-api-stubs" % "1.3.8" % "test"
+  val gaeLabs = "com.google.appengine" % "appengine-api-labs" % "1.3.8" % "test"
 
   // database depends
   val h2db = "com.h2database" % "h2" % "1.2.142"
   val squeryl = "org.squeryl" % "squeryl_2.8.0" % "0.9.4-RC2"
+  val objectify = "com.googlecode.objectify" % "objectify" % "2.2.1"
+  val jpa = "javax.persistence" % "persistence-api" % "1.0"
 
   // used to obtain the path for a specific dependency jar file
   def depPath (name :String) = managedDependencyRootPath ** (name+"*")

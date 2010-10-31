@@ -42,10 +42,10 @@ public interface DataService extends RemoteService
 
     /** Creates a new datum for the calling user.
      * @return the id of the newly created datum. */
-    long createDatum (Datum datum) throws ServiceException;
+    long createDatum (String cortexId, Datum datum) throws ServiceException;
 
     /** Updates the specified datum. Only the non-null fields are modified. */
-    void updateDatum (long id, Long parentId, Type type, String meta, String title, String text,
-                      Long when, Boolean archived)
+    void updateDatum (String cortexId, long id, Long parentId, Type type, String meta,
+                      String title, String text, Long when, Boolean archived)
         throws ServiceException;
 }

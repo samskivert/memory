@@ -4,7 +4,6 @@
 package memory.persist
 package squeryl
 
-import java.io.File
 import java.sql.DriverManager
 
 import org.squeryl.PrimitiveTypeMode._
@@ -18,7 +17,7 @@ import memory.data.{Access, Datum, Type}
 /**
  * Implements our persistence services using Squeryl and H2.
  */
-object SquerylDB extends Schema with DB
+object SquerylDB extends Schema // with DB
 {
   /** Provides cortices. */
   val cortexen = table[CortexRow]
@@ -63,8 +62,6 @@ object SquerylDB extends Schema with DB
   def init {
     // initialize the H2 database
     Class.forName("org.h2.Driver")
-    // TODO: make configurable
-    // val dburl = "jdbc:h2:database"
     val dburl = "jdbc:h2:mem:database;DB_CLOSE_DELAY=-1" // TEMP while testing GAE
     SessionFactory.concreteFactory = Some(() => {
       // TODO: use connection pools as Squeryl creates and closes a connection on every query

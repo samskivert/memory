@@ -4,6 +4,8 @@
   <!--<inherits name="com.google.gwt.i18n.I18N"/>-->
   <inherits name="com.threerings.gwt.Utils"/>
 
-  <source path="memory"/>
+  <source path="memory/client"/>
+  <source path="memory/data"/>
+  <source path="memory/rpc"/>
   <entry-point class="memory.client.AccountClient"/>
 </module>

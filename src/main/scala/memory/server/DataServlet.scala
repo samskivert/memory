@@ -19,7 +19,7 @@ import memory.rpc.{DataService, ServiceException}
 class DataServlet extends RemoteServiceServlet with DataService
 {
   // TODO: configure this based on servlet config?
-  val db :DB = memory.persist.squeryl.SquerylDB
+  val db :DB = memory.persist.objectify.ObjectifyDB
 
   // from DataService
   def loadAccountInfo = {
@@ -46,18 +46,18 @@ class DataServlet extends RemoteServiceServlet with DataService
   }
 
   // from DataService
-  def createDatum (datum :Datum) = {
+  def createDatum (cortexId :String, datum :Datum) = {
     val userId = 0 // TODO
-    val parent = db.loadDatum(datum.parentId)
+    val parent = db.loadDatum(cortexId, datum.parentId)
     // TODO: check access using parent
-    db.createDatum(datum)
+    db.createDatum(cortexId, datum)
   }
 
   // from DataService
-  def updateDatum (id :Long, parentId :java.lang.Long, `type` :Type, meta :String,
+  def updateDatum (cortexId :String, id :Long, parentId :java.lang.Long, `type` :Type, meta :String,
                    title :String, text :String, when :java.lang.Long, archived :java.lang.Boolean) {
     // TODO: check access
-    db.updateDatum(id, Option(parentId) map(_.longValue), Option(`type`), Option(meta),
+    db.updateDatum(cortexId, id, Option(parentId) map(_.longValue), Option(`type`), Option(meta),
                    Option(title), Option(text), Option(when) map(_.longValue))
     // TODO: handle archived
   }

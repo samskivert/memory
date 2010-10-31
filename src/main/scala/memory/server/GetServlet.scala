@@ -19,7 +19,7 @@ import memory.persist.DB
 class GetServlet extends HttpServlet
 {
   // TODO: configure this based on servlet config?
-  val db :DB = memory.persist.squeryl.SquerylDB
+  val db :DB = memory.persist.objectify.ObjectifyDB
 
   override def init (config :ServletConfig) {
     try {
@@ -30,45 +30,54 @@ class GetServlet extends HttpServlet
   }
 
   override protected def doGet (req :HttpServletRequest, rsp :HttpServletResponse) {
-    // val userId = 0 // TODO
-    // val dat = resolveChildren(loadUserRoot(userId))
-    val out = rsp.getWriter
-    // val contents = <div id="root">{toXML(dat)}</div>
-    // out.println(Header)
-    // XML.write(out, contents, null, false, null)
-    // out.println(Footer)
-    out.println("TODO!")
+    try {
+      require(req.getPathInfo != null, "Missing path.")
+
+      val bits = req.getPathInfo.split("/")
+      require(bits.length >= 2, "Missing cortex name.")
+      val cortexId = bits(1)
+
+      val user = _usvc.getCurrentUser
+      val access = db.loadAccess(cortexId, if (user == null) "" else user.getUserId)
+      require(access != Access.NONE, "You lack access to '" + cortexId + "'.")
+
+      db.loadRoot(cortexId) match {
+        case None => throw new Exception("No such cortex '" + cortexId + "'.")
+        case Some(root) => {
+          val contents = <div id="root">{toXML(resolveChildren(cortexId)(root))}</div>
+          val out = rsp.getWriter
+          out.println(Header)
+          XML.write(out, contents, null, false, null)
+          out.println(Footer)
+        }
+      }
+
+    } catch {
+      case e => 
+      rsp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage)
+    }
   }
 
-  private def getCurrentUser () = _usvc.getCurrentUser
+  private def require (condition : => Boolean, error :String) {
+    if (!condition) throw new Exception(error)
+  }
 
-  // private def loadUserRoot (userId :Long) = {
-  //   db.loadRoot(userId) match {
-  //     case None => {
-  //       val root = createUserPage(userId)
-  //       db.createDatum(root)
-  //       db.createDatum(createUserPageContents(root))
-  //       root
-  //     }
-  //     case Some(root) => root
-  //   }
-  // }
+  private def resolveChildren (cortexId :String, rootId :Long) :Datum =
+    resolveChildren(cortexId)(db.loadDatum(cortexId, rootId))
 
-  private def resolveChildren (rootId :Long) :Datum = resolveChildren(db.loadDatum(rootId))
-
-  private def resolveChildren (root :Datum) :Datum = {
+  private def resolveChildren (cortexId :String)(root :Datum) :Datum = {
     root.children = root.`type` match {
-      case Type.LIST => resolveChildList(root.id) // TODO: archive old bits
-      case Type.CHECKLIST => resolveChildList(root.id) // TODO: archive old bits
-      case Type.JOURNAL => resolveChildList(root.id) // TODO: just today's data
-      case Type.PAGE => resolveChildList(root.id)
+      case Type.LIST => resolveChildList(cortexId, root.id) // TODO: archive old bits
+      case Type.CHECKLIST => resolveChildList(cortexId, root.id) // TODO: archive old bits
+      case Type.JOURNAL => resolveChildList(cortexId, root.id) // TODO: just today's data
+      case Type.PAGE => resolveChildList(cortexId, root.id)
       case _ => null
     }
     root
   }
 
-  private def resolveChildList (id :Long) =
-    java.util.Arrays.asList(db.loadChildren(id) map(resolveChildren) :_*)
+  private def resolveChildList (cortexId :String, id :Long) =
+    java.util.Arrays.asList(db.loadChildren(cortexId, id) map(resolveChildren(cortexId)) :_*)
 
   private def toXML (datum :Datum) :Node = {
     import scalaj.collection.Imports._
@@ -94,7 +103,7 @@ class GetServlet extends HttpServlet
   private val Footer = """
   |  <div id="client" style="min-height: 600px"></div>
   |  <iframe id="__gwt_historyFrame" style="width:0;height:0;border:0"></iframe>
-  |  <script src="memory.nocache.js" type="text/javascript"></script>
+  |  <script src="/memory/memory.nocache.js" type="text/javascript"></script>
   |</body>
   |</html>
   """.stripMargin
