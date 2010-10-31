@@ -3,6 +3,8 @@
 
 package memory.client;
 
+import java.util.ArrayList;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -153,6 +155,7 @@ public abstract class DatumPanel extends FlowPanel
         child.title = title;
         child.text = text;
         child.when = System.currentTimeMillis();
+        child.children = new ArrayList<Datum>();
         return child;
     }
 
