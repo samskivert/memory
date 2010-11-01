@@ -13,7 +13,7 @@ pre {
 }
 
 p {
-  margin: 0px 0px 10px 0px;
+  margin: 0px 0px 5px 0px;
 }
 
 .cornerButton {
@@ -41,6 +41,7 @@ p {
 
 .editor {
   border: 1px solid;
+  /* max-width: 480px; */
 }
 
 .editorTitle {

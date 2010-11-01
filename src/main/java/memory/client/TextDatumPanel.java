@@ -20,9 +20,9 @@ import memory.data.FieldValue;
  */
 public abstract class TextDatumPanel extends DatumPanel
 {
-    protected void addEditor (FlowPanel editor)
+    @Override protected void addEditor (FlowPanel editor)
     {
-        addTitleEditor(editor);
+        super.addEditor(editor);
         editor.add(Widgets.newShim(5, 5));
 
         final TextArea text = Widgets.newTextArea(_datum.text, -1, 30);
@@ -45,5 +45,10 @@ public abstract class TextDatumPanel extends DatumPanel
             protected String _text;
         };
         editor.add(update);
+    }
+
+    @Override protected void addChildrenEditor (FlowPanel editor)
+    {
+        // no children of text datum
     }
 }

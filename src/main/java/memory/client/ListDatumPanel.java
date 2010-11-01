@@ -70,14 +70,9 @@ public class ListDatumPanel extends DatumPanel
         }
     }
 
-    protected void addEditor (FlowPanel editor)
+    @Override protected void addChildrenEditor (FlowPanel editor)
     {
-        addTitleEditor(editor);
-        addItemEditors(editor);
-    }
-
-    protected void addItemEditors (FlowPanel editor)
-    {
+        // no children editor, instead we use item editors
         editor.add(Widgets.newLabel("Items:", _rsrc.styles().editorTitle()));
         for (final Datum item : _datum.children) {
             final TextBox text = Widgets.newTextBox(item.text, -1, 20);

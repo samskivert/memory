@@ -20,6 +20,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.threerings.gwt.ui.Anchor;
 import com.threerings.gwt.ui.EnumListBox;
 import com.threerings.gwt.ui.FluentTable;
+import com.threerings.gwt.ui.NumberTextBox;
 import com.threerings.gwt.ui.Popups;
 import com.threerings.gwt.ui.Widgets;
 import com.threerings.gwt.util.ClickCallback;
@@ -79,11 +80,14 @@ public abstract class DatumPanel extends FlowPanel
         clear();
         removeStyleName(_rsrc.styles().view());
         addStyleName(_rsrc.styles().editor());
-        add(createCornerButton(_rsrc.closeImage(), _msgs.closeTip(), new ClickHandler() {
+        PushButton close = createCornerButton(
+            _rsrc.closeImage(), _msgs.closeTip(), new ClickHandler() {
             public void onClick (ClickEvent event) {
                 showContents();
             }
-        }));
+        });
+        close.addStyleName(_rsrc.styles().floatRight());
+        add(close);
         FlowPanel editor = Widgets.newFlowPanel(_rsrc.styles().insetBox());
         addEditor(editor);
         add(editor);
@@ -129,30 +133,36 @@ public abstract class DatumPanel extends FlowPanel
 
     protected void addEditor (FlowPanel editor)
     {
-        addTitleEditor(editor);
+        addBitsEditor(editor);
         addChildrenEditor(editor);
     }
 
-    protected void addTitleEditor (FlowPanel editor)
+    protected void addBitsEditor (FlowPanel editor)
     {
         final TextBox title = Widgets.newTextBox(_datum.title, Datum.MAX_TITLE_LENGTH, 20);
+        title.addStyleName(_rsrc.styles().stretchWide());
         final EnumListBox<Type> type = createTypeListBox();
         type.setSelectedValue(_datum.type);
+        final NumberTextBox parentId = NumberTextBox.newIntBox(10);
+        parentId.setNumber(_datum.parentId);
         Button update = new Button("Update");
 
-        new ClickCallback<Void>(update, title) {
+        new ClickCallback<Void>(update) {
             protected boolean callService () {
                 _title = title.getText().trim();
                 _type = type.getSelectedValue();
+                _parentId = parentId.getNumber().longValue();
                 _datasvc.updateDatum(_cortexId, _datum.id,
+                                     Datum.Field.TITLE, FieldValue.of(_title),
                                      Datum.Field.TYPE, FieldValue.of(_type),
-                                     Datum.Field.TITLE, FieldValue.of(_title), this);
+                                     Datum.Field.PARENT_ID, FieldValue.of(_parentId), this);
                 return true;
             }
             protected boolean gotResult (Void result) {
                 Popups.infoNear(_msgs.datumUpdated(), getPopupNear());
                 title.setText(_title);
                 _datum.title = _title;
+                _datum.parentId = _parentId;
                 if (_datum.type != _type) {
                     _datum.type = _type;
                     showEditor(); // reload the editor as our type changed
@@ -161,9 +171,15 @@ public abstract class DatumPanel extends FlowPanel
             }
             protected String _title;
             protected Type _type;
+            protected long _parentId;
         };
 
-        editor.add(Widgets.newRow(Widgets.newLabel("Title:"), title, type, update));
+        FluentTable bits = new FluentTable(0, 5);
+        bits.add().setText("Title:").right().setWidget(title).setColSpan(3);
+        bits.add().setText("Type:").right().setWidget(type).
+            right().setText("Parent:").right().setWidget(parentId).
+            right().setWidget(update);
+        editor.add(bits);
     }
 
     protected void addChildrenEditor (FlowPanel editor)
@@ -171,8 +187,7 @@ public abstract class DatumPanel extends FlowPanel
         editor.add(Widgets.newLabel("Children:", _rsrc.styles().editorTitle()));
         final FlowPanel kids = new FlowPanel();
         for (Datum child : _datum.children) {
-            kids.add(Widgets.newLabel(child.type + ": " + getTitle(child),
-                                      _rsrc.styles().listItem()));
+            addChildWidget(kids, child);
         }
         editor.add(kids);
 
@@ -191,13 +206,19 @@ public abstract class DatumPanel extends FlowPanel
             protected boolean gotResult (Long datumId) {
                 _child.id = datumId;
                 _datum.children.add(_child);
-                kids.add(Widgets.newLabel(getTitle(_child)));
+                addChildWidget(kids, _child);
                 title.setText("");
                 Popups.infoNear(_msgs.datumCreated(), getPopupNear());
                 return true;
             }
             protected Datum _child;
         };
+    }
+
+    protected void addChildWidget (FlowPanel kids, Datum child)
+    {
+        kids.add(Widgets.newLabel(child.type + " (" + child.id + "): " + getTitle(child),
+                                  _rsrc.styles().listItem()));
     }
 
     protected Datum createChildDatum (Type type, String title, String text)

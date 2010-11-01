@@ -58,12 +58,8 @@ trait DB
   /** Loads the specified data. */
   def loadData (cortexId :String, ids :Set[Long]) :Array[Datum]
 
-  /** Updates the specified field of the specified datum. */
-  def updateDatum (cortexId :String, id :Long, field :Datum.Field, value :FieldValue) :Unit
-
   /** Updates the specified fields of the specified datum. */
-  def updateDatum (cortexId :String, id :Long, field1 :Datum.Field, value1 :FieldValue,
-                   field2 :Datum.Field, value2 :FieldValue) :Unit
+  def updateDatum (cortexId :String, id :Long, updates :Seq[(Datum.Field, FieldValue)]) :Unit
 
   /** Creates a new datum and fills in its {@link Datum#id} field.
    * @return the newly assigned id. */

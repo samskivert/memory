@@ -29,6 +29,11 @@ public interface DataServiceAsync
     void updateDatum (String cortexId, long id, Datum.Field field, FieldValue value, Datum.Field arg4, FieldValue arg5, AsyncCallback<Void> callback);
 
     /**
+     * The async version of {@link DataService#updateDatum}.
+     */
+    void updateDatum (String cortexId, long id, Datum.Field field, FieldValue value, Datum.Field arg4, FieldValue arg5, Datum.Field arg6, FieldValue arg7, AsyncCallback<Void> callback);
+
+    /**
      * The async version of {@link DataService#loadAccountInfo}.
      */
     void loadAccountInfo (AsyncCallback<DataService.AccountResult> callback);

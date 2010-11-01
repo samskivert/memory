@@ -56,7 +56,7 @@ class DataServlet extends RemoteServiceServlet with DataService
   // from DataService
   def updateDatum (cortexId :String, id :Long, field :Datum.Field, value :FieldValue) {
     // TODO: check access
-    db.updateDatum(cortexId, id, field, value)
+    db.updateDatum(cortexId, id, Seq(field -> value))
     // TODO: handle archived
   }
 
@@ -64,7 +64,16 @@ class DataServlet extends RemoteServiceServlet with DataService
   def updateDatum (cortexId :String, id :Long, field1 :Datum.Field, value1 :FieldValue,
                    field2 :Datum.Field, value2 :FieldValue) {
     // TODO: check access
-    db.updateDatum(cortexId, id, field1, value1, field2, value2)
+    db.updateDatum(cortexId, id, Seq(field1 -> value1, field2 -> value2))
+    // TODO: handle archived
+  }
+
+  // from DataService
+  def updateDatum (cortexId :String, id :Long, field1 :Datum.Field, value1 :FieldValue,
+                   field2 :Datum.Field, value2 :FieldValue,
+                   field3 :Datum.Field, value3 :FieldValue) {
+    // TODO: check access
+    db.updateDatum(cortexId, id, Seq(field1 -> value1, field2 -> value2, field3 -> value3))
     // TODO: handle archived
   }
 

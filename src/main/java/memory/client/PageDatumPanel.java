@@ -77,8 +77,7 @@ public class PageDatumPanel extends DatumPanel
 
     @Override protected void addEditor (FlowPanel editor)
     {
-        addTitleEditor(editor);
-        addChildrenEditor(editor);
+        super.addEditor(editor);
         addColumnsEditor(editor);
         addOrderEditor(editor);
     }

@@ -122,14 +122,13 @@ object ObjectifyDB extends DB
   }
 
   // from trait DB
-  def updateDatum (cortexId :String, id :Long, field :Datum.Field, value :FieldValue) {
-    updateDatum(cortexId, id, Seq((field, value)))
-  }
-
-  // from trait DB
-  def updateDatum (cortexId :String, id :Long, field1 :Datum.Field, value1 :FieldValue,
-                   field2 :Datum.Field, value2 :FieldValue) {
-    updateDatum(cortexId, id, Seq((field1, value1), (field2, value2)))
+  def updateDatum (cortexId :String, id :Long, updates :Seq[(Datum.Field, FieldValue)]) {
+    transaction { obj => 
+      var datum = obj.get(datumKey(cortexId, id))
+      updates.foreach { case (f, v) => updateField(datum, f, v) }
+      datum.when = System.currentTimeMillis
+      obj.put(datum) :Key[DatumRow]
+    }
   }
 
   // from trait DB
@@ -139,15 +138,6 @@ object ObjectifyDB extends DB
         datumRow(cortexId, d.parentId, d.`type`, d.meta, d.title, d.text, d.when))
       d.id = key.getId
       d.id
-    }
-  }
-
-  private def updateDatum (cortexId :String, id :Long, updates :Seq[(Datum.Field, FieldValue)]) {
-    transaction { obj => 
-      var datum = obj.get(datumKey(cortexId, id))
-      updates.foreach { case (f, v) => updateField(datum, f, v) }
-      datum.when = System.currentTimeMillis
-      obj.put(datum) :Key[DatumRow]
     }
   }
 
