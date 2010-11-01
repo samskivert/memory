@@ -3,6 +3,7 @@
 
 package memory.client;
 
+import com.google.gwt.dom.client.Document;
 import com.threerings.gwt.util.WikiParser;
 
 import memory.data.Datum;
@@ -44,7 +45,16 @@ public class WikiUtil
         }
 
         protected void appendInternalLink (String uri, String text) {
-            sb.append("<a href=\"/c/" + _cortexId + "/" + _parent.id + "/" + uri + "\">");
+            String path = "/c/" + _cortexId + "/" + _parent.id + "/" + uri;
+
+            // preserve the query string to make life in GWT devmode easier
+            String url = Document.get().getURL();
+            int qidx = url.indexOf("?");
+            if (qidx != -1) {
+                path = path + url.substring(qidx);
+            }
+
+            sb.append("<a href=\"" + path + "\">");
             appendText(text);
             sb.append("</a>");
         }
