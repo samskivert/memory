@@ -47,7 +47,7 @@ public class NonExistentDatumPanel extends DatumPanel
                 _datum.children = new ArrayList<Datum>();
                 Panel parent = (Panel)getParent();
                 parent.remove(NonExistentDatumPanel.this);
-                parent.add(DatumPanel.create(false, _cortexId, _datum));
+                parent.add(DatumPanel.create(_topLevel, _cortexId, _datum));
                 return false;
             }
         };
