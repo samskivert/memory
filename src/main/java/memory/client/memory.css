@@ -41,6 +41,7 @@ pre {
 
 .textTitle {
   font-weight: bold;
+  border-bottom: 1px dashed;
 }
 
 .listItem {
