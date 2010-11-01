@@ -9,7 +9,7 @@ import scalaj.collection.Imports._
 import com.googlecode.objectify.{Key, Objectify, ObjectifyService}
 import com.googlecode.objectify.annotation.Unindexed
 
-import memory.data.{Access, Datum, Type}
+import memory.data.{Access, Datum, FieldValue, Type}
 
 /**
  * Implements the database via Objectify (which builds on GAE Data Store).
@@ -122,22 +122,14 @@ object ObjectifyDB extends DB
   }
 
   // from trait DB
-  def updateDatum (cortexId :String, id :Long, parentId :Option[Long], typ :Option[Type],
-                   meta :Option[String], title :Option[String], text :Option[String],
-                   when :Option[Long]) {
-    transaction { obj => 
-      var datum = obj.get(datumKey(cortexId, id))
-      parentId foreach(datum.parentId = _)
-      typ foreach(datum.`type` = _)
-      meta foreach(datum.meta = _)
-      title foreach(t => {
-        datum.titleKey = t.toLowerCase
-        datum.title = t
-      })
-      text foreach(datum.text = _)
-      when foreach(datum.when = _)
-      obj.put(datum) :Key[DatumRow]
-    }
+  def updateDatum (cortexId :String, id :Long, field :Datum.Field, value :FieldValue) {
+    updateDatum(cortexId, id, Seq((field, value)))
+  }
+
+  // from trait DB
+  def updateDatum (cortexId :String, id :Long, field1 :Datum.Field, value1 :FieldValue,
+                   field2 :Datum.Field, value2 :FieldValue) {
+    updateDatum(cortexId, id, Seq((field1, value1), (field2, value2)))
   }
 
   // from trait DB
@@ -147,6 +139,15 @@ object ObjectifyDB extends DB
         datumRow(cortexId, d.parentId, d.`type`, d.meta, d.title, d.text, d.when))
       d.id = key.getId
       d.id
+    }
+  }
+
+  private def updateDatum (cortexId :String, id :Long, updates :Seq[(Datum.Field, FieldValue)]) {
+    transaction { obj => 
+      var datum = obj.get(datumKey(cortexId, id))
+      updates.foreach { case (f, v) => updateField(datum, f, v) }
+      datum.when = System.currentTimeMillis
+      obj.put(datum) :Key[DatumRow]
     }
   }
 
@@ -186,6 +187,21 @@ object ObjectifyDB extends DB
     acc.datumId = datumId
     acc.access = access
     acc
+  }
+
+  private def updateField (datum :DatumRow, field :Datum.Field, value :FieldValue) {
+    field match {
+      case Datum.Field.PARENT_ID => datum.parentId = value.asInstanceOf[FieldValue.LongValue].value
+      case Datum.Field.TYPE => datum.`type` = value.asInstanceOf[FieldValue.TypeValue].value
+      case Datum.Field.META => datum.meta = value.asInstanceOf[FieldValue.StringValue].value
+      case Datum.Field.TITLE => {
+        datum.title = value.asInstanceOf[FieldValue.StringValue].value
+        datum.titleKey = datum.title.toLowerCase
+      }
+      case Datum.Field.TEXT => datum.text = value.asInstanceOf[FieldValue.StringValue].value
+      case Datum.Field.WHEN => datum.when = value.asInstanceOf[FieldValue.LongValue].value
+      case _ => throw new IllegalArgumentException("Unknown field " + field)
+    }
   }
 
   private def toJava (row :DatumRow) = {

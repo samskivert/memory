@@ -13,6 +13,7 @@ import com.threerings.gwt.ui.Widgets;
 import com.threerings.gwt.util.ClickCallback;
 
 import memory.data.Datum;
+import memory.data.FieldValue;
 import memory.data.Type;
 
 /**
@@ -53,24 +54,51 @@ public class ListDatumPanel extends DatumPanel
 
     protected void addItem (FlowPanel items, Datum item)
     {
-        Widget ilabel;
-        switch (item.type) {
-        case WIKI:
-            ilabel = Widgets.newHTML(WikiUtil.formatSnippet(_cortexId, _datum, item.text));
-            break;
-        case HTML:
-            ilabel = Widgets.newHTML(item.text);
-            break;
-        default:
-            ilabel = Widgets.newLabel(item.text);
-            break;
-        }
+        Widget ilabel = createItemLabel(item);
+        ilabel.setTitle(""+item.id);
         ilabel.addStyleName(_rsrc.styles().listItem());
         items.add(ilabel);
+    }
+
+    protected Widget createItemLabel (Datum item)
+    {
+        switch (item.type) {
+        case WIKI:
+            return Widgets.newHTML(WikiUtil.formatSnippet(_cortexId, _datum, item.text));
+        case HTML:
+            return Widgets.newHTML(item.text);
+        default:
+            return Widgets.newLabel(item.text);
+        }
     }
 
     protected void addEditor (FlowPanel editor)
     {
         addTitleEditor(editor);
+        addItemEditors(editor);
+    }
+
+    protected void addItemEditors (FlowPanel editor)
+    {
+        editor.add(Widgets.newLabel("Items:", _rsrc.styles().editorTitle()));
+        for (final Datum item : _datum.children) {
+            final TextBox text = Widgets.newTextBox(item.text, -1, 20);
+            Button update = new Button("Update");
+            editor.add(Widgets.newRow(text, update));
+            new ClickCallback<Void>(update, text) {
+                protected boolean callService () {
+                    _text = text.getText().trim();
+                    _datasvc.updateDatum(_cortexId, item.id,
+                                         Datum.Field.TEXT, FieldValue.of(_text), this);
+                    return true;
+                }
+                protected boolean gotResult (Void result) {
+                    item.text = _text;
+                    Popups.infoNear("Item updated.", getPopupNear());
+                    return true;
+                }
+                protected String _text;
+            };
+        }
     }
 }

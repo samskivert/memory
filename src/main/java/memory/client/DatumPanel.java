@@ -4,6 +4,7 @@
 package memory.client;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -24,6 +25,7 @@ import com.threerings.gwt.util.ClickCallback;
 import com.threerings.gwt.util.StringUtil;
 
 import memory.data.Datum;
+import memory.data.FieldValue;
 import memory.data.MetaData;
 import memory.data.Type;
 import memory.rpc.DataService;
@@ -98,24 +100,34 @@ public abstract class DatumPanel extends FlowPanel
     protected void addTitleEditor (FlowPanel editor)
     {
         final TextBox title = Widgets.newTextBox(_datum.title, Datum.MAX_TITLE_LENGTH, 20);
+        final EnumListBox<Type> type = createTypeListBox();
+        type.setSelectedValue(_datum.type);
         Button update = new Button("Update");
+
         new ClickCallback<Void>(update, title) {
             protected boolean callService () {
                 _title = title.getText().trim();
-                _datasvc.updateDatum(
-                    _cortexId, _datum.id, null, null, null, _title, null, null, null, this);
+                _type = type.getSelectedValue();
+                _datasvc.updateDatum(_cortexId, _datum.id,
+                                     Datum.Field.TYPE, FieldValue.of(_type),
+                                     Datum.Field.TITLE, FieldValue.of(_title), this);
                 return true;
             }
             protected boolean gotResult (Void result) {
+                Popups.infoNear(_msgs.datumUpdated(), getPopupNear());
                 title.setText(_title);
                 _datum.title = _title;
-                Popups.infoNear(_msgs.datumUpdated(), getPopupNear());
+                if (_datum.type != _type) {
+                    _datum.type = _type;
+                    showEditor(); // reload the editor as our type changed
+                }
                 return true;
             }
             protected String _title;
+            protected Type _type;
         };
 
-        editor.add(Widgets.newRow(Widgets.newLabel("Title:"), title, update));
+        editor.add(Widgets.newRow(Widgets.newLabel("Title:"), title, type, update));
     }
 
     protected void addChildrenEditor (FlowPanel editor)
@@ -129,7 +141,7 @@ public abstract class DatumPanel extends FlowPanel
         editor.add(kids);
 
         editor.add(Widgets.newLabel("Add child:", _rsrc.styles().editorTitle()));
-        final EnumListBox<Type> type = new EnumListBox<Type>(Type.class);
+        final EnumListBox<Type> type = createTypeListBox();
         final TextBox title = Widgets.newTextBox("", Datum.MAX_TITLE_LENGTH, 20);
         final Button add = new Button("Add");
         editor.add(Widgets.newRow(Widgets.newLabel("Title:"), title, type, add));
@@ -173,6 +185,12 @@ public abstract class DatumPanel extends FlowPanel
         return button;
     }
 
+    protected EnumListBox<Type> createTypeListBox ()
+    {
+        return new EnumListBox<Type>(
+            Type.class, EnumSet.complementOf(EnumSet.of(Type.NONEXISTENT)));
+    }
+
     protected abstract void createContents ();
 
     protected String _cortexId;
@@ -194,7 +212,7 @@ public abstract class DatumPanel extends FlowPanel
         case HTML: return new HTMLDatumPanel();
         case EMBED: return new HTMLDatumPanel();
         case LIST: return new ListDatumPanel();
-        case CHECKLIST: return new HTMLDatumPanel();
+        case CHECKLIST: return new ChecklistDatumPanel();
         case JOURNAL: return new HTMLDatumPanel();
         case PAGE: return new PageDatumPanel();
         case NONEXISTENT: return new NonExistentDatumPanel();

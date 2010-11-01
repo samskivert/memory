@@ -29,7 +29,7 @@ public class NonExistentDatumPanel extends DatumPanel
         add(Widgets.newLabel("This page does not exist. You can create it if you like. " +
                              "Or click the back button to return from whence you came.",
                              _rsrc.styles().nonExistNote()));
-        final EnumListBox<Type> type = new EnumListBox<Type>(Type.class);
+        final EnumListBox<Type> type = createTypeListBox();
         final Button create = new Button("Create");
         add(Widgets.newRow(Widgets.newLabel("Type:"), type, create));
 

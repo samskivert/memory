@@ -12,6 +12,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 import memory.data.Access;
 import memory.data.Datum;
+import memory.data.FieldValue;
 import memory.data.Type;
 
 /**
@@ -44,8 +45,12 @@ public interface DataService extends RemoteService
      * @return the id of the newly created datum. */
     long createDatum (String cortexId, Datum datum) throws ServiceException;
 
-    /** Updates the specified datum. Only the non-null fields are modified. */
-    void updateDatum (String cortexId, long id, Long parentId, Type type, String meta,
-                      String title, String text, Long when, Boolean archived)
+    /** Updates the specified field of the specified datum. */
+    void updateDatum (String cortexId, long id, Datum.Field field, FieldValue value)
+        throws ServiceException;
+
+    /** Updates the specified fields of the specified datum. */
+    void updateDatum (String cortexId, long id, Datum.Field field1, FieldValue value1,
+                      Datum.Field field2, FieldValue value2)
         throws ServiceException;
 }

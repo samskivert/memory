@@ -9,7 +9,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet
 
 import com.google.appengine.api.users.{User, UserService, UserServiceFactory}
 
-import memory.data.{Access, Datum, Type}
+import memory.data.{Access, Datum, FieldValue, Type}
 import memory.persist.DB
 import memory.rpc.{DataService, ServiceException}
 
@@ -54,11 +54,17 @@ class DataServlet extends RemoteServiceServlet with DataService
   }
 
   // from DataService
-  def updateDatum (cortexId :String, id :Long, parentId :java.lang.Long, `type` :Type, meta :String,
-                   title :String, text :String, when :java.lang.Long, archived :java.lang.Boolean) {
+  def updateDatum (cortexId :String, id :Long, field :Datum.Field, value :FieldValue) {
     // TODO: check access
-    db.updateDatum(cortexId, id, Option(parentId) map(_.longValue), Option(`type`), Option(meta),
-                   Option(title), Option(text), Option(when) map(_.longValue))
+    db.updateDatum(cortexId, id, field, value)
+    // TODO: handle archived
+  }
+
+  // from DataService
+  def updateDatum (cortexId :String, id :Long, field1 :Datum.Field, value1 :FieldValue,
+                   field2 :Datum.Field, value2 :FieldValue) {
+    // TODO: check access
+    db.updateDatum(cortexId, id, field1, value1, field2, value2)
     // TODO: handle archived
   }
 

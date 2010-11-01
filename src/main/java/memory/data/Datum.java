@@ -14,6 +14,9 @@ public class Datum implements Serializable
     /** The maximum allowed length of a title. */
     public static final int MAX_TITLE_LENGTH = 256;
 
+    /** An enumeration of the fields of this datum for use in updating. */
+    public enum Field { PARENT_ID, TYPE, META, TITLE, TEXT, WHEN };
+
     /** The unique identifier for this datum. */
     public long id;
 

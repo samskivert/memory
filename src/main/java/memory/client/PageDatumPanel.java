@@ -20,6 +20,7 @@ import com.threerings.gwt.ui.Widgets;
 import com.threerings.gwt.util.ClickCallback;
 
 import memory.data.Datum;
+import memory.data.FieldValue;
 
 /**
  * Displays the datum for a page.
@@ -88,8 +89,8 @@ public class PageDatumPanel extends DatumPanel
         new ClickCallback<Void>(update) {
             protected boolean callService () {
                 _meta.set(COLS_KEY, columns.getSelectedItem());
-                _datasvc.updateDatum(_cortexId, _datum.id, null, null, _meta.toMetaString(),
-                                     null, null, null, null, this);
+                _datasvc.updateDatum(_cortexId, _datum.id,
+                                     Datum.Field.META, FieldValue.of(_meta.toMetaString()), this);
                 return true;
             }
             protected boolean gotResult (Void result) {
@@ -111,8 +112,8 @@ public class PageDatumPanel extends DatumPanel
         new ClickCallback<Void>(update, order) {
             protected boolean callService () {
                 _meta.set("order", order.getText().trim());
-                _datasvc.updateDatum(_cortexId, _datum.id, null, null, _meta.toMetaString(),
-                                     null, null, null, null, this);
+                _datasvc.updateDatum(_cortexId, _datum.id,
+                                     Datum.Field.META, FieldValue.of(_meta.toMetaString()), this);
                 return true;
             }
             protected boolean gotResult (Void result) {

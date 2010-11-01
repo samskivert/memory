@@ -27,6 +27,15 @@ public class MetaData
     }
 
     /**
+     * Returns a boolean value for the specified key, or `defval` if no value exists.
+     */
+    public boolean get (String key, boolean defval)
+    {
+        String value = _data.get(key);
+        return (value == null) ? defval : "t".equals(value);
+    }
+
+    /**
      * Returns an integer value for the specified key, or `defval` if no value exists.
      */
     public int get (String key, int defval)
@@ -66,6 +75,14 @@ public class MetaData
             }
         }
         return ids;
+    }
+
+    /**
+     * Sets the specified key to the specified value.
+     */
+    public void set (String key, boolean value)
+    {
+        _data.put(key, value ? "t" : "f");
     }
 
     /**
