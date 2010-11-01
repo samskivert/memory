@@ -79,7 +79,7 @@ public abstract class DatumPanel extends FlowPanel
         try { // more damage control
             addContents();
         } catch (Exception e) {
-            add(Widgets.newLabel("Error generating contents for "+ datum.id + "."));
+            add(Widgets.newLabel("Error generating contents for "+ _datum.id + "."));
             add(Widgets.newLabel(e.toString()));
         }
     }
