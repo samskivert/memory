@@ -65,11 +65,11 @@ public class PageDatumPanel extends DatumPanel
                 Widget cpanel = DatumPanel.create(false, _cortexId, child);
                 cpanel.addStyleName(_rsrc.styles().pageDatum());
                 column.add(cpanel);
-            }
-            if (++added == cpc) {
-                added = 0;
-                col++;
-                column = null;
+                if (++added == cpc) {
+                    added = 0;
+                    col++;
+                    column = null;
+                }
             }
         }
     }
