@@ -36,12 +36,7 @@ public class MemoryClient implements EntryPoint
             relem.removeFromParent();
             String cortexId = relem.getAttribute("x:cortex");
             for (Datum data : parseChildren(relem)) {
-                try {
-                    RootPanel.get(CLIENT_DIV).add(DatumPanel.create(true, cortexId, data));
-                } catch (Exception e) {
-                    RootPanel.get(CLIENT_DIV).add(
-                        Widgets.newLabel("Error with id " + data.id + ": " + e));
-                }
+                RootPanel.get(CLIENT_DIV).add(DatumPanel.create(true, cortexId, data));
             }
         }
     }

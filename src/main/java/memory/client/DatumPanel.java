@@ -38,11 +38,15 @@ import memory.rpc.DataServiceAsync;
  */
 public abstract class DatumPanel extends FlowPanel
 {
-    public static DatumPanel create (boolean topLevel, String cortexId, Datum datum)
+    public static Widget create (boolean topLevel, String cortexId, Datum datum)
     {
-        DatumPanel panel = createPanel(datum.type);
-        panel.init(topLevel, cortexId, datum);
-        return panel;
+        try {
+            DatumPanel panel = createPanel(datum.type);
+            panel.init(topLevel, cortexId, datum);
+            return panel;
+        } catch (Exception e) {
+            return Widgets.newLabel("Error [id=" + datum.id + ", errror=" + e + "]");
+        }
     }
 
     public void init (boolean topLevel, String cortexId, Datum datum)
