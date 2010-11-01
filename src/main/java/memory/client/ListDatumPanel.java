@@ -3,11 +3,13 @@
 
 package memory.client;
 
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
+import com.threerings.gwt.ui.FluentTable;
 import com.threerings.gwt.ui.Popups;
 import com.threerings.gwt.ui.Widgets;
 import com.threerings.gwt.util.ClickCallback;
@@ -30,8 +32,12 @@ public class ListDatumPanel extends DatumPanel
         add(items);
 
         final TextBox item = Widgets.newTextBox("", -1, 20);
+        item.addStyleName(_rsrc.styles().width99());
         final Button add = new Button("Add");
-        add(Widgets.newRow(item, add));
+        add(new FluentTable(0, 0, _rsrc.styles().width100()).
+            add().setWidget(item, _rsrc.styles().width100()).
+            right().setWidget(add).table());
+
         new ClickCallback<Long>(add, item) {
             protected boolean callService () {
                 _item = createChildDatum(Type.WIKI, "", item.getText().trim());

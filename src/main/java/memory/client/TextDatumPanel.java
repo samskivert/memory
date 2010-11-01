@@ -26,7 +26,7 @@ public abstract class TextDatumPanel extends DatumPanel
         editor.add(Widgets.newShim(5, 5));
 
         final TextArea text = Widgets.newTextArea(_datum.text, -1, 30);
-        text.addStyleName(_rsrc.styles().stretchWide());
+        text.addStyleName(_rsrc.styles().width98());
         editor.add(text);
 
         Button update = new Button("Update");

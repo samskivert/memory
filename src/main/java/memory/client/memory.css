@@ -71,8 +71,16 @@ p {
   display: list-item;
 }
 
-.stretchWide {
+.width98 {
   width: 98%;
+}
+
+.width99 {
+  width: 98%;
+}
+
+.width100 {
+  width: 100%;
 }
 
 .insetBox {

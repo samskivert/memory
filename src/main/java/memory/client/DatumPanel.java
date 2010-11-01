@@ -140,7 +140,7 @@ public abstract class DatumPanel extends FlowPanel
     protected void addBitsEditor (FlowPanel editor)
     {
         final TextBox title = Widgets.newTextBox(_datum.title, Datum.MAX_TITLE_LENGTH, 20);
-        title.addStyleName(_rsrc.styles().stretchWide());
+        title.addStyleName(_rsrc.styles().width98());
         final EnumListBox<Type> type = createTypeListBox();
         type.setSelectedValue(_datum.type);
         final NumberTextBox parentId = NumberTextBox.newIntBox(10);

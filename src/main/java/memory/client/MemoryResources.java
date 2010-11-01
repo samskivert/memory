@@ -27,8 +27,11 @@ public interface MemoryResources extends ClientBundle
         String pageDatum ();
         String textTitle ();
         String listItem ();
-        String stretchWide ();
         String insetBox ();
+
+        String width98 ();
+        String width99 ();
+        String width100 ();
 
         String columnCont ();
         String column ();
