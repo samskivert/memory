@@ -17,6 +17,7 @@ import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
+import com.threerings.gwt.ui.Anchor;
 import com.threerings.gwt.ui.EnumListBox;
 import com.threerings.gwt.ui.FluentTable;
 import com.threerings.gwt.ui.Popups;
@@ -36,15 +37,16 @@ import memory.rpc.DataServiceAsync;
  */
 public abstract class DatumPanel extends FlowPanel
 {
-    public static DatumPanel create (String cortexId, Datum datum)
+    public static DatumPanel create (boolean topLevel, String cortexId, Datum datum)
     {
         DatumPanel panel = createPanel(datum.type);
-        panel.init(cortexId, datum);
+        panel.init(topLevel, cortexId, datum);
         return panel;
     }
 
-    public void init (String cortexId, Datum datum)
+    public void init (boolean topLevel, String cortexId, Datum datum)
     {
+        _topLevel = topLevel;
         _cortexId = cortexId;
         _datum = datum;
         _meta = new MetaData(_datum.meta);
@@ -56,15 +58,20 @@ public abstract class DatumPanel extends FlowPanel
         clear();
         removeStyleName(_rsrc.styles().editor());
         addStyleName(_rsrc.styles().view());
-        addEditButton();
-        createContents();
-    }
 
-    protected void addTextTitle ()
-    {
-        if (!StringUtil.isBlank(_datum.title)) {
-            add(Widgets.newLabel(_datum.title, _rsrc.styles().textTitle()));
+        // this is a twisty maze of header logic; beware static analyses
+        FlowPanel header = null;
+        if (_topLevel || !StringUtil.isBlank(_datum.title)) {
+            header = Widgets.newFlowPanel(getHeaderStyle());
+            add(header);
         }
+        addEditButton(header);
+        if (_topLevel) {
+            addNavigation(header);
+        }
+        addTitle(header);
+
+        addContents();
     }
 
     protected void showEditor ()
@@ -82,13 +89,42 @@ public abstract class DatumPanel extends FlowPanel
         add(editor);
     }
 
-    protected void addEditButton ()
+    protected String getHeaderStyle ()
     {
-        add(createCornerButton(_rsrc.editImage(), _msgs.editTip(), new ClickHandler() {
+        return _rsrc.styles().textTitle();
+    }
+
+    protected void addEditButton (FlowPanel header)
+    {
+        PushButton button = createCornerButton(
+            _rsrc.editImage(), _msgs.editTip(), new ClickHandler() {
             public void onClick (ClickEvent event) {
                 showEditor();
             }
-        }));
+        });
+        if (header == null) {
+            button.addStyleName(_rsrc.styles().floatLeft());
+            add(button);
+        } else {
+            header.add(button);
+        }
+    }
+
+    protected void addNavigation (FlowPanel header)
+    {
+        Anchor cortex = new Anchor("/c/" + _cortexId.toLowerCase(), _cortexId);
+        cortex.addStyleName(_rsrc.styles().navigationLink());
+        header.add(cortex);
+        header.add(Widgets.newLabel(" - ", _rsrc.styles().navigationLink()));
+    }
+
+    protected void addTitle (FlowPanel header)
+    {
+        if (!StringUtil.isBlank(_datum.title)) {
+            Widget title = Widgets.newLabel(_datum.title, _rsrc.styles().title());
+            title.setTitle("ID: " + _datum.id);
+            header.add(title);
+        }
     }
 
     protected void addEditor (FlowPanel editor)
@@ -191,8 +227,9 @@ public abstract class DatumPanel extends FlowPanel
             Type.class, EnumSet.complementOf(EnumSet.of(Type.NONEXISTENT)));
     }
 
-    protected abstract void createContents ();
+    protected abstract void addContents ();
 
+    protected boolean _topLevel;
     protected String _cortexId;
     protected Datum _datum;
     protected MetaData _meta;

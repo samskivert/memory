@@ -27,10 +27,13 @@ import memory.data.FieldValue;
  */
 public class PageDatumPanel extends DatumPanel
 {
-    @Override protected void createContents ()
+    @Override protected String getHeaderStyle ()
     {
-        add(Widgets.newLabel(_datum.title, _rsrc.styles().pageTitle()));
+        return _rsrc.styles().pageTitle();
+    }
 
+    @Override protected void addContents ()
+    {
         // map the children by id as we need that to handle custom ordering
         Map<Long,Datum> cmap = new HashMap<Long,Datum>();
         for (Datum child : _datum.children) {
@@ -59,7 +62,7 @@ public class PageDatumPanel extends DatumPanel
             }
             Datum child = cmap.get(id);
             if (child != null) {
-                Widget cpanel = DatumPanel.create(_cortexId, child);
+                Widget cpanel = DatumPanel.create(false, _cortexId, child);
                 cpanel.addStyleName(_rsrc.styles().pageDatum());
                 column.add(cpanel);
             }

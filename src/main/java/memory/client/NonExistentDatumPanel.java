@@ -6,6 +6,7 @@ package memory.client;
 import java.util.ArrayList;
 
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 
 import com.threerings.gwt.ui.EnumListBox;
@@ -20,12 +21,11 @@ import memory.data.Type;
  */
 public class NonExistentDatumPanel extends DatumPanel
 {
-    @Override protected void addEditButton () {
+    @Override protected void addEditButton (FlowPanel header) {
         // no edit button here
     }
 
-    @Override protected void createContents () {
-        addTextTitle();
+    @Override protected void addContents () {
         add(Widgets.newLabel("This page does not exist. You can create it if you like. " +
                              "Or click the back button to return from whence you came.",
                              _rsrc.styles().nonExistNote()));
@@ -47,7 +47,7 @@ public class NonExistentDatumPanel extends DatumPanel
                 _datum.children = new ArrayList<Datum>();
                 Panel parent = (Panel)getParent();
                 parent.remove(NonExistentDatumPanel.this);
-                parent.add(DatumPanel.create(_cortexId, _datum));
+                parent.add(DatumPanel.create(false, _cortexId, _datum));
                 return false;
             }
         };

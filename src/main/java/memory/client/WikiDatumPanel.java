@@ -10,9 +10,8 @@ import com.google.gwt.user.client.ui.HTMLPanel;
  */
 public class WikiDatumPanel extends TextDatumPanel
 {
-    @Override protected void createContents ()
+    @Override protected void addContents ()
     {
-        addTextTitle();
         add(new HTMLPanel(WikiUtil.format(_cortexId, _datum, _datum.text)));
     }
 }

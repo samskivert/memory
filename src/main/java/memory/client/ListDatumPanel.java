@@ -21,10 +21,8 @@ import memory.data.Type;
  */
 public class ListDatumPanel extends DatumPanel
 {
-    protected void createContents ()
+    protected void addContents ()
     {
-        addTextTitle();
-
         final FlowPanel items = new FlowPanel();
         for (Datum child : _datum.children) {
             addItem(items, child);

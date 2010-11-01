@@ -10,9 +10,8 @@ import com.google.gwt.user.client.ui.HTMLPanel;
  */
 public class HTMLDatumPanel extends TextDatumPanel
 {
-    @Override protected void createContents ()
+    @Override protected void addContents ()
     {
-        addTextTitle();
         add(new HTMLPanel(_datum.text));
     }
 }

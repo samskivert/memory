@@ -12,10 +12,31 @@ pre {
  padding: 5px 0px;
 }
 
+p {
+  margin: 0px 0px 10px 0px;
+}
+
 .cornerButton {
-  float: right;
   margin: 2px 2px 0px 0px;
   cursor: pointer;
+  display: inline;
+}
+
+.floatLeft {
+  float: left;
+}
+
+.floatRight {
+  float: right;
+}
+
+.navigationLink {
+  text-decoration: none;
+  display: inline;
+}
+
+.title {
+  display: inline;
 }
 
 .editor {
