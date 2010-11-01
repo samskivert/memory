@@ -72,7 +72,6 @@ public class PageDatumPanel extends DatumPanel
                 column = null;
             }
         }
-
     }
 
     @Override protected void addEditor (FlowPanel editor)
