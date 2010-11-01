@@ -37,7 +37,7 @@ public class NonExistentDatumPanel extends DatumPanel
             protected boolean callService () {
                 _datum.type = type.getSelectedValue();
                 if (_datum.type.hasText()) {
-                    _datum.text = "Click the button at right to edit this item.";
+                    _datum.text = "Click the button above to edit this item.";
                 }
                 _datasvc.createDatum(_cortexId, _datum, this);
                 return true;
