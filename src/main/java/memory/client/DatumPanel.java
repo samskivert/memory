@@ -40,7 +40,7 @@ public abstract class DatumPanel extends FlowPanel
 {
     public static Widget create (boolean topLevel, String cortexId, Datum datum)
     {
-        try {
+        try { // damage control
             DatumPanel panel = createPanel(datum.type);
             panel.init(topLevel, cortexId, datum);
             return panel;
@@ -76,7 +76,12 @@ public abstract class DatumPanel extends FlowPanel
         }
         addTitle(header);
 
-        addContents();
+        try { // more damage control
+            addContents();
+        } catch (Exception e) {
+            add(Widgets.newLabel("Error generating contents for "+ datum.id + "."));
+            add(Widgets.newLabel(e.toString()));
+        }
     }
 
     protected void showEditor ()
