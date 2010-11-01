@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.TextBox;
@@ -42,6 +43,9 @@ public class PageDatumPanel extends DatumPanel
 
         // support multiple columns by just splitting things up evenly for now
         int cols = _meta.get(COLS_KEY, DEF_COLS);
+        if (Window.getClientWidth() < 500) {
+            cols = 1; // if we're on an iPhone etc., always lay out in one column
+        }
         int added = 0, col = 0, ccount = _datum.children.size(), cpc = ccount / cols;
         // handle overflow by putting extras in the first column
         added -= (ccount - cpc * cols);
