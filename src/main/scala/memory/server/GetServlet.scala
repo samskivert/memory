@@ -66,7 +66,7 @@ class GetServlet extends HttpServlet
       val xml = <div style="display: none" id="root" x:cortex={cortexId}>
         {toXML(resolveChildren(cortexId)(contents))}</div>
       val out = rsp.getWriter
-      out.println(ServletUtil.htmlHeader(cortexId + " - " + contents.title))
+      out.println(ServletUtil.htmlHeader(contents.title + " (" + cortexId + ")"))
       XML.write(out, xml, null, false, null)
       out.println(GwitBits)
       out.println(ServletUtil.htmlFooter)
