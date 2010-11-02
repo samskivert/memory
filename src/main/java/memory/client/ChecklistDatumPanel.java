@@ -21,31 +21,65 @@ import memory.data.MetaData;
  */
 public class ChecklistDatumPanel extends ListDatumPanel
 {
-    protected void addItem (FlowPanel items, final Datum item)
+    @Override protected void addItems ()
     {
-        final MetaData data = new MetaData(item.meta);
+        _items = new FlowPanel();
+        for (Datum child : _datum.children) {
+            if (!_metamap.get(child.id).get(DONE, false)) {
+                addItem(_items, child);
+            }
+        }
+        add(_items);
+
+        _doneItems = new FlowPanel();
+        for (Datum child : _datum.children) {
+            if (_metamap.get(child.id).get(DONE, false)) {
+                addItem(_doneItems, child);
+            }
+        }
+        add(_doneItems);
+    }
+
+    @Override protected Widget addItem (FlowPanel items, final Datum item)
+    {
+        final MetaData data = _metamap.get(item.id);
         final CheckBox box = new CheckBox();
         box.addStyleName("inline");
         box.setValue(data.get(DONE, false));
 
         Widget ilabel = createItemLabel(item);
         ilabel.addStyleName("inline");
-        items.add(Widgets.newFlowPanel(box, ilabel));
+
+        final Widget row = Widgets.newFlowPanel(box, ilabel);
+        items.add(row);
 
         // listen for checklist changes and toggle "done" metadata
         box.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             public void onValueChange (ValueChangeEvent<Boolean> event) {
-                data.set(DONE, event.getValue());
+                final boolean isDone = event.getValue();
+                data.set(DONE, isDone);
+                final String meta = data.toMetaString();
                 _datasvc.updateDatum(
-                    _cortexId, item.id, Datum.Field.META, FieldValue.of(data.toMetaString()),
+                    _cortexId, item.id, Datum.Field.META, FieldValue.of(meta),
                     new PopupCallback<Void>(box) {
                     public void onSuccess (Void result) {
-                        // nada
+                        item.meta = meta;
+                        if (isDone) {
+                            _items.remove(row);
+                            _doneItems.add(row);
+                        } else {
+                            _doneItems.remove(row);
+                            _items.add(row);
+                        }
                     }
                 });
             }
         });
+
+        return box;
     }
+
+    protected FlowPanel _doneItems;
 
     protected static final String DONE = "done";
 }

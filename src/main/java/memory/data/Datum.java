@@ -4,6 +4,7 @@
 package memory.data;
 
 import java.io.Serializable;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -13,6 +14,19 @@ public class Datum implements Serializable
 {
     /** The maximum allowed length of a title. */
     public static final int MAX_TITLE_LENGTH = 256;
+
+    /** A comparator that sorts datum by "when", least to greatest. */
+    public static final Comparator<Datum> BY_WHEN = new Comparator<Datum>() {
+        public int compare (Datum one, Datum two) {
+            if (one.when < two.when) {
+                return -1;
+            } else if (one.when > two.when) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+    };
 
     /** An enumeration of the fields of this datum for use in updating. */
     public enum Field { PARENT_ID, TYPE, META, TITLE, TEXT, WHEN };

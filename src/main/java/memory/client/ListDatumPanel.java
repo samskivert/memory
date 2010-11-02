@@ -3,6 +3,10 @@
 
 package memory.client;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -16,6 +20,7 @@ import com.threerings.gwt.util.ClickCallback;
 
 import memory.data.Datum;
 import memory.data.FieldValue;
+import memory.data.MetaData;
 import memory.data.Type;
 
 /**
@@ -25,11 +30,13 @@ public class ListDatumPanel extends DatumPanel
 {
     protected void addContents ()
     {
-        final FlowPanel items = new FlowPanel();
+        // sort the data and add a metadata record for each child
+        Collections.sort(_datum.children, Datum.BY_WHEN);
         for (Datum child : _datum.children) {
-            addItem(items, child);
+            _metamap.put(child.id, new MetaData(child.meta));
         }
-        add(items);
+
+        addItems();
 
         final TextBox item = Widgets.newTextBox("", -1, 20);
         item.addStyleName(_rsrc.styles().width99());
@@ -47,21 +54,32 @@ public class ListDatumPanel extends DatumPanel
             protected boolean gotResult (Long itemId) {
                 _item.id = itemId;
                 _datum.children.add(_item);
-                addItem(items, _item);
+                _metamap.put(_item.id, new MetaData(_item.meta));
+                Widget row = addItem(_items, _item);
                 item.setText("");
-                Popups.infoNear(_msgs.datumCreated(), getPopupNear());
+                Popups.infoNear(_msgs.datumCreated(), row);
                 return true;
             }
             protected Datum _item;
         };
     }
 
-    protected void addItem (FlowPanel items, Datum item)
+    protected void addItems ()
+    {
+        _items = new FlowPanel();
+        for (Datum child : _datum.children) {
+            addItem(_items, child);
+        }
+        add(_items);
+    }
+
+    protected Widget addItem (FlowPanel items, Datum item)
     {
         Widget ilabel = createItemLabel(item);
         ilabel.setTitle(""+item.id);
         ilabel.addStyleName(_rsrc.styles().listItem());
         items.add(ilabel);
+        return ilabel;
     }
 
     protected Widget createItemLabel (Datum item)
@@ -100,4 +118,7 @@ public class ListDatumPanel extends DatumPanel
             };
         }
     }
+
+    protected FlowPanel _items;
+    protected Map<Long, MetaData> _metamap = new HashMap<Long, MetaData>();
 }
