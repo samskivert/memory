@@ -54,19 +54,22 @@ class GetServlet extends HttpServlet
         case _ => throw new Error("Invalid path " + req.getPathInfo)
       }
 
-      val userId = Option(_usvc.getCurrentUser) map(_.getUserId) getOrElse(DataService.NO_USER)
-      val access = db.loadAccess(userId, cortexId) match {
-        case Access.NONE => db.loadAccess(userId, cortexId, datum.id)
-        case other => other
+      // check whether this user can access this data
+      val user = Option(_usvc.getCurrentUser)
+      lazy val publicAccess = db.loadAccess(DataService.NO_USER, cortexId) getOrElse(
+        db.loadAccess(DataService.NO_USER, cortexId, datum.id) getOrElse(Access.NONE))
+      val access = user map(_.getUserId) match {
+        case Some(userId) => db.loadAccess(userId, cortexId) getOrElse(
+          db.loadAccess(userId, cortexId, datum.id) getOrElse(publicAccess))
+        case None => publicAccess
       }
-      if (access == Access.NONE) {
-        if (userId == DataService.NO_USER)
-          throw new RedirectException(_usvc.createLoginURL(req.getServletPath + req.getPathInfo))
-        else
-          throw new Exception("You lack access to this data.")
+      if (access == Access.NONE) user match {
+        case None => throw new RedirectException(
+          _usvc.createLoginURL(req.getServletPath + req.getPathInfo))
+        case _ => new Exception("You lack access to this data.")
       }
 
-      val xml = <div style="display: none" id="root" x:cortex={cortexId}>
+      val xml = <div style="display: none" id="root" x:cortex={cortexId} x:access={access.toString}>
         {toXML(resolveChildren(cortexId)(datum))}</div>
       val out = rsp.getWriter
       out.println(ServletUtil.htmlHeader(datum.title + " (" + cortexId + ")"))
@@ -115,7 +118,7 @@ class GetServlet extends HttpServlet
 
   private def mkStub (parentId :Int, title :String) = {
     val datum = new Datum
-    datum.parentId = parentId;
+    datum.parentId = parentId
     datum.meta = ""
     datum.title = title
     datum.`type` = Type.NONEXISTENT

@@ -73,14 +73,14 @@ object ObjectifyDB extends DB
   def loadAccess (userId :String, cortexId :String) = {
     val obj = ObjectifyService.begin
     Option(obj.query(classOf[CortexAccess]).ancestor(userKey(userId)).filter(
-      "cortexId", cortexId).get) map(_.access) getOrElse(Access.NONE)
+      "cortexId", cortexId).get) map(_.access)
   }
 
   // from trait DB
   def loadAccess (userId :String, cortexId :String, datumId :Long) = {
     val obj = ObjectifyService.begin
-    Option(obj.query(classOf[DatumAccess]).ancestor(userKey(userId)).filter(
-      "cortexId", cortexId).filter("datumId", datumId).get) map(_.access) getOrElse(Access.NONE)
+    Option(obj.query(classOf[CortexAccess]).ancestor(userKey(userId)).filter(
+      "cortexId", cortexId).filter("datumId", datumId).get) map(_.access)
   }
 
   // from trait DB

@@ -42,7 +42,8 @@ class DataServlet extends RemoteServiceServlet with DataService
   // from DataService
   def loadAccessInfo (cortexId :String, datumId :Long) = {
     val result = new DataService.AccessResult
-    result.publicAccess = db.loadAccess(DataService.NO_USER, cortexId, datumId)
+    result.publicAccess =
+      db.loadAccess(DataService.NO_USER, cortexId, datumId) getOrElse(Access.NONE)
     // TODO: result.userAccess = ...
     result
   }

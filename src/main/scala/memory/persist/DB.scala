@@ -30,12 +30,12 @@ trait DB
   def loadRoot (cortexId: String) :Option[Datum]
 
   /** Returns the access permissions for the specified user for the specified cortex.
-   * @param userId the id of the user to be checked or "" to check public access. */
-  def loadAccess (userId :String, cortexId :String) :Access
+   * @param userId the id of the user to be checked. */
+  def loadAccess (userId :String, cortexId :String) :Option[Access]
 
   /** Returns the access permissions for the specified user for the specified datum.
-   * @param userId the id of the user to be checked or "" to check public access. */
-  def loadAccess (userId :String, cortexId :String, datumId :Long) :Access
+   * @param userId the id of the user to be checked. */
+  def loadAccess (userId :String, cortexId :String, datumId :Long) :Option[Access]
 
   /** Returns the cortices to which the supplied user has access. */
   def loadCortexAccess (userId :String) :Seq[(Access,String)]
