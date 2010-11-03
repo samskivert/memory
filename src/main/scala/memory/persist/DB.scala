@@ -20,8 +20,9 @@ trait DB
   def noteUser (userId :String) :Unit
 
   /** Creates a cortex, populates it with the supplied root and contents data and grants the
-   * specified owner read/write access. */
-  def createCortex (cortexId :String, ownerId :String, root :Datum, contents :Datum) :Unit
+   * specified owner read/write access.
+   * @returns true if the cortex was created, false if said cortex already exists. */
+  def createCortex (cortexId :String, ownerId :String, root :Datum, contents :Datum) :Boolean
 
   /** Loads the userId of the owner of the specified cortex. */
   def loadOwner (cortexId :String) :String
