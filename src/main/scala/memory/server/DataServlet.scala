@@ -58,15 +58,13 @@ class DataServlet extends RemoteServiceServlet with DataService
 
   // from DataService
   def createDatum (cortexId :String, datum :Datum) = {
-    if (db.loadAccess(requireUser.getUserId, cortexId) != Access.WRITE)
-      throw new ServiceException("e.lack_write_access")
+    requireWriteAccess(cortexId)
     db.createDatum(cortexId, datum)
   }
 
   // from DataService
   def updateDatum (cortexId :String, id :Long, field :Datum.Field, value :FieldValue) {
-    if (db.loadAccess(requireUser.getUserId, cortexId) != Access.WRITE)
-      throw new ServiceException("e.lack_write_access")
+    requireWriteAccess(cortexId)
     db.updateDatum(cortexId, id, Seq(field -> value))
     // TODO: handle archived
   }
@@ -74,8 +72,7 @@ class DataServlet extends RemoteServiceServlet with DataService
   // from DataService
   def updateDatum (cortexId :String, id :Long, field1 :Datum.Field, value1 :FieldValue,
                    field2 :Datum.Field, value2 :FieldValue) {
-    if (db.loadAccess(requireUser.getUserId, cortexId) != Access.WRITE)
-      throw new ServiceException("e.lack_write_access")
+    requireWriteAccess(cortexId)
     db.updateDatum(cortexId, id, Seq(field1 -> value1, field2 -> value2))
     // TODO: handle archived
   }
@@ -84,8 +81,7 @@ class DataServlet extends RemoteServiceServlet with DataService
   def updateDatum (cortexId :String, id :Long, field1 :Datum.Field, value1 :FieldValue,
                    field2 :Datum.Field, value2 :FieldValue,
                    field3 :Datum.Field, value3 :FieldValue) {
-    if (db.loadAccess(requireUser.getUserId, cortexId) != Access.WRITE)
-      throw new ServiceException("e.lack_write_access")
+    requireWriteAccess(cortexId)
     db.updateDatum(cortexId, id, Seq(field1 -> value1, field2 -> value2, field3 -> value3))
     // TODO: handle archived
   }
@@ -106,6 +102,11 @@ class DataServlet extends RemoteServiceServlet with DataService
     val user = _usvc.getCurrentUser
     if (user == null) throw new ServiceException("e.not_logged_in")
     else user
+  }
+
+  private def requireWriteAccess (cortexId :String) {
+    if (db.loadAccess(requireUser.getUserId, cortexId).getOrElse(Access.NONE) != Access.WRITE)
+      throw new ServiceException("e.lack_write_access")
   }
 
   private def createRoot (cortexId :String) = {
