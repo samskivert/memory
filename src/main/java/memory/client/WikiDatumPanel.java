@@ -12,6 +12,6 @@ public class WikiDatumPanel extends TextDatumPanel
 {
     @Override protected void addContents ()
     {
-        add(new HTMLPanel(WikiUtil.format(_cortexId, _datum, _datum.text)));
+        add(new HTMLPanel(WikiUtil.format(_ctx.cortexId, _datum, _datum.text)));
     }
 }

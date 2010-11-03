@@ -38,30 +38,32 @@ public class ListDatumPanel extends DatumPanel
 
         addItems();
 
-        final TextBox item = Widgets.newTextBox("", -1, 20);
-        item.addStyleName(_rsrc.styles().width99());
-        final Button add = new Button("Add");
-        add(new FluentTable(0, 0, _rsrc.styles().width100()).
-            add().setWidget(item, _rsrc.styles().width100()).
-            right().setWidget(add).table());
+        if (_ctx.canWrite()) {
+            final TextBox item = Widgets.newTextBox("", -1, 20);
+            item.addStyleName(_rsrc.styles().width99());
+            final Button add = new Button("Add");
+            add(new FluentTable(0, 0, _rsrc.styles().width100()).
+                add().setWidget(item, _rsrc.styles().width100()).
+                right().setWidget(add).table());
 
-        new ClickCallback<Long>(add, item) {
-            protected boolean callService () {
-                _item = createChildDatum(Type.WIKI, "", item.getText().trim());
-                _datasvc.createDatum(_cortexId, _item, this);
-                return true;
-            }
-            protected boolean gotResult (Long itemId) {
-                _item.id = itemId;
-                _datum.children.add(_item);
-                _metamap.put(_item.id, new MetaData(_item.meta));
-                Widget row = addItem(_items, _item);
-                item.setText("");
-                Popups.infoNear(_msgs.datumCreated(), row);
-                return true;
-            }
-            protected Datum _item;
-        };
+            new ClickCallback<Long>(add, item) {
+                protected boolean callService () {
+                    _item = createChildDatum(Type.WIKI, "", item.getText().trim());
+                    _datasvc.createDatum(_ctx.cortexId, _item, this);
+                    return true;
+                }
+                protected boolean gotResult (Long itemId) {
+                    _item.id = itemId;
+                    _datum.children.add(_item);
+                    _metamap.put(_item.id, new MetaData(_item.meta));
+                    Widget row = addItem(_items, _item);
+                    item.setText("");
+                    Popups.infoNear(_msgs.datumCreated(), row);
+                    return true;
+                }
+                protected Datum _item;
+            };
+        }
     }
 
     protected void addItems ()
@@ -86,7 +88,7 @@ public class ListDatumPanel extends DatumPanel
     {
         switch (item.type) {
         case WIKI:
-            return Widgets.newHTML(WikiUtil.formatSnippet(_cortexId, _datum, item.text));
+            return Widgets.newHTML(WikiUtil.formatSnippet(_ctx.cortexId, _datum, item.text));
         case HTML:
             return Widgets.newHTML(item.text);
         default:
@@ -105,7 +107,7 @@ public class ListDatumPanel extends DatumPanel
             new ClickCallback<Void>(update, text) {
                 protected boolean callService () {
                     _text = text.getText().trim();
-                    _datasvc.updateDatum(_cortexId, item.id,
+                    _datasvc.updateDatum(_ctx.cortexId, item.id,
                                          Datum.Field.TEXT, FieldValue.of(_text), this);
                     return true;
                 }

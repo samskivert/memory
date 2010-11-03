@@ -44,6 +44,7 @@ public class ChecklistDatumPanel extends ListDatumPanel
     {
         final MetaData data = _metamap.get(item.id);
         final CheckBox box = new CheckBox();
+        box.setEnabled(_ctx.canWrite());
         box.addStyleName("inline");
         box.setValue(data.get(DONE, false));
 
@@ -60,7 +61,7 @@ public class ChecklistDatumPanel extends ListDatumPanel
                 data.set(DONE, isDone);
                 final String meta = data.toMetaString();
                 _datasvc.updateDatum(
-                    _cortexId, item.id, Datum.Field.META, FieldValue.of(meta),
+                    _ctx.cortexId, item.id, Datum.Field.META, FieldValue.of(meta),
                     new PopupCallback<Void>(box) {
                     public void onSuccess (Void result) {
                         item.meta = meta;

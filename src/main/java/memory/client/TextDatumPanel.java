@@ -33,7 +33,7 @@ public abstract class TextDatumPanel extends DatumPanel
         new ClickCallback<Void>(update) {
             protected boolean callService () {
                 _text = text.getText().trim();
-                _datasvc.updateDatum(_cortexId, _datum.id,
+                _datasvc.updateDatum(_ctx.cortexId, _datum.id,
                                      Datum.Field.TEXT, FieldValue.of(_text), this);
                 return true;
             }

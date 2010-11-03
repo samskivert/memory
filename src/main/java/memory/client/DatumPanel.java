@@ -38,21 +38,20 @@ import memory.rpc.DataServiceAsync;
  */
 public abstract class DatumPanel extends FlowPanel
 {
-    public static Widget create (boolean topLevel, String cortexId, Datum datum)
+    public static Widget create (Context ctx, Datum datum)
     {
         try { // damage control
             DatumPanel panel = createPanel(datum.type);
-            panel.init(topLevel, cortexId, datum);
+            panel.init(ctx, datum);
             return panel;
         } catch (Exception e) {
             return Widgets.newLabel("Error [id=" + datum.id + ", errror=" + e + "]");
         }
     }
 
-    public void init (boolean topLevel, String cortexId, Datum datum)
+    public void init (Context ctx, Datum datum)
     {
-        _topLevel = topLevel;
-        _cortexId = cortexId;
+        _ctx = ctx;
         _datum = datum;
         _meta = new MetaData(_datum.meta);
         showContents();
@@ -65,12 +64,12 @@ public abstract class DatumPanel extends FlowPanel
         addStyleName(_rsrc.styles().view());
 
         // if we're top-level, add an access icon
-        if (_topLevel) {
+        if (_ctx.topLevel) {
             final Image accessIcon = Widgets.newImage(
                 _rsrc.accessImage(), _rsrc.styles().cornerButton(), _rsrc.styles().floatRight());
             Widgets.makeActionImage(accessIcon, _msgs.accessTip(), new ClickHandler() {
                 public void onClick (ClickEvent event) {
-                    AccessPopup.show(_cortexId, _datum, accessIcon);
+                    AccessPopup.show(_ctx, _datum, accessIcon);
                 }
             });
             add(accessIcon);
@@ -78,12 +77,14 @@ public abstract class DatumPanel extends FlowPanel
 
         // this is a twisty maze of header logic; beware static analyses
         FlowPanel header = null;
-        if (_topLevel || !StringUtil.isBlank(_datum.title)) {
+        if (_ctx.topLevel || !StringUtil.isBlank(_datum.title)) {
             header = Widgets.newFlowPanel(getHeaderStyle());
             add(header);
         }
-        addEditButton(header);
-        if (_topLevel) {
+        if (_ctx.canWrite()) {
+            addEditButton(header);
+        }
+        if (_ctx.topLevel) {
             addNavigation(header);
         }
         addTitle(header);
@@ -137,7 +138,7 @@ public abstract class DatumPanel extends FlowPanel
 
     protected void addNavigation (FlowPanel header)
     {
-        Anchor cortex = new Anchor("/c/" + _cortexId.toLowerCase(), _cortexId);
+        Anchor cortex = new Anchor("/c/" + _ctx.cortexId.toLowerCase(), _ctx.cortexId);
         cortex.addStyleName(_rsrc.styles().navigationLink());
         header.add(cortex);
         header.add(Widgets.newLabel(" - ", _rsrc.styles().navigationLink()));
@@ -173,7 +174,7 @@ public abstract class DatumPanel extends FlowPanel
                 _title = title.getText().trim();
                 _type = type.getSelectedValue();
                 _parentId = parentId.getNumber().longValue();
-                _datasvc.updateDatum(_cortexId, _datum.id,
+                _datasvc.updateDatum(_ctx.cortexId, _datum.id,
                                      Datum.Field.TITLE, FieldValue.of(_title),
                                      Datum.Field.TYPE, FieldValue.of(_type),
                                      Datum.Field.PARENT_ID, FieldValue.of(_parentId), this);
@@ -221,7 +222,7 @@ public abstract class DatumPanel extends FlowPanel
         new ClickCallback<Long>(add) {
             protected boolean callService () {
                 _child = createChildDatum(type.getSelectedValue(), title.getText(), null);
-                _datasvc.createDatum(_cortexId, _child, this);
+                _datasvc.createDatum(_ctx.cortexId, _child, this);
                 return true;
             }
             protected boolean gotResult (Long datumId) {
@@ -271,8 +272,7 @@ public abstract class DatumPanel extends FlowPanel
 
     protected abstract void addContents ();
 
-    protected boolean _topLevel;
-    protected String _cortexId;
+    protected Context _ctx;
     protected Datum _datum;
     protected MetaData _meta;
 

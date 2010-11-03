@@ -66,7 +66,7 @@ public class PageDatumPanel extends DatumPanel
             }
             Datum child = cmap.get(id);
             if (child != null) {
-                Widget cpanel = DatumPanel.create(false, _cortexId, child);
+                Widget cpanel = DatumPanel.create(_ctx.getChild(), child);
                 cpanel.addStyleName(_rsrc.styles().pageDatum());
                 column.add(cpanel);
                 if (++added == cpc) {
@@ -94,7 +94,7 @@ public class PageDatumPanel extends DatumPanel
         new ClickCallback<Void>(update) {
             protected boolean callService () {
                 _meta.set(COLS_KEY, columns.getSelectedItem());
-                _datasvc.updateDatum(_cortexId, _datum.id,
+                _datasvc.updateDatum(_ctx.cortexId, _datum.id,
                                      Datum.Field.META, FieldValue.of(_meta.toMetaString()), this);
                 return true;
             }
@@ -117,7 +117,7 @@ public class PageDatumPanel extends DatumPanel
         new ClickCallback<Void>(update, order) {
             protected boolean callService () {
                 _meta.set("order", order.getText().trim());
-                _datasvc.updateDatum(_cortexId, _datum.id,
+                _datasvc.updateDatum(_ctx.cortexId, _datum.id,
                                      Datum.Field.META, FieldValue.of(_meta.toMetaString()), this);
                 return true;
             }

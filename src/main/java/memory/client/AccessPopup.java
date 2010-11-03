@@ -24,12 +24,12 @@ import memory.rpc.DataServiceAsync;
  */
 public class AccessPopup extends PopupPanel
 {
-    public static void show (final String cortexId, final Datum datum, final Widget near)
+    public static void show (final Context ctx, final Datum datum, final Widget near)
     {
         _datasvc.loadAccessInfo(
-            cortexId, datum.id, new PopupCallback<DataService.AccessResult>(near) {
+            ctx.cortexId, datum.id, new PopupCallback<DataService.AccessResult>(near) {
             public void onSuccess (DataService.AccessResult access) {
-                AccessPopup popup = new AccessPopup(cortexId, datum, access);
+                AccessPopup popup = new AccessPopup(ctx, datum, access);
                 popup.setVisible(false);
                 popup.show();
                 popup.setPopupPosition(
@@ -40,7 +40,7 @@ public class AccessPopup extends PopupPanel
         });
     }
 
-    public AccessPopup (final String cortexId, final Datum datum, DataService.AccessResult access)
+    public AccessPopup (final Context ctx, final Datum datum, DataService.AccessResult access)
     {
         super(true);
         addStyleName(_rsrc.styles().popup());
@@ -50,7 +50,7 @@ public class AccessPopup extends PopupPanel
         pubAccess.addChangeHandler(new ChangeHandler() {
             public void onChange (ChangeEvent event) {
                 _datasvc.updateAccess(
-                    DataService.NO_USER, cortexId, datum.id, pubAccess.getSelectedValue(),
+                    DataService.NO_USER, ctx.cortexId, datum.id, pubAccess.getSelectedValue(),
                     new PopupCallback<Void>(pubAccess) {
                     public void onSuccess (Void result) {
                         Popups.infoNear("Access updated.", pubAccess);

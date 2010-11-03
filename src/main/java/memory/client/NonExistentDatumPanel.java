@@ -39,7 +39,7 @@ public class NonExistentDatumPanel extends DatumPanel
                 if (_datum.type.hasText()) {
                     _datum.text = "Click the button above to edit this item.";
                 }
-                _datasvc.createDatum(_cortexId, _datum, this);
+                _datasvc.createDatum(_ctx.cortexId, _datum, this);
                 return true;
             }
             protected boolean gotResult (Long datumId) {
@@ -47,7 +47,7 @@ public class NonExistentDatumPanel extends DatumPanel
                 _datum.children = new ArrayList<Datum>();
                 Panel parent = (Panel)getParent();
                 parent.remove(NonExistentDatumPanel.this);
-                parent.add(DatumPanel.create(_topLevel, _cortexId, _datum));
+                parent.add(DatumPanel.create(_ctx, _datum));
                 return false;
             }
         };
