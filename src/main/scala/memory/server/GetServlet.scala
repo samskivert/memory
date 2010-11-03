@@ -12,6 +12,7 @@ import com.google.appengine.api.users.{User, UserService, UserServiceFactory}
 
 import memory.data.{Access, Datum, Type}
 import memory.persist.DB
+import memory.rpc.DataService
 
 /**
  * Serves up REST data.
@@ -42,20 +43,10 @@ class GetServlet extends HttpServlet
       require(bits.length >= 2, "Missing cortex name.")
       val cortexId = bits(1)
 
-      val user = _usvc.getCurrentUser
-      val access = db.loadAccess(if (user == null) db.NO_USER else user.getUserId, cortexId)
-      if (access == Access.NONE) {
-        if (user == null)
-          throw new RedirectException(
-            _usvc.createLoginURL(req.getServletPath + req.getPathInfo))
-        else
-          throw new Exception("You lack access to '" + cortexId + "'.")
-      }
-
       val root = db.loadRoot(cortexId) getOrElse(
         throw new Exception("No such cortex '" + cortexId + "'."))
 
-      val contents = bits.length match {
+      val datum = bits.length match {
         case 2 => root
         case 3 => db.loadDatum(cortexId, bits(2).toInt)
         case 4 => db.loadDatum(cortexId, bits(2).toInt, bits(3)) getOrElse(
@@ -63,10 +54,22 @@ class GetServlet extends HttpServlet
         case _ => throw new Error("Invalid path " + req.getPathInfo)
       }
 
+      val userId = Option(_usvc.getCurrentUser) map(_.getUserId) getOrElse(DataService.NO_USER)
+      val access = db.loadAccess(userId, cortexId) match {
+        case Access.NONE => db.loadAccess(userId, cortexId, datum.id)
+        case other => other
+      }
+      if (access == Access.NONE) {
+        if (userId == DataService.NO_USER)
+          throw new RedirectException(_usvc.createLoginURL(req.getServletPath + req.getPathInfo))
+        else
+          throw new Exception("You lack access to this data.")
+      }
+
       val xml = <div style="display: none" id="root" x:cortex={cortexId}>
-        {toXML(resolveChildren(cortexId)(contents))}</div>
+        {toXML(resolveChildren(cortexId)(datum))}</div>
       val out = rsp.getWriter
-      out.println(ServletUtil.htmlHeader(contents.title + " (" + cortexId + ")"))
+      out.println(ServletUtil.htmlHeader(datum.title + " (" + cortexId + ")"))
       XML.write(out, xml, null, false, null)
       out.println(GwitBits)
       out.println(ServletUtil.htmlFooter)

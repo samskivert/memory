@@ -18,9 +18,12 @@ public class CortexRow
     /** The id of the root datum for this cortex. */
     @Unindexed public long rootId;
 
+    /** The id of the owner of this cortex. */
+    @Unindexed public String ownerId;
+
     @Override // from Object
     public String toString ()
     {
-        return id + ":" + rootId;
+        return id + ":" + rootId + ":" + ownerId;
     }
 }

@@ -24,6 +24,9 @@ public interface DataService extends RemoteService
     /** The path at which this service's servlet is mapped. */
     public static final String ENTRY_POINT = "data";
 
+    /** Supplied for userId when checking access for unauthenticated viewers. */
+    public static final String NO_USER = "<global>";
+
     /** Returned by {@link #loadAccountInfo}. */
     public static class AccountResult implements IsSerializable
     {
@@ -34,8 +37,21 @@ public interface DataService extends RemoteService
         public Map<Access, List<String>> cortexen;
     }
 
+    /** Returned by {@link #loadAccessInfo}. */
+    public static class AccessResult implements IsSerializable
+    {
+        /** The public access setting for this datum. */
+        public Access publicAccess;
+
+        /** A map from userId to access privileges for users with custom access. */
+        public Map<String, Access> userAccess;
+    }
+
     /** Loads info for the authenticated account. */
     AccountResult loadAccountInfo () throws ServiceException;
+
+    /** Loads the access information for the specified datum. */
+    AccessResult loadAccessInfo (String cortexId, long datumId) throws ServiceException;
 
     /** Creates a new cortex with the specified id.
      * @exception ServiceException thrown with `e.name_in_use` if the requested name is used. */
@@ -60,5 +76,9 @@ public interface DataService extends RemoteService
                       Datum.Field field1, FieldValue value1,
                       Datum.Field field2, FieldValue value2,
                       Datum.Field field3, FieldValue value3)
+        throws ServiceException;
+
+    /** Updates access to the specified datum for the specified user. */
+    void updateAccess (String userId, String cortexId, long datumId, Access access)
         throws ServiceException;
 }

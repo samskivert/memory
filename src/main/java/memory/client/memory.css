@@ -40,6 +40,12 @@ ul {
   float: right;
 }
 
+.popup {
+  background: #FFFFFF;
+  border: 1px solid;
+  margin: 5px;
+}
+
 .navigationLink {
   text-decoration: none;
   display: inline;

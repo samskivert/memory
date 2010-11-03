@@ -64,6 +64,18 @@ public abstract class DatumPanel extends FlowPanel
         removeStyleName(_rsrc.styles().editor());
         addStyleName(_rsrc.styles().view());
 
+        // if we're top-level, add an access icon
+        if (_topLevel) {
+            final Image accessIcon = Widgets.newImage(
+                _rsrc.accessImage(), _rsrc.styles().cornerButton(), _rsrc.styles().floatRight());
+            Widgets.makeActionImage(accessIcon, _msgs.accessTip(), new ClickHandler() {
+                public void onClick (ClickEvent event) {
+                    AccessPopup.show(_cortexId, _datum, accessIcon);
+                }
+            });
+            add(accessIcon);
+        }
+
         // this is a twisty maze of header logic; beware static analyses
         FlowPanel header = null;
         if (_topLevel || !StringUtil.isBlank(_datum.title)) {

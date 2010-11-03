@@ -17,6 +17,7 @@ public interface MemoryResources extends ClientBundle
         String cornerButton ();
         String floatLeft ();
         String floatRight ();
+        String popup ();
         String navigationLink ();
         String title ();
 
@@ -52,4 +53,7 @@ public interface MemoryResources extends ClientBundle
 
     @Source("close.png")
     ImageResource closeImage ();
+
+    @Source("access.png")
+    ImageResource accessImage ();
 }

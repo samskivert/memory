@@ -10,9 +10,6 @@ import memory.data.{Access, Datum, FieldValue, Type}
  */
 trait DB
 {
-  /** Supplied for userId when checking access for unauthenticated viewers. */
-  val NO_USER = "<global>"
-
   /** Initializes the database component. */
   def init :Unit
 
@@ -26,6 +23,9 @@ trait DB
    * specified owner read/write access. */
   def createCortex (cortexId :String, ownerId :String, root :Datum, contents :Datum) :Unit
 
+  /** Loads the userId of the owner of the specified cortex. */
+  def loadOwner (cortexId :String) :String
+
   /** Loads the root datum for the specified cortex. */
   def loadRoot (cortexId: String) :Option[Datum]
 
@@ -35,7 +35,7 @@ trait DB
 
   /** Returns the access permissions for the specified user for the specified datum.
    * @param userId the id of the user to be checked or "" to check public access. */
-  def loadAccess (userId :String, datumId :Long) :Access
+  def loadAccess (userId :String, cortexId :String, datumId :Long) :Access
 
   /** Returns the cortices to which the supplied user has access. */
   def loadCortexAccess (userId :String) :Seq[(Access,String)]
@@ -44,7 +44,7 @@ trait DB
   def updateAccess (userId :String, cortexId :String, access :Access) :Unit
 
   /** Updates the access permissions for the specified user for the specified datum. */
-  def updateAccess (userId :String, datumId :Long, access :Access) :Unit
+  def updateAccess (userId :String, cortexId :String, datumId :Long, access :Access) :Unit
 
   /** Loads the specified datum. Throws an excepton if it does not exist. */
   def loadDatum (cortexId :String, id :Long) :Datum

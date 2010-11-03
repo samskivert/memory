@@ -4,6 +4,7 @@
 package memory.rpc;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import memory.data.Access;
 import memory.data.Datum;
 
 import memory.data.FieldValue;
@@ -13,6 +14,21 @@ import memory.data.FieldValue;
  */
 public interface DataServiceAsync
 {
+    /**
+     * The async version of {@link DataService#loadAccountInfo}.
+     */
+    void loadAccountInfo (AsyncCallback<DataService.AccountResult> callback);
+
+    /**
+     * The async version of {@link DataService#loadAccessInfo}.
+     */
+    void loadAccessInfo (String cortexId, long datumId, AsyncCallback<DataService.AccessResult> callback);
+
+    /**
+     * The async version of {@link DataService#createCortex}.
+     */
+    void createCortex (String cortexId, AsyncCallback<Void> callback);
+
     /**
      * The async version of {@link DataService#createDatum}.
      */
@@ -34,12 +50,7 @@ public interface DataServiceAsync
     void updateDatum (String cortexId, long id, Datum.Field field, FieldValue value, Datum.Field arg4, FieldValue arg5, Datum.Field arg6, FieldValue arg7, AsyncCallback<Void> callback);
 
     /**
-     * The async version of {@link DataService#loadAccountInfo}.
+     * The async version of {@link DataService#updateAccess}.
      */
-    void loadAccountInfo (AsyncCallback<DataService.AccountResult> callback);
-
-    /**
-     * The async version of {@link DataService#createCortex}.
-     */
-    void createCortex (String cortexId, AsyncCallback<Void> callback);
+    void updateAccess (String userId, String cortexId, long datumId, Access access, AsyncCallback<Void> callback);
 }

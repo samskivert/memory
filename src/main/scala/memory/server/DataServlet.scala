@@ -40,6 +40,14 @@ class DataServlet extends RemoteServiceServlet with DataService
   }
 
   // from DataService
+  def loadAccessInfo (cortexId :String, datumId :Long) = {
+    val result = new DataService.AccessResult
+    result.publicAccess = db.loadAccess(DataService.NO_USER, cortexId, datumId)
+    // TODO: result.userAccess = ...
+    result
+  }
+
+  // from DataService
   def createCortex (cortexId :String) {
     db.createCortex(cortexId, requireUser.getUserId,
                     createRoot(cortexId), createRootContents(cortexId))
@@ -47,15 +55,15 @@ class DataServlet extends RemoteServiceServlet with DataService
 
   // from DataService
   def createDatum (cortexId :String, datum :Datum) = {
-    val userId = 0 // TODO
-    val parent = db.loadDatum(cortexId, datum.parentId)
-    // TODO: check access using parent
+    if (db.loadAccess(requireUser.getUserId, cortexId) != Access.WRITE)
+      throw new ServiceException("e.lack_write_access")
     db.createDatum(cortexId, datum)
   }
 
   // from DataService
   def updateDatum (cortexId :String, id :Long, field :Datum.Field, value :FieldValue) {
-    // TODO: check access
+    if (db.loadAccess(requireUser.getUserId, cortexId) != Access.WRITE)
+      throw new ServiceException("e.lack_write_access")
     db.updateDatum(cortexId, id, Seq(field -> value))
     // TODO: handle archived
   }
@@ -63,7 +71,8 @@ class DataServlet extends RemoteServiceServlet with DataService
   // from DataService
   def updateDatum (cortexId :String, id :Long, field1 :Datum.Field, value1 :FieldValue,
                    field2 :Datum.Field, value2 :FieldValue) {
-    // TODO: check access
+    if (db.loadAccess(requireUser.getUserId, cortexId) != Access.WRITE)
+      throw new ServiceException("e.lack_write_access")
     db.updateDatum(cortexId, id, Seq(field1 -> value1, field2 -> value2))
     // TODO: handle archived
   }
@@ -72,9 +81,17 @@ class DataServlet extends RemoteServiceServlet with DataService
   def updateDatum (cortexId :String, id :Long, field1 :Datum.Field, value1 :FieldValue,
                    field2 :Datum.Field, value2 :FieldValue,
                    field3 :Datum.Field, value3 :FieldValue) {
-    // TODO: check access
+    if (db.loadAccess(requireUser.getUserId, cortexId) != Access.WRITE)
+      throw new ServiceException("e.lack_write_access")
     db.updateDatum(cortexId, id, Seq(field1 -> value1, field2 -> value2, field3 -> value3))
     // TODO: handle archived
+  }
+
+  // from DataService
+  def updateAccess (userId :String, cortexId :String, datumId :Long, access :Access) {
+    if (requireUser.getUserId != db.loadOwner(cortexId))
+      throw new ServiceException("e.access_denied")
+    db.updateAccess(userId, cortexId, datumId, access)
   }
 
   override def doUnexpectedFailure (e :Throwable) {

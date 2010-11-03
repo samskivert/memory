@@ -35,8 +35,8 @@ public class MemoryClient implements EntryPoint
             Element relem = root.getElement();
             relem.removeFromParent();
             String cortexId = relem.getAttribute("x:cortex");
-            for (Datum data : parseChildren(relem)) {
-                RootPanel.get(CLIENT_DIV).add(DatumPanel.create(true, cortexId, data));
+            for (Datum datum : parseChildren(relem)) {
+                RootPanel.get(CLIENT_DIV).add(DatumPanel.create(true, cortexId, datum));
             }
         }
     }

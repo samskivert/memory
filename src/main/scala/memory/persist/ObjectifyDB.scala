@@ -49,12 +49,18 @@ object ObjectifyDB extends DB
       createDatum(cortexId, root)
       contents.parentId = root.id
       createDatum(cortexId, contents)
-      obj.put(cortexRow(cortexId, root.id)) :Key[CortexRow]
+      obj.put(cortexRow(cortexId, root.id, ownerId)) :Key[CortexRow]
     }
     transaction { obj =>
       // we have to force the return type below to resolve pesky overload of put()
       obj.put(cortexAccess(ownerId, cortexId, Access.WRITE)) :Key[CortexAccess]
     }
+  }
+
+  // from trait DB
+  def loadOwner (cortexId :String) = {
+    val obj = ObjectifyService.begin
+    obj.get(cortexKey(cortexId)).ownerId
   }
 
   // from trait DB
@@ -71,9 +77,10 @@ object ObjectifyDB extends DB
   }
 
   // from trait DB
-  def loadAccess (userId :String, datumId :Long) = {
+  def loadAccess (userId :String, cortexId :String, datumId :Long) = {
     val obj = ObjectifyService.begin
-    error("unimplemented")
+    Option(obj.query(classOf[DatumAccess]).ancestor(userKey(userId)).filter(
+      "cortexId", cortexId).filter("datumId", datumId).get) map(_.access) getOrElse(Access.NONE)
   }
 
   // from trait DB
@@ -85,14 +92,17 @@ object ObjectifyDB extends DB
 
   // from trait DB
   def updateAccess (userId :String, cortexId :String, access :Access) :Unit = {
-    val obj = ObjectifyService.begin
-    error("unimplemented")
+    transaction { obj =>
+      // TODO: if access == NONE, remove it
+      obj.put(cortexAccess(userId, cortexId, access)) :Key[CortexAccess]
+    }
   }
 
   // from trait DB
-  def updateAccess (userId :String, datumId :Long, access :Access) {
-    val obj = ObjectifyService.begin
-    error("unimplemented")
+  def updateAccess (userId :String, cortexId :String, datumId :Long, access :Access) {
+    transaction { obj =>
+      obj.put(datumAccess(userId, cortexId, datumId, access)) :Key[DatumAccess]
+    }
   }
 
   // from trait DB
@@ -141,10 +151,11 @@ object ObjectifyDB extends DB
     }
   }
 
-  private def cortexRow (id :String, rootId :Long) = {
+  private def cortexRow (id :String, rootId :Long, ownerId :String) = {
     val row = new CortexRow
     row.id = id
     row.rootId = rootId
+    row.ownerId = ownerId
     row
   }
 
