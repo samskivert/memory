@@ -44,8 +44,11 @@ object ObjectifyDB extends DB
   }
 
   // from trait DB
-  def createCortex (cortexId :String, ownerId :String, root :Datum, contents :Datum) {
+  def createCortex (cortexId :String, ownerId :String, root :Datum, contents :Datum) :Boolean = {
     transaction { obj =>
+      if (obj.find(cortexKey(cortexId)) != null) {
+        return false
+      }
       createDatum(cortexId, root)
       contents.parentId = root.id
       createDatum(cortexId, contents)
@@ -55,6 +58,7 @@ object ObjectifyDB extends DB
       // we have to force the return type below to resolve pesky overload of put()
       obj.put(cortexAccess(ownerId, cortexId, Access.WRITE)) :Key[CortexAccess]
     }
+    true
   }
 
   // from trait DB

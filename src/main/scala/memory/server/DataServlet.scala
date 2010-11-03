@@ -41,8 +41,10 @@ class DataServlet extends RemoteServiceServlet with DataService
 
   // from DataService
   def createCortex (cortexId :String) {
-    db.createCortex(cortexId, requireUser.getUserId,
-                    createRoot(cortexId), createRootContents(cortexId))
+    if (!db.createCortex(cortexId, requireUser.getUserId,
+                         createRoot(cortexId), createRootContents(cortexId))) {
+      throw new ServiceException("e.cortex_name_in_use")
+    }
   }
 
   // from DataService
