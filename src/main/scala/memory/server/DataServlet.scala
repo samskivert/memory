@@ -50,10 +50,9 @@ class DataServlet extends RemoteServiceServlet with DataService
 
   // from DataService
   def createCortex (cortexId :String) {
-    if (!db.createCortex(cortexId, requireUser.getUserId,
-                         createRoot(cortexId), createRootContents(cortexId))) {
-      throw new ServiceException("e.cortex_name_in_use")
-    }
+    val created = db.createCortex(
+      cortexId, requireUser.getUserId, createRoot(cortexId), createRootContents(cortexId))
+    if (!created) throw new ServiceException("e.cortex_name_in_use")
   }
 
   // from DataService
@@ -88,7 +87,8 @@ class DataServlet extends RemoteServiceServlet with DataService
 
   // from DataService
   def updateAccess (userId :String, cortexId :String, datumId :Long, access :Access) {
-    if (requireUser.getUserId != db.loadOwner(cortexId))
+    val updater = requireUser.getUserId
+    if (updater != "root" && updater != db.loadOwner(cortexId))
       throw new ServiceException("e.access_denied")
     db.updateAccess(userId, cortexId, datumId, access)
   }
@@ -105,7 +105,8 @@ class DataServlet extends RemoteServiceServlet with DataService
   }
 
   private def requireWriteAccess (cortexId :String) {
-    if (db.loadAccess(requireUser.getUserId, cortexId).getOrElse(Access.NONE) != Access.WRITE)
+    val userId = requireUser.getUserId
+    if (userId != "root" && db.loadAccess(userId, cortexId).getOrElse(Access.NONE) != Access.WRITE)
       throw new ServiceException("e.lack_write_access")
   }
 
