@@ -30,6 +30,9 @@ public interface DataService extends RemoteService
     /** Returned by {@link #loadAccountInfo}. */
     public static class AccountResult implements IsSerializable
     {
+        /** The userId as which the user is logged in. */
+        public String userId;
+
         /** The nickname as which the user is logged in. */
         public String nickname;
 

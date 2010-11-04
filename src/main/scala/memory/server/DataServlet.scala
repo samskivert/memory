@@ -29,6 +29,7 @@ class DataServlet extends RemoteServiceServlet with DataService
     }
 
     val result = new DataService.AccountResult
+    result.userId = user.getUserId
     result.nickname = user.getNickname
     result.cortexen = new java.util.HashMap[Access, java.util.List[String]]
     for ((k, v) <- db.loadCortexAccess(user.getUserId) groupBy(_._1)) {

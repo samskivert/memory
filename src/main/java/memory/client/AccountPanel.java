@@ -35,7 +35,11 @@ public class AccountPanel extends Composite
     {
         initWidget(_binder.createAndBindUi(this));
 
-        _nickname.setText(data.nickname);
+        if (data.nickname.equals(data.userId)) {
+            _nickname.setText(data.nickname);
+        } else {
+            _nickname.setText(data.nickname + " (" + data.userId + ")");
+        }
 
         addCortexenLinks(data.cortexen.get(Access.WRITE), _readWrite);
         addCortexenLinks(data.cortexen.get(Access.READ), _readOnly);
