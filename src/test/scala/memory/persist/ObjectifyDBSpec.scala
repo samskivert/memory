@@ -9,7 +9,7 @@ import org.scalatest.matchers.ShouldMatchers
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper
 
-import memory.data.{Datum, Type}
+import memory.data.{Access, Datum, Type}
 
 /**
  * Tests the Objectify based database.
@@ -59,5 +59,17 @@ class ObjectifyDBSpec extends FlatSpec with BeforeAndAfterAll with ShouldMatcher
     db.loadDatum("test", 1, "Howdy") map(_.text) should equal(Some("Hello"))
     db.loadDatum("test", 1, "howdy") map(_.text) should equal(Some("Hello"))
     db.loadDatum("test", 1, "HOWDY") map(_.text) should equal(Some("Hello"))
+  }
+
+  "DB" should "support cortex access updates" in {
+    db.updateAccess("testUser", "testCortex", Access.READ)
+    db.loadAccess("randomUser", "testCortex").getOrElse(Access.NONE) should equal(Access.NONE)
+    db.loadAccess("testUser", "testCortex").getOrElse(Access.NONE) should equal(Access.READ)
+  }
+
+  "DB" should "support datum access updates" in {
+    db.updateAccess("testUser", "testCortex", 1, Access.READ)
+    db.loadAccess("randomUser", "testCortex", 1).getOrElse(Access.NONE) should equal(Access.NONE)
+    db.loadAccess("testUser", "testCortex", 1).getOrElse(Access.NONE) should equal(Access.READ)
   }
 }

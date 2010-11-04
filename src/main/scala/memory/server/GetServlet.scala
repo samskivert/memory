@@ -69,8 +69,9 @@ class GetServlet extends HttpServlet
         case _ => new Exception("You lack access to this data.")
       }
 
-      val xml = <div style="display: none" id="root" x:cortex={cortexId} x:access={access.toString}>
-        {toXML(resolveChildren(cortexId)(datum))}</div>
+      val xml = <div style="display: none" id="root" x:cortex={cortexId} x:access={
+        access.toString} x:publicAccess={publicAccess.toString}>{"\n  "}{
+          toXML(resolveChildren(cortexId)(datum))}{"\n"}</div>
       val out = rsp.getWriter
       out.println(ServletUtil.htmlHeader(datum.title + " (" + cortexId + ")"))
       XML.write(out, xml, null, false, null)
