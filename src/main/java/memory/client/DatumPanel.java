@@ -63,8 +63,8 @@ public abstract class DatumPanel extends FlowPanel
         removeStyleName(_rsrc.styles().editor());
         addStyleName(_rsrc.styles().view());
 
-        // if we're top-level, add an access icon
-        if (_ctx.topLevel) {
+        // if we're top-level and a writer, add an access control icon
+        if (_ctx.topLevel && _ctx.canWrite()) {
             final Image accessIcon = Widgets.newImage(
                 _rsrc.accessImage(), _rsrc.styles().cornerButton(), _rsrc.styles().floatRight());
             Widgets.makeActionImage(accessIcon, _msgs.accessTip(), new ClickHandler() {
