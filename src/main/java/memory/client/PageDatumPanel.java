@@ -131,6 +131,7 @@ public class PageDatumPanel extends DatumPanel
             }
         };
         editor.add(Widgets.newRow(order, update));
+        editor.add(Widgets.newLabel(_msgs.orderTip()));
     }
 
     protected List<Long> getChildOrder ()
