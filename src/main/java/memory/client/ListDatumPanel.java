@@ -4,7 +4,9 @@
 package memory.client;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.user.client.Window;
@@ -31,8 +33,8 @@ public class ListDatumPanel extends DatumPanel
     protected void addContents ()
     {
         // sort the data and add a metadata record for each child
-        Collections.sort(_datum.children, Datum.BY_WHEN);
-        for (Datum child : _datum.children) {
+        Collections.sort(getChildData(), Datum.BY_WHEN);
+        for (Datum child : getChildData()) {
             _metamap.put(child.id, new MetaData(child.meta));
         }
 
@@ -54,7 +56,7 @@ public class ListDatumPanel extends DatumPanel
                 }
                 protected boolean gotResult (Long itemId) {
                     _item.id = itemId;
-                    _datum.children.add(_item);
+                    getChildData().add(_item);
                     _metamap.put(_item.id, new MetaData(_item.meta));
                     Widget row = addItem(_items, _item);
                     item.setText("");
@@ -69,7 +71,7 @@ public class ListDatumPanel extends DatumPanel
     protected void addItems ()
     {
         _items = new FlowPanel();
-        for (Datum child : _datum.children) {
+        for (Datum child : getChildData()) {
             addItem(_items, child);
         }
         add(_items);
@@ -96,11 +98,16 @@ public class ListDatumPanel extends DatumPanel
         }
     }
 
+    protected List<Datum> getChildData ()
+    {
+        return _datum.children;
+    }
+
     @Override protected void addChildrenEditor (FlowPanel editor)
     {
         // no children editor, instead we use item editors
         editor.add(Widgets.newLabel("Items:", _rsrc.styles().editorTitle()));
-        for (final Datum item : _datum.children) {
+        for (final Datum item : getChildData()) {
             final TextBox text = Widgets.newTextBox(item.text, -1, 20);
             Button update = new Button("Update");
             editor.add(Widgets.newRow(text, update));

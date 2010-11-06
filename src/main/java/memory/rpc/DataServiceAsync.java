@@ -53,4 +53,9 @@ public interface DataServiceAsync
      * The async version of {@link DataService#updateAccess}.
      */
     void updateAccess (String userId, String cortexId, long datumId, Access access, AsyncCallback<Void> callback);
+
+    /**
+     * The async version of {@link DataService#loadJournalData}.
+     */
+    void loadJournalData (String arg0, long arg1, long arg2, AsyncCallback<Datum> callback);
 }

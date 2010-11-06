@@ -7,5 +7,7 @@
   <source path="memory/client"/>
   <source path="memory/data"/>
   <source path="memory/rpc"/>
+  <public path="memory/css"/>
+  <stylesheet src="standard.css"/>
   <entry-point class="memory.client.MemoryClient"/>
 </module>

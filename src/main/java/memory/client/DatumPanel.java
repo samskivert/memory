@@ -13,7 +13,6 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -94,6 +93,7 @@ public abstract class DatumPanel extends FlowPanel
         } catch (Exception e) {
             add(Widgets.newLabel("Error generating contents for "+ _datum.id + "."));
             add(Widgets.newLabel(e.toString()));
+            GWT.log("Error generating UI for " + _datum.id, e);
         }
     }
 
@@ -102,13 +102,13 @@ public abstract class DatumPanel extends FlowPanel
         clear();
         removeStyleName(_rsrc.styles().view());
         addStyleName(_rsrc.styles().editor());
-        PushButton close = createCornerButton(
-            _rsrc.closeImage(), _msgs.closeTip(), new ClickHandler() {
+        Image close = Widgets.newImage(_rsrc.closeImage(), _rsrc.styles().floatRight(),
+                                       _rsrc.styles().cornerButton());
+        Widgets.makeActionImage(close, _msgs.closeTip(), new ClickHandler() {
             public void onClick (ClickEvent event) {
                 showContents();
             }
         });
-        close.addStyleName(_rsrc.styles().floatRight());
         add(close);
         FlowPanel editor = Widgets.newFlowPanel(_rsrc.styles().insetBox());
         addEditor(editor);
@@ -122,8 +122,8 @@ public abstract class DatumPanel extends FlowPanel
 
     protected void addEditButton (FlowPanel header)
     {
-        PushButton button = createCornerButton(
-            _rsrc.editImage(), _msgs.editTip(), new ClickHandler() {
+        Image button = Widgets.newImage(_rsrc.editImage(), _rsrc.styles().cornerButton());
+        Widgets.makeActionImage(button, _msgs.editTip(), new ClickHandler() {
             public void onClick (ClickEvent event) {
                 showEditor();
             }
@@ -246,7 +246,7 @@ public abstract class DatumPanel extends FlowPanel
     protected Datum createChildDatum (Type type, String title, String text)
     {
         Datum child = new Datum();
-        child.parentId = _datum.id;
+        child.parentId = getParentIdForChild();
         child.type = type;
         child.meta = "";
         child.title = title;
@@ -256,12 +256,9 @@ public abstract class DatumPanel extends FlowPanel
         return child;
     }
 
-    protected PushButton createCornerButton (ImageResource image, String tip, ClickHandler onClick)
+    protected long getParentIdForChild ()
     {
-        PushButton button = new PushButton(new Image(image), onClick);
-        button.setTitle(tip);
-        button.addStyleName(_rsrc.styles().cornerButton());
-        return button;
+        return _datum.id;
     }
 
     protected EnumListBox<Type> createTypeListBox ()
@@ -292,7 +289,7 @@ public abstract class DatumPanel extends FlowPanel
         case EMBED: return new HTMLDatumPanel();
         case LIST: return new ListDatumPanel();
         case CHECKLIST: return new ChecklistDatumPanel();
-        case JOURNAL: return new HTMLDatumPanel();
+        case JOURNAL: return new JournalDatumPanel();
         case PAGE: return new PageDatumPanel();
         case NONEXISTENT: return new NonExistentDatumPanel();
         }

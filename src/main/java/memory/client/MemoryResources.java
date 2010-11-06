@@ -43,6 +43,7 @@ public interface MemoryResources extends ClientBundle
         String column33 ();
 
         String nonExistNote ();
+        String pickerPopper ();
     }
 
     @Source("memory.css")
@@ -56,4 +57,10 @@ public interface MemoryResources extends ClientBundle
 
     @Source("access.png")
     ImageResource accessImage ();
+
+    @Source("pickdate.png")
+    ImageResource pickdateImage ();
+
+    @Source("today.png")
+    ImageResource todayImage ();
 }

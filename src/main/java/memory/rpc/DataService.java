@@ -84,4 +84,8 @@ public interface DataService extends RemoteService
     /** Updates access to the specified datum for the specified user. */
     void updateAccess (String userId, String cortexId, long datumId, Access access)
         throws ServiceException;
+
+    /** Loads the journal data for the specified date. */
+    Datum loadJournalData (String cortexId, long journalId, long when)
+        throws ServiceException;
 }

@@ -71,7 +71,7 @@ class GetServlet extends HttpServlet
 
       val xml = <div style="display: none" id="root" x:cortex={cortexId} x:access={
         access.toString} x:publicAccess={publicAccess.toString}>{"\n  "}{
-          toXML(resolveChildren(cortexId)(datum))}{"\n"}</div>
+          toXML(MemoryLogic.resolveChildren(cortexId)(datum))}{"\n"}</div>
       val out = rsp.getWriter
       out.println(ServletUtil.htmlHeader(datum.title + " (" + cortexId + ")"))
       XML.write(out, xml, null, false, null)
@@ -80,30 +80,13 @@ class GetServlet extends HttpServlet
 
     } catch {
       case re :RedirectException => rsp.sendRedirect(re.getMessage)
-      case e => rsp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage)
+      case e => e.printStackTrace; rsp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage)
     }
   }
 
   private def require (condition : => Boolean, error :String) {
     if (!condition) throw new Exception(error)
   }
-
-  private def resolveChildren (cortexId :String, rootId :Long) :Datum =
-    resolveChildren(cortexId)(db.loadDatum(cortexId, rootId))
-
-  private def resolveChildren (cortexId :String)(root :Datum) :Datum = {
-    root.children = root.`type` match {
-      case Type.LIST => resolveChildList(cortexId, root.id) // TODO: archive old bits
-      case Type.CHECKLIST => resolveChildList(cortexId, root.id) // TODO: archive old bits
-      case Type.JOURNAL => resolveChildList(cortexId, root.id) // TODO: just today's data
-      case Type.PAGE => resolveChildList(cortexId, root.id)
-      case _ => null
-    }
-    root
-  }
-
-  private def resolveChildList (cortexId :String, id :Long) =
-    java.util.Arrays.asList(db.loadChildren(cortexId, id) map(resolveChildren(cortexId)) :_*)
 
   private def toXML (datum :Datum) :Node = {
     import scalaj.collection.Imports._

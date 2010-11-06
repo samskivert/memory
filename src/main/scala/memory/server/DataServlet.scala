@@ -93,6 +93,12 @@ class DataServlet extends RemoteServiceServlet with DataService
     db.updateAccess(userId, cortexId, datumId, access)
   }
 
+  // from DataService
+  def loadJournalData (cortexId :String, journalId :Long, when :Long) :Datum = {
+    requireWriteAccess(cortexId) // TODO: allow read-only access (disabling creation)?
+    MemoryLogic.resolveJournalDatum(cortexId, journalId, when)
+  }
+
   override def doUnexpectedFailure (e :Throwable) {
     e.printStackTrace(System.err)
     super.doUnexpectedFailure(e)
