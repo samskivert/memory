@@ -107,10 +107,13 @@ public class ListDatumPanel extends DatumPanel
     {
         // no children editor, instead we use item editors
         editor.add(Widgets.newLabel("Items:", _rsrc.styles().editorTitle()));
+        FluentTable ctable = new FluentTable(0, 0, _rsrc.styles().width100());
+        editor.add(ctable);
         for (final Datum item : getChildData()) {
             final TextBox text = Widgets.newTextBox(item.text, -1, 20);
+            text.addStyleName(_rsrc.styles().width99());
             Button update = new Button("Update");
-            editor.add(Widgets.newRow(text, update));
+            ctable.add().setWidget(text, _rsrc.styles().width100()).right().setWidget(update);
             new ClickCallback<Void>(update, text) {
                 protected boolean callService () {
                     _text = text.getText().trim();
