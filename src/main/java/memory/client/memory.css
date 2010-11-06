@@ -30,6 +30,8 @@ ul {
   margin: 2px 2px 0px 0px;
   cursor: pointer;
   display: inline;
+  position: relative;
+  top: 1px;
 }
 
 .floatLeft {
@@ -145,4 +147,6 @@ ul {
 
 .pickerPopper {
   margin-right: 5px;
+  position: relative;
+  top: 1px;
 }
