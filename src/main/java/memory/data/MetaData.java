@@ -49,6 +49,19 @@ public class MetaData
     }
 
     /**
+     * Returns a long value for the specified key, or `defval` if no value exists.
+     */
+    public long get (String key, long defval)
+    {
+        String value = _data.get(key);
+        try {
+            return (value == null) ? defval : Long.parseLong(value);
+        } catch (NumberFormatException nfe) {
+            return defval;
+        }
+    }
+
+    /**
      * Returns a string value for the specified key, or `defval` if no value exists.
      */
     public String get (String key, String defval)
@@ -89,6 +102,14 @@ public class MetaData
      * Sets the specified key to the specified value.
      */
     public void set (String key, int value)
+    {
+        _data.put(key, String.valueOf(value));
+    }
+
+    /**
+     * Sets the specified key to the specified value.
+     */
+    public void set (String key, long value)
     {
         _data.put(key, String.valueOf(value));
     }
