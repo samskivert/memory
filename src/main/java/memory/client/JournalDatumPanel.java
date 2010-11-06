@@ -38,7 +38,7 @@ public class JournalDatumPanel extends ListDatumPanel
 
     @Override protected void addTitle (FlowPanel header)
     {
-        Image today = Widgets.newImage(_rsrc.todayImage(), _rsrc.styles().pickerPopper());
+        Image today = Widgets.newImage(_rsrc.todayImage(), _rsrc.styles().iconButton());
         header.add(Widgets.makeActionImage(today, "Go to today.", new ClickHandler() {
             public void onClick (ClickEvent event) {
                 changeDate(System.currentTimeMillis());
@@ -78,7 +78,7 @@ public class JournalDatumPanel extends ListDatumPanel
     protected Widget createPickerPopper ()
     {
         final Image popper = new Image(_rsrc.pickdateImage());
-        popper.addStyleName(_rsrc.styles().pickerPopper());
+        popper.addStyleName(_rsrc.styles().iconButton());
         Widgets.makeActionImage(popper, "Change date.", new ClickHandler() {
             public void onClick (ClickEvent event) {
                 if (_popup == null) {

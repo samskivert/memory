@@ -65,7 +65,7 @@ public abstract class DatumPanel extends FlowPanel
         // if we're top-level and a writer, add an access control icon
         if (_ctx.topLevel && _ctx.canWrite()) {
             final Image accessIcon = Widgets.newImage(
-                _rsrc.accessImage(), _rsrc.styles().cornerButton(), _rsrc.styles().floatRight());
+                _rsrc.accessImage(), _rsrc.styles().iconButton(), _rsrc.styles().floatRight());
             Widgets.makeActionImage(accessIcon, _msgs.accessTip(), new ClickHandler() {
                 public void onClick (ClickEvent event) {
                     AccessPopup.show(_ctx, _datum, accessIcon);
@@ -103,7 +103,7 @@ public abstract class DatumPanel extends FlowPanel
         removeStyleName(_rsrc.styles().view());
         addStyleName(_rsrc.styles().editor());
         Image close = Widgets.newImage(_rsrc.closeImage(), _rsrc.styles().floatRight(),
-                                       _rsrc.styles().cornerButton());
+                                       _rsrc.styles().iconButton());
         Widgets.makeActionImage(close, _msgs.closeTip(), new ClickHandler() {
             public void onClick (ClickEvent event) {
                 showContents();
@@ -122,7 +122,7 @@ public abstract class DatumPanel extends FlowPanel
 
     protected void addEditButton (FlowPanel header)
     {
-        Image button = Widgets.newImage(_rsrc.editImage(), _rsrc.styles().cornerButton());
+        Image button = Widgets.newImage(_rsrc.editImage(), _rsrc.styles().iconButton());
         Widgets.makeActionImage(button, _msgs.editTip(), new ClickHandler() {
             public void onClick (ClickEvent event) {
                 showEditor();

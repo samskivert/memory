@@ -26,8 +26,8 @@ ul {
   margin-bottom: 5px;
 }
 
-.cornerButton {
-  margin: 2px 2px 0px 0px;
+.iconButton {
+  margin-right: 3px;
   cursor: pointer;
   display: inline;
   position: relative;
@@ -143,10 +143,4 @@ ul {
 
 .nonExistNote {
   margin: 10px 0px;
-}
-
-.pickerPopper {
-  margin: 0px 3px 0px 1px;
-  position: relative;
-  top: 1px;
 }

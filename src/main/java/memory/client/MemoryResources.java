@@ -14,7 +14,7 @@ public interface MemoryResources extends ClientBundle
 {
     /** Defines our CSS styles. */
     public interface Styles extends CssResource {
-        String cornerButton ();
+        String iconButton ();
         String floatLeft ();
         String floatRight ();
         String popup ();
@@ -43,7 +43,6 @@ public interface MemoryResources extends ClientBundle
         String column33 ();
 
         String nonExistNote ();
-        String pickerPopper ();
     }
 
     @Source("memory.css")
