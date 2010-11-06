@@ -38,14 +38,28 @@ public class JournalDatumPanel extends ListDatumPanel
 
     @Override protected void addTitle (FlowPanel header)
     {
-        Image today = Widgets.newImage(_rsrc.todayImage(), _rsrc.styles().iconButton());
+        header.add(_popper = createPickerPopper());
+        header.add(_title = Widgets.newLabel("", _rsrc.styles().title()));
+
+        Image fwdday = Widgets.newImage(_rsrc.fwddayImage(), _rsrc.styles().rightIconButton());
+        header.add(Widgets.makeActionImage(fwdday, "Forward one day.", new ClickHandler() {
+            public void onClick (ClickEvent event) {
+                changeDate(_curdate.getTime()+24*60*60*1000);
+            }
+        }));
+        Image today = Widgets.newImage(_rsrc.todayImage(), _rsrc.styles().rightIconButton());
         header.add(Widgets.makeActionImage(today, "Go to today.", new ClickHandler() {
             public void onClick (ClickEvent event) {
                 changeDate(System.currentTimeMillis());
             }
         }));
-        header.add(_popper = createPickerPopper());
-        header.add(_title = Widgets.newLabel("", _rsrc.styles().title()));
+        Image backday = Widgets.newImage(_rsrc.backdayImage(), _rsrc.styles().rightIconButton());
+        header.add(Widgets.makeActionImage(backday, "Backward one day.", new ClickHandler() {
+            public void onClick (ClickEvent event) {
+                changeDate(_curdate.getTime()-24*60*60*1000);
+            }
+        }));
+
         dateUpdated(new Date(Long.parseLong(_today.title)));
     }
 
@@ -73,6 +87,7 @@ public class JournalDatumPanel extends ListDatumPanel
     {
         _curdate = when;
         _title.setText(_datum.title + " - " + _yfmt.format(_curdate));
+        _title.setTitle(""+when);
     }
 
     protected Widget createPickerPopper ()

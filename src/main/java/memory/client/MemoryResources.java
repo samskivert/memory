@@ -15,6 +15,7 @@ public interface MemoryResources extends ClientBundle
     /** Defines our CSS styles. */
     public interface Styles extends CssResource {
         String iconButton ();
+        String rightIconButton ();
         String floatLeft ();
         String floatRight ();
         String popup ();
@@ -62,4 +63,10 @@ public interface MemoryResources extends ClientBundle
 
     @Source("today.png")
     ImageResource todayImage ();
+
+    @Source("fwdday.png")
+    ImageResource fwddayImage ();
+
+    @Source("backday.png")
+    ImageResource backdayImage ();
 }
