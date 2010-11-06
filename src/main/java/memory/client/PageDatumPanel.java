@@ -107,6 +107,7 @@ public class PageDatumPanel extends DatumPanel
             }
         };
         editor.add(Widgets.newRow(break1, break2, update));
+        editor.add(Widgets.newLabel(_msgs.breakTip()));
     }
 
     protected void addOrderEditor (FlowPanel editor)
