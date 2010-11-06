@@ -72,7 +72,7 @@ public class JournalDatumPanel extends ListDatumPanel
     protected void dateUpdated (Date when)
     {
         _curdate = when;
-        _title.setText(_yfmt.format(_curdate));
+        _title.setText(_datum.title + " - " + _yfmt.format(_curdate));
     }
 
     protected Widget createPickerPopper ()
