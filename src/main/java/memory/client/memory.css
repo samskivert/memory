@@ -114,6 +114,10 @@ ul {
   padding: 5px;
 }
 
+.noitems {
+  color: #666666;
+}
+
 .columnCont {
   clear: both;
   float: left;

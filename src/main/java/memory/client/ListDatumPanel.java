@@ -9,9 +9,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -30,7 +33,26 @@ import memory.data.Type;
  */
 public class ListDatumPanel extends DatumPanel
 {
-    protected void addContents ()
+    @Override protected void addTitle (FlowPanel header)
+    {
+        super.addTitle(header);
+        if (autoHideAdd()) {
+            addAddIcon(header);
+        }
+    }
+
+    protected void addAddIcon (FlowPanel header)
+    {
+        Image add = Widgets.newImage(_rsrc.addImage(), _rsrc.styles().rightIconButton());
+        header.add(Widgets.makeActionImage(add, "Add item.", new ClickHandler() {
+            public void onClick (ClickEvent event) {
+                _addui.setVisible(true);
+                _itext.setFocus(true);
+            }
+        }));
+    }
+
+    @Override protected void addContents ()
     {
         // sort the data and add a metadata record for each child
         Collections.sort(getChildData(), Datum.BY_WHEN);
@@ -41,16 +63,19 @@ public class ListDatumPanel extends DatumPanel
         addItems();
 
         if (_ctx.canWrite()) {
-            final TextBox item = Widgets.newTextBox("", -1, 20);
-            item.addStyleName(_rsrc.styles().width99());
+            _itext = Widgets.newTextBox("", -1, 20);
+            _itext.addStyleName(_rsrc.styles().width99());
             final Button add = new Button("Add");
-            add(new FluentTable(0, 0, _rsrc.styles().width100()).
-                add().setWidget(item, _rsrc.styles().width100()).
-                right().setWidget(add).table());
+            _addui = new FluentTable(0, 0, _rsrc.styles().width100());
+            _addui.add().setWidget(_itext, _rsrc.styles().width100()).right().setWidget(add);
+            if (autoHideAdd()) {
+                _addui.setVisible(false);
+            }
+            add(_addui);
 
-            new ClickCallback<Long>(add, item) {
+            new ClickCallback<Long>(add, _itext) {
                 protected boolean callService () {
-                    _item = createChildDatum(Type.WIKI, "", item.getText().trim());
+                    _item = createChildDatum(Type.WIKI, "", _itext.getText().trim());
                     _datasvc.createDatum(_ctx.cortexId, _item, this);
                     return true;
                 }
@@ -59,8 +84,11 @@ public class ListDatumPanel extends DatumPanel
                     getChildData().add(_item);
                     _metamap.put(_item.id, new MetaData(_item.meta));
                     Widget row = addItem(_items, _item);
-                    item.setText("");
+                    _itext.setText("");
                     Popups.infoNear(_msgs.datumCreated(), row);
+                    if (autoHideAdd()) {
+                        _addui.setVisible(false);
+                    }
                     return true;
                 }
                 protected Datum _item;
@@ -68,8 +96,14 @@ public class ListDatumPanel extends DatumPanel
         }
     }
 
+    protected boolean autoHideAdd ()
+    {
+        return !_ctx.topLevel;
+    }
+
     protected void addItems ()
     {
+        add(_noitems = Widgets.newLabel("<no items>", _rsrc.styles().noitems()));
         _items = new FlowPanel();
         for (Datum child : getChildData()) {
             addItem(_items, child);
@@ -83,6 +117,7 @@ public class ListDatumPanel extends DatumPanel
         ilabel.setTitle(""+item.id);
         ilabel.addStyleName(_rsrc.styles().listItem());
         items.add(ilabel);
+        _noitems.setVisible(false);
         return ilabel;
     }
 
@@ -131,6 +166,9 @@ public class ListDatumPanel extends DatumPanel
         }
     }
 
+    protected Widget _noitems;
+    protected TextBox _itext;
+    protected FluentTable _addui;
     protected FlowPanel _items;
     protected Map<Long, MetaData> _metamap = new HashMap<Long, MetaData>();
 }

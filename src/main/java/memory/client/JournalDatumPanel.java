@@ -63,6 +63,11 @@ public class JournalDatumPanel extends ListDatumPanel
         dateUpdated(new Date(Long.parseLong(_today.title)));
     }
 
+    @Override protected boolean autoHideAdd ()
+    {
+        return false; // we leave the add UI always showing
+    }
+
     @Override protected List<Datum> getChildData ()
     {
         return _today.children;
