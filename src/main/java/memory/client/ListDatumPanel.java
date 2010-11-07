@@ -184,49 +184,12 @@ public class ListDatumPanel extends DatumPanel
 
         for (final Datum item : getOrderedChildren()) {
             final Image drag = allowChildReorder() ? DnDUtil.newDragIcon() : null;
-            final Widget iedit = makeItemEditor(item, drag, false);
+            final Widget iedit = new ItemEditor(item, drag);
             items.add(iedit);
             if (allowChildReorder()) {
                 dragger.makeDraggable(iedit, drag);
             }
         }
-    }
-
-    protected ItemEditor makeItemEditor (final Datum item, Image drag, boolean focusEditor)
-    {
-        final ItemEditor row = new ItemEditor(item, drag);
-
-        // wire up our update callback
-        new ClickCallback<Void>(row.update, row.text) {
-            protected boolean callService () {
-                _text = row.text.getText().trim();
-                _datasvc.updateDatum(_ctx.cortexId, item.id,
-                                     Datum.Field.TEXT, FieldValue.of(_text), this);
-                return true;
-            }
-            protected boolean gotResult (Void result) {
-                item.text = _text;
-                Popups.infoNear("Item updated.", getPopupNear());
-                return true;
-            }
-            protected String _text;
-        };
-
-        // wire up our delete callback
-        new ClickCallback<Void>(row.delete) {
-            protected boolean callService () {
-                _datasvc.deleteDatum(_ctx.cortexId, item.id, this);
-                return true;
-            }
-            protected boolean gotResult (Void result) {
-                Popups.infoNear("Item deleted.", row); // TODO: add undo?
-                getChildData().remove(item);
-                row.removeFromParent();
-                return true;
-            }
-        };
-
-        return row;
     }
 
     protected boolean allowChildReorder ()
@@ -273,7 +236,11 @@ public class ListDatumPanel extends DatumPanel
         }
 
         protected void displayEditor () {
-            ItemEditor row = makeItemEditor(_item, null, true);
+            ItemEditor row = new ItemEditor(_item, null) {
+                protected void onUpdated () {
+                    displayItem();
+                }
+            };
             setWidget(row);
             row.text.setFocus(true);
             row.text.addKeyDownHandler(new KeyDownHandler() {
@@ -288,16 +255,15 @@ public class ListDatumPanel extends DatumPanel
         protected Datum _item;
     }
 
-    protected static class ItemEditor extends StretchBox
+    protected class ItemEditor extends StretchBox
     {
         public final Datum item;
         public final Image delete;
         public final TextBox text;
         public final Button update;
 
-        public ItemEditor (Datum item, Image drag) {
-            this.item = item;
-
+        public ItemEditor (Datum eitem, Image drag) {
+            item = eitem;
             delete = Widgets.newImage(_rsrc.deleteImage(), _rsrc.styles().iconButton());
             delete.setTitle("Delete item.");
             text = Widgets.newTextBox(item.text, -1, 20);
@@ -305,6 +271,40 @@ public class ListDatumPanel extends DatumPanel
 
             setWidgets(1, delete, text, update, drag);
             gaps(9);
+
+            // wire up our update callback
+            new ClickCallback<Void>(update, text) {
+                protected boolean callService () {
+                    _text = text.getText().trim();
+                    _datasvc.updateDatum(_ctx.cortexId, item.id,
+                                         Datum.Field.TEXT, FieldValue.of(_text), this);
+                    return true;
+                }
+                protected boolean gotResult (Void result) {
+                    item.text = _text;
+                    onUpdated();
+                    return true;
+                }
+                protected String _text;
+            };
+
+            // wire up our delete callback
+            new ClickCallback<Void>(delete) {
+                protected boolean callService () {
+                    _datasvc.deleteDatum(_ctx.cortexId, item.id, this);
+                    return true;
+                }
+                protected boolean gotResult (Void result) {
+                    getChildData().remove(item);
+                    Popups.infoNear("Item deleted.", getPopupNear()); // TODO: add undo?
+                    removeFromParent();
+                    return true;
+                }
+            };
+        }
+
+        protected void onUpdated () {
+            Popups.infoNear("Item updated.", this);
         }
     }
 

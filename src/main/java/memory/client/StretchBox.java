@@ -49,7 +49,7 @@ public class StretchBox extends FlowPanel
         addStyleName(_rsrc.styles().stretchBox());
     }
 
-    protected void setWidgets (int stretchIdx, Widgets... widgets)
+    protected void setWidgets (int stretchIdx, Widget... widgets)
     {
         _stretch = widgets[stretchIdx];
         for (Widget w : widgets) {
