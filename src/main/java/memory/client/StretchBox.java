@@ -4,8 +4,7 @@
 package memory.client;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.DeferredCommand;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -17,14 +16,8 @@ public class StretchBox extends FlowPanel
 {
     public StretchBox (int stretchIdx, Widget... widgets)
     {
-        addStyleName(_rsrc.styles().stretchBox());
-        _stretch = widgets[stretchIdx];
-        for (Widget w : widgets) {
-            if (w != null) {
-                add(w);
-            }
-        }
-        queueUpdateStretcher();
+        this();
+        setWidgets(stretchIdx, widgets);
     }
 
     @Override // from Widget
@@ -48,9 +41,28 @@ public class StretchBox extends FlowPanel
         return this;
     }
 
+    /**
+     * Derived classes can override this and call {@link #setWidgets} if desired.
+     */
+    protected StretchBox ()
+    {
+        addStyleName(_rsrc.styles().stretchBox());
+    }
+
+    protected void setWidgets (int stretchIdx, Widgets... widgets)
+    {
+        _stretch = widgets[stretchIdx];
+        for (Widget w : widgets) {
+            if (w != null) {
+                add(w);
+            }
+        }
+        queueUpdateStretcher();
+    }
+
     protected void queueUpdateStretcher ()
     {
-        DeferredCommand.addCommand(new Command() {
+        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             public void execute () {
                 if (isAttached() && isVisible()) {
                     updateStretcher();
