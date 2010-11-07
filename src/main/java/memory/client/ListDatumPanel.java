@@ -82,7 +82,7 @@ public class ListDatumPanel extends DatumPanel
             _itext = Widgets.newTextBox("", -1, 20);
             _itext.addStyleName(_rsrc.styles().width99());
             final Button add = new Button("Add");
-            _addui = new StretchBox(0, _itext, add).gaps(6);
+            _addui = new StretchBox(0, _itext, add).gaps(8);
             add(_addui);
             maybeHideAddUI();
 
