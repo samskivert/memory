@@ -13,11 +13,20 @@ import java.util.Map;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.DoubleClickEvent;
+import com.google.gwt.event.dom.client.DoubleClickHandler;
+import com.google.gwt.event.dom.client.HasDoubleClickHandlers;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -59,7 +68,8 @@ public class ListDatumPanel extends DatumPanel
             public void onClick (ClickEvent event) {
                 boolean isViz = _addui.isVisible();
                 _addui.setVisible(!isViz);
-                if (isViz) {
+                _hideTimer.cancel();
+                if (!isViz) {
                     _itext.setFocus(true);
                 }
             }
@@ -104,7 +114,7 @@ public class ListDatumPanel extends DatumPanel
                     Widget row = addItem(_items, _item);
                     _itext.setText("");
                     Popups.infoNear(_msgs.datumCreated(), row);
-                    maybeHideAddUI();
+                    _hideTimer.schedule(10000);
                     return true;
                 }
                 protected Datum _item;
@@ -119,7 +129,7 @@ public class ListDatumPanel extends DatumPanel
 
     protected void maybeHideAddUI ()
     {
-        if (autoHideAdd()) {
+        if (autoHideAdd() && _itext.getText().trim().length() == 0) {
             _addui.setVisible(false);
         }
     }
@@ -133,7 +143,7 @@ public class ListDatumPanel extends DatumPanel
 
     protected Widget addItem (FlowPanel items, Datum item)
     {
-        Widget iwidget = createItemWidget(item);
+        Widget iwidget = new EditableItemLabel(item);
         items.add(iwidget);
         _noitems.setVisible(false);
         return iwidget;
@@ -173,47 +183,50 @@ public class ListDatumPanel extends DatumPanel
         });
 
         for (final Datum item : getOrderedChildren()) {
-            final Image delete = Widgets.newImage(_rsrc.deleteImage(), _rsrc.styles().iconButton());
-            delete.setTitle("Delete item.");
-            final TextBox text = Widgets.newTextBox(item.text, -1, 20);
-            final Button update = new Button("Save");
             final Image drag = allowChildReorder() ? DnDUtil.newDragIcon() : null;
-            final Widget box = new ItemRow(item, 1, delete, text, update, drag).gaps(9);
-            items.add(box);
+            final Widget iedit = makeItemEditor(item, drag, false);
+            items.add(iedit);
             if (allowChildReorder()) {
-                dragger.makeDraggable(box, drag);
+                dragger.makeDraggable(iedit, drag);
             }
-
-            // wire up our update callback
-            new ClickCallback<Void>(update, text) {
-                protected boolean callService () {
-                    _text = text.getText().trim();
-                    _datasvc.updateDatum(_ctx.cortexId, item.id,
-                                         Datum.Field.TEXT, FieldValue.of(_text), this);
-                    return true;
-                }
-                protected boolean gotResult (Void result) {
-                    item.text = _text;
-                    Popups.infoNear("Item updated.", getPopupNear());
-                    return true;
-                }
-                protected String _text;
-            };
-
-            // wire up our delete callback
-            new ClickCallback<Void>(delete) {
-                protected boolean callService () {
-                    _datasvc.deleteDatum(_ctx.cortexId, item.id, this);
-                    return true;
-                }
-                protected boolean gotResult (Void result) {
-                    Popups.infoNear("Item deleted.", delete); // TODO: add undo?
-                    getChildData().remove(item);
-                    box.removeFromParent();
-                    return true;
-                }
-            };
         }
+    }
+
+    protected ItemEditor makeItemEditor (final Datum item, Image drag, boolean focusEditor)
+    {
+        final ItemEditor row = new ItemEditor(item, drag);
+
+        // wire up our update callback
+        new ClickCallback<Void>(row.update, row.text) {
+            protected boolean callService () {
+                _text = row.text.getText().trim();
+                _datasvc.updateDatum(_ctx.cortexId, item.id,
+                                     Datum.Field.TEXT, FieldValue.of(_text), this);
+                return true;
+            }
+            protected boolean gotResult (Void result) {
+                item.text = _text;
+                Popups.infoNear("Item updated.", getPopupNear());
+                return true;
+            }
+            protected String _text;
+        };
+
+        // wire up our delete callback
+        new ClickCallback<Void>(row.delete) {
+            protected boolean callService () {
+                _datasvc.deleteDatum(_ctx.cortexId, item.id, this);
+                return true;
+            }
+            protected boolean gotResult (Void result) {
+                Popups.infoNear("Item deleted.", row); // TODO: add undo?
+                getChildData().remove(item);
+                row.removeFromParent();
+                return true;
+            }
+        };
+
+        return row;
     }
 
     protected boolean allowChildReorder ()
@@ -225,7 +238,7 @@ public class ListDatumPanel extends DatumPanel
     {
         List<Long> ids = new ArrayList<Long>();
         for (int ii = 0, ll = items.getWidgetCount(); ii < ll; ii++) {
-            ids.add(((ItemRow)items.getWidget(ii)).item.id);
+            ids.add(((ItemEditor)items.getWidget(ii)).item.id);
         }
         _meta.setIds(ORDER_KEY, ids);
         _datasvc.updateDatum(
@@ -237,15 +250,70 @@ public class ListDatumPanel extends DatumPanel
         });
     }
 
-    protected static class ItemRow extends StretchBox
+    protected class EditableItemLabel extends SimplePanel
+        implements HasDoubleClickHandlers
+    {
+        public EditableItemLabel (Datum item) {
+            _item = item;
+            displayItem();
+            addDoubleClickHandler(new DoubleClickHandler() {
+                public void onDoubleClick (DoubleClickEvent event) {
+                    displayEditor();
+                }
+            });
+        }
+
+        // from interface HasDoubleClickHandlers
+        public HandlerRegistration addDoubleClickHandler (DoubleClickHandler handler) {
+            return addDomHandler(handler, DoubleClickEvent.getType());
+        }
+
+        protected void displayItem () {
+            setWidget(createItemWidget(_item));
+        }
+
+        protected void displayEditor () {
+            ItemEditor row = makeItemEditor(_item, null, true);
+            setWidget(row);
+            row.text.setFocus(true);
+            row.text.addKeyDownHandler(new KeyDownHandler() {
+                public void onKeyDown (KeyDownEvent event) {
+                    if (event.getNativeKeyCode() == KeyCodes.KEY_ESCAPE) {
+                        displayItem();
+                    }
+                }
+            });
+        }
+
+        protected Datum _item;
+    }
+
+    protected static class ItemEditor extends StretchBox
     {
         public final Datum item;
+        public final Image delete;
+        public final TextBox text;
+        public final Button update;
 
-        public ItemRow (Datum item, int stretchIdx, Widget... widgets) {
-            super(stretchIdx, widgets);
+        public ItemEditor (Datum item, Image drag) {
             this.item = item;
+
+            delete = Widgets.newImage(_rsrc.deleteImage(), _rsrc.styles().iconButton());
+            delete.setTitle("Delete item.");
+            text = Widgets.newTextBox(item.text, -1, 20);
+            update = new Button("Save");
+
+            setWidgets(1, delete, text, update, drag);
+            gaps(9);
         }
     }
+
+    /** Used to hide the add UI after some time has elapsed. */
+    protected Timer _hideTimer = new Timer() {
+        public void run () {
+            maybeHideAddUI();
+        }
+    };
 
     protected Widget _noitems;
     protected TextBox _itext;
