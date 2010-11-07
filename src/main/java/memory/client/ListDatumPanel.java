@@ -57,8 +57,11 @@ public class ListDatumPanel extends DatumPanel
         Image add = Widgets.newImage(_rsrc.addImage(), _rsrc.styles().rightIconButton());
         header.add(Widgets.makeActionImage(add, "Add item.", new ClickHandler() {
             public void onClick (ClickEvent event) {
-                _addui.setVisible(true);
-                _itext.setFocus(true);
+                boolean isViz = _addui.isVisible();
+                _addui.setVisible(!isViz);
+                if (isViz) {
+                    _itext.setFocus(true);
+                }
             }
         }));
     }
