@@ -30,6 +30,7 @@ public interface MemoryResources extends ClientBundle
         String textTitle ();
         String listItem ();
         String insetBox ();
+        String stretchBox ();
         String noitems ();
 
         String width98 ();
@@ -73,4 +74,10 @@ public interface MemoryResources extends ClientBundle
 
     @Source("add.png")
     ImageResource addImage ();
+
+    @Source("save.png")
+    ImageResource saveImage ();
+
+    @Source("delete.png")
+    ImageResource deleteImage ();
 }

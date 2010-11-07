@@ -88,4 +88,7 @@ public interface DataService extends RemoteService
     /** Loads the journal data for the specified date. */
     Datum loadJournalData (String cortexId, long journalId, long when)
         throws ServiceException;
+
+    /** Deletes the specified datum. */
+    void deleteDatum (String cortextId, long id);
 }

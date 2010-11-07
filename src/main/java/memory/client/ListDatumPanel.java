@@ -18,7 +18,6 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
-import com.threerings.gwt.ui.FluentTable;
 import com.threerings.gwt.ui.Popups;
 import com.threerings.gwt.ui.Widgets;
 import com.threerings.gwt.util.ClickCallback;
@@ -66,16 +65,18 @@ public class ListDatumPanel extends DatumPanel
             _itext = Widgets.newTextBox("", -1, 20);
             _itext.addStyleName(_rsrc.styles().width99());
             final Button add = new Button("Add");
-            _addui = new FluentTable(0, 0, _rsrc.styles().width100());
-            _addui.add().setWidget(_itext, _rsrc.styles().width100()).right().setWidget(add);
-            if (autoHideAdd()) {
-                _addui.setVisible(false);
-            }
+            _addui = new StretchBox(0, _itext, add).gaps(6);
             add(_addui);
+            maybeHideAddUI();
 
             new ClickCallback<Long>(add, _itext) {
                 protected boolean callService () {
-                    _item = createChildDatum(Type.WIKI, "", _itext.getText().trim());
+                    String text = _itext.getText().trim();
+                    if (text.length() == 0) {
+                        maybeHideAddUI();
+                        return false;
+                    }
+                    _item = createChildDatum(Type.WIKI, "", text);
                     _datasvc.createDatum(_ctx.cortexId, _item, this);
                     return true;
                 }
@@ -86,9 +87,7 @@ public class ListDatumPanel extends DatumPanel
                     Widget row = addItem(_items, _item);
                     _itext.setText("");
                     Popups.infoNear(_msgs.datumCreated(), row);
-                    if (autoHideAdd()) {
-                        _addui.setVisible(false);
-                    }
+                    maybeHideAddUI();
                     return true;
                 }
                 protected Datum _item;
@@ -99,6 +98,13 @@ public class ListDatumPanel extends DatumPanel
     protected boolean autoHideAdd ()
     {
         return !_ctx.topLevel;
+    }
+
+    protected void maybeHideAddUI ()
+    {
+        if (autoHideAdd()) {
+            _addui.setVisible(false);
+        }
     }
 
     protected void addItems ()
@@ -142,13 +148,15 @@ public class ListDatumPanel extends DatumPanel
     {
         // no children editor, instead we use item editors
         editor.add(Widgets.newLabel("Items:", _rsrc.styles().editorTitle()));
-        FluentTable ctable = new FluentTable(0, 0, _rsrc.styles().width100());
-        editor.add(ctable);
         for (final Datum item : getChildData()) {
+            final Image delete = Widgets.newImage(_rsrc.deleteImage(), _rsrc.styles().iconButton());
+            delete.setTitle("Delete item.");
             final TextBox text = Widgets.newTextBox(item.text, -1, 20);
-            text.addStyleName(_rsrc.styles().width99());
-            Button update = new Button("Update");
-            ctable.add().setWidget(text, _rsrc.styles().width100()).right().setWidget(update);
+            final Button update = new Button("Save");
+            final StretchBox box = new StretchBox(1, delete, text, update).gaps(9);
+            editor.add(box);
+
+            // wire up our update callback
             new ClickCallback<Void>(update, text) {
                 protected boolean callService () {
                     _text = text.getText().trim();
@@ -163,12 +171,26 @@ public class ListDatumPanel extends DatumPanel
                 }
                 protected String _text;
             };
+
+            // wire up our delete callback
+            new ClickCallback<Void>(delete) {
+                protected boolean callService () {
+                    _datasvc.deleteDatum(_ctx.cortexId, item.id, this);
+                    return true;
+                }
+                protected boolean gotResult (Void result) {
+                    Popups.infoNear("Item deleted.", delete); // TODO: add undo?
+                    getChildData().remove(item);
+                    box.removeFromParent();
+                    return true;
+                }
+            };
         }
     }
 
     protected Widget _noitems;
     protected TextBox _itext;
-    protected FluentTable _addui;
+    protected Widget _addui;
     protected FlowPanel _items;
     protected Map<Long, MetaData> _metamap = new HashMap<Long, MetaData>();
 }

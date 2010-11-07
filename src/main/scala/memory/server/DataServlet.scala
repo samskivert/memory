@@ -99,6 +99,12 @@ class DataServlet extends RemoteServiceServlet with DataService
     MemoryLogic.resolveJournalDatum(cortexId, journalId, when)
   }
 
+  // from DataService
+  def deleteDatum (cortexId :String, id :Long) {
+    requireWriteAccess(cortexId)
+    db.deleteDatum(cortexId, id);
+  }
+
   override def doUnexpectedFailure (e :Throwable) {
     e.printStackTrace(System.err)
     super.doUnexpectedFailure(e)

@@ -65,4 +65,7 @@ trait DB
   /** Creates a new datum and fills in its {@link Datum#id} field.
    * @return the newly assigned id. */
   def createDatum (cortexId :String, datum :Datum) :Long
+
+  /** Deletes the specified datum. */
+  def deleteDatum (cortexId :String, id :Long) :Unit
 }

@@ -114,6 +114,10 @@ ul {
   padding: 5px;
 }
 
+.stretchBox {
+  white-space: nowrap;
+}
+
 .noitems {
   color: #666666;
 }

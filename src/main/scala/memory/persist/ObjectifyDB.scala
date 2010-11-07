@@ -155,6 +155,13 @@ object ObjectifyDB extends DB
     }
   }
 
+  // from trait DB
+  def deleteDatum (cortexId :String, id :Long) {
+    transaction { obj =>
+      obj.delete(datumKey(cortexId, id))
+    }
+  }
+
   private def cortexRow (id :String, rootId :Long, ownerId :String) = {
     val row = new CortexRow
     row.id = id

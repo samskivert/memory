@@ -15,6 +15,11 @@ import memory.data.FieldValue;
 public interface DataServiceAsync
 {
     /**
+     * The async version of {@link DataService#loadJournalData}.
+     */
+    void loadJournalData (String cortexId, long journalId, long when, AsyncCallback<Datum> callback);
+
+    /**
      * The async version of {@link DataService#loadAccountInfo}.
      */
     void loadAccountInfo (AsyncCallback<DataService.AccountResult> callback);
@@ -55,7 +60,7 @@ public interface DataServiceAsync
     void updateAccess (String userId, String cortexId, long datumId, Access access, AsyncCallback<Void> callback);
 
     /**
-     * The async version of {@link DataService#loadJournalData}.
+     * The async version of {@link DataService#deleteDatum}.
      */
-    void loadJournalData (String arg0, long arg1, long arg2, AsyncCallback<Datum> callback);
+    void deleteDatum (String cortextId, long id, AsyncCallback<Void> callback);
 }
