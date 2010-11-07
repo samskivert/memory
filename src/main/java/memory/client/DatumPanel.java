@@ -47,6 +47,7 @@ public abstract class DatumPanel extends FlowPanel
             panel.init(ctx, datum);
             return panel;
         } catch (Exception e) {
+            GWT.log("Error generating UI for " + datum.id, e);
             return Widgets.newLabel("Error [id=" + datum.id + ", errror=" + e + "]");
         }
     }
