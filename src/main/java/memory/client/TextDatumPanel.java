@@ -25,7 +25,8 @@ public abstract class TextDatumPanel extends DatumPanel
         super.addEditor(editor);
         editor.add(Widgets.newShim(5, 5));
 
-        final TextArea text = Widgets.newTextArea(_datum.text, -1, 30);
+        int height = Math.max(5, Math.min(30, countNewlines(_datum.text)+2));
+        final TextArea text = Widgets.newTextArea(_datum.text, -1, height);
         text.addStyleName(_rsrc.styles().width98());
         editor.add(text);
 
@@ -50,5 +51,14 @@ public abstract class TextDatumPanel extends DatumPanel
     @Override protected void addChildrenEditor (FlowPanel editor)
     {
         // no children of text datum
+    }
+
+    protected static int countNewlines (String text)
+    {
+        int nl = 0, nlidx = -1;
+        while ((nlidx = text.indexOf("\n", nlidx+1)) != -1) {
+            nl++;
+        }
+        return nl;
     }
 }
