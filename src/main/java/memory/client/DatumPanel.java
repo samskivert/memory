@@ -5,6 +5,9 @@ package memory.client;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -110,7 +113,7 @@ public abstract class DatumPanel extends FlowPanel
             }
         });
         add(close);
-        FlowPanel editor = Widgets.newFlowPanel(_rsrc.styles().insetBox());
+        FlowPanel editor = Widgets.newFlowPanel(_rsrc.styles().editorBox());
         addEditor(editor);
         add(editor);
     }
@@ -155,53 +158,86 @@ public abstract class DatumPanel extends FlowPanel
 
     protected void addEditor (FlowPanel editor)
     {
-        addBitsEditor(editor);
-        addChildrenEditor(editor);
-    }
+        FluentTable bits = new FluentTable(0, 1);
+        editor.add(bits);
+        addBitsEditors(editor, bits);
 
-    protected void addBitsEditor (FlowPanel editor)
-    {
-        final TextBox title = Widgets.newTextBox(_datum.title, Datum.MAX_TITLE_LENGTH, 20);
-        title.addStyleName(_rsrc.styles().width98());
-        final EnumListBox<Type> type = createTypeListBox();
-        type.setSelectedValue(_datum.type);
-        final NumberTextBox parentId = NumberTextBox.newIntBox(10);
-        parentId.setNumber(_datum.parentId);
+        final Type otype = _datum.type;
         Button update = new Button("Update");
-
+        update.addStyleName(_rsrc.styles().editorUpdateButton());
         new ClickCallback<Void>(update) {
             protected boolean callService () {
-                _title = title.getText().trim();
-                _type = type.getSelectedValue();
-                _parentId = parentId.getNumber().longValue();
-                _datasvc.updateDatum(_ctx.cortexId, _datum.id,
-                                     Datum.Field.TITLE, FieldValue.of(_title),
-                                     Datum.Field.TYPE, FieldValue.of(_type),
-                                     Datum.Field.PARENT_ID, FieldValue.of(_parentId), this);
+                Map<Datum.Field, FieldValue> updates = new HashMap<Datum.Field, FieldValue>();
+                for (BitsUpdater updater : _updaters) {
+                    updater.addUpdates(updates);
+                }
+                _datasvc.updateDatum(_ctx.cortexId, _datum.id, updates, this);
                 return true;
             }
             protected boolean gotResult (Void result) {
-                Popups.infoNear(_msgs.datumUpdated(), getPopupNear());
-                title.setText(_title);
-                _datum.title = _title;
-                _datum.parentId = _parentId;
-                if (_datum.type != _type) {
-                    _datum.type = _type;
-                    showEditor(); // reload the editor as our type changed
+                for (BitsUpdater updater : _updaters) {
+                    updater.applyUpdates();
                 }
+                showContents();
                 return true;
             }
             protected String _title;
+        };
+        editor.add(update);
+
+        addChildrenEditor(editor);
+    }
+
+    protected void addBitsEditors (FlowPanel editor, FluentTable bits)
+    {
+        addTitleEditor(bits);
+        addTypeParentEditor(bits);
+    }
+
+    protected void addTitleEditor (FluentTable bits)
+    {
+        final TextBox title = Widgets.newTextBox(_datum.title, Datum.MAX_TITLE_LENGTH, 20);
+        title.addStyleName(_rsrc.styles().width100());
+        bits.add().setText("Title:", _rsrc.styles().editorLabel()).
+            right().setWidget(title).setColSpan(3);
+
+        _updaters.add(new BitsUpdater() {
+            public void addUpdates (Map<Datum.Field, FieldValue> updates) {
+                _title = title.getText().trim();
+                updates.put(Datum.Field.TITLE, FieldValue.of(_title));
+            }
+            public void applyUpdates () {
+                title.setText(_title);
+                _datum.title = _title;
+            }
+            protected String _title;
+        });
+    }
+
+    protected void addTypeParentEditor (FluentTable bits)
+    {
+        final EnumListBox<Type> type = createTypeListBox();
+        type.setSelectedValue(_datum.type);
+        final NumberTextBox parentId = NumberTextBox.newIntBox(10);
+        parentId.addStyleName(_rsrc.styles().width100());
+        parentId.setNumber(_datum.parentId);
+        bits.add().setText("Type:", _rsrc.styles().editorLabel()).right().setWidget(type).
+            right().setText("Parent:", _rsrc.styles().editorLabel()).right().setWidget(parentId);
+
+        _updaters.add(new BitsUpdater() {
+            public void addUpdates (Map<Datum.Field, FieldValue> updates) {
+                _type = type.getSelectedValue();
+                updates.put(Datum.Field.TYPE, FieldValue.of(_type));
+                _parentId = parentId.getNumber().longValue();
+                updates.put(Datum.Field.PARENT_ID, FieldValue.of(_parentId));
+            }
+            public void applyUpdates () {
+                _datum.parentId = _parentId;
+                _datum.type = _type;
+            }
             protected Type _type;
             protected long _parentId;
-        };
-
-        FluentTable bits = new FluentTable(0, 5);
-        bits.add().setText("Title:").right().setWidget(title).setColSpan(3);
-        bits.add().setText("Type:").right().setWidget(type).
-            right().setText("Parent:").right().setWidget(parentId).
-            right().setWidget(update);
-        editor.add(bits);
+        });
     }
 
     protected void addChildrenEditor (FlowPanel editor)
@@ -217,7 +253,7 @@ public abstract class DatumPanel extends FlowPanel
         final EnumListBox<Type> type = createTypeListBox();
         final TextBox title = Widgets.newTextBox("", Datum.MAX_TITLE_LENGTH, 20);
         final Button add = new Button("Add");
-        editor.add(Widgets.newRow(Widgets.newLabel("Title:"), title, type, add));
+        editor.add(newRow("Title:", title, type, add));
 
         new ClickCallback<Long>(add) {
             protected boolean callService () {
@@ -267,11 +303,30 @@ public abstract class DatumPanel extends FlowPanel
             Type.class, EnumSet.complementOf(EnumSet.of(Type.NONEXISTENT)));
     }
 
+    protected Widget newRow (String label, Widget... contents)
+    {
+        FlowPanel row = new FlowPanel();
+        row.add(Widgets.newInlineLabel(label + " "));
+        for (int ii = 0; ii < contents.length; ii++) {
+            if (ii > 0) {
+                row.add(Widgets.newInlineLabel(" "));
+            }
+            row.add(contents[ii]);
+        }
+        return row;
+    }
+
     protected abstract void addContents ();
 
     protected Context _ctx;
     protected Datum _datum;
     protected MetaData _meta;
+    protected List<BitsUpdater> _updaters = new ArrayList<BitsUpdater>();
+
+    protected static interface BitsUpdater {
+        void addUpdates (Map<Datum.Field, FieldValue> updates);
+        void applyUpdates ();
+    }
 
     protected static String getTitle (Datum datum)
     {

@@ -18,18 +18,22 @@ public interface MemoryResources extends ClientBundle
         String rightIconButton ();
         String floatLeft ();
         String floatRight ();
+        String textCenter ();
+        String blockCenter ();
         String popup ();
         String navigationLink ();
         String title ();
 
+        String editorBox ();
         String editor ();
         String editorTitle ();
+        String editorLabel ();
+        String editorUpdateButton ();
         String view ();
         String pageTitle ();
         String pageDatum ();
         String textTitle ();
         String listItem ();
-        String insetBox ();
         String stretchBox ();
         String noitems ();
 
@@ -46,6 +50,7 @@ public interface MemoryResources extends ClientBundle
         String column33 ();
 
         String nonExistNote ();
+        String tip ();
     }
 
     @Source("memory.css")

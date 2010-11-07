@@ -70,19 +70,10 @@ class DataServlet extends RemoteServiceServlet with DataService
   }
 
   // from DataService
-  def updateDatum (cortexId :String, id :Long, field1 :Datum.Field, value1 :FieldValue,
-                   field2 :Datum.Field, value2 :FieldValue) {
+  def updateDatum (cortexId :String, id :Long, updates :java.util.Map[Datum.Field, FieldValue]) {
+    import scalaj.collection.Imports._ // for asScala
     requireWriteAccess(cortexId)
-    db.updateDatum(cortexId, id, Seq(field1 -> value1, field2 -> value2))
-    // TODO: handle archived
-  }
-
-  // from DataService
-  def updateDatum (cortexId :String, id :Long, field1 :Datum.Field, value1 :FieldValue,
-                   field2 :Datum.Field, value2 :FieldValue,
-                   field3 :Datum.Field, value3 :FieldValue) {
-    requireWriteAccess(cortexId)
-    db.updateDatum(cortexId, id, Seq(field1 -> value1, field2 -> value2, field3 -> value3))
+    db.updateDatum(cortexId, id, updates.asScala.toSeq)
     // TODO: handle archived
   }
 

@@ -3,7 +3,6 @@
 
 package memory.client;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +14,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
+import com.threerings.gwt.ui.FluentTable;
 import com.threerings.gwt.ui.ItemListBox;
 import com.threerings.gwt.ui.NumberTextBox;
 import com.threerings.gwt.ui.Popups;
@@ -77,61 +77,36 @@ public class PageDatumPanel extends DatumPanel
         }
     }
 
-    @Override protected void addEditor (FlowPanel editor)
+    @Override protected void addBitsEditors (FlowPanel editor, FluentTable bits)
     {
-        super.addEditor(editor);
-        addColumnsEditor(editor);
-        addOrderEditor(editor);
-    }
+        super.addBitsEditors(editor, bits);
 
-    protected void addColumnsEditor (FlowPanel editor)
-    {
-        editor.add(Widgets.newLabel("Break after:", _rsrc.styles().editorTitle()));
         final NumberTextBox break1 = NumberTextBox.newIntBox(10);
         break1.setNumber(_meta.get(BREAK1_KEY, 0L));
         final NumberTextBox break2 = NumberTextBox.newIntBox(10);
         break2.setNumber(_meta.get(BREAK2_KEY, 0L));
-        Button update = new Button("Update");
-        new ClickCallback<Void>(update) {
-            protected boolean callService () {
+        bits.add().setText("Break:").right().setWidget(break1).
+            right().setWidget(break2).setColSpan(2);
+        bits.add().right().setText(_msgs.breakTip(), _rsrc.styles().tip()).setColSpan(3);
+
+        // captain temporary!
+        _meta.setIds(ORDER_KEY, getChildOrder()); // turn list into string
+        final TextBox order = Widgets.newTextBox(_meta.get(ORDER_KEY, ""), -1, 30);
+        order.addStyleName(_rsrc.styles().width100());
+        bits.add().setText("Order:").right().setWidget(order).setColSpan(3);
+        bits.add().right().setText(_msgs.orderTip(), _rsrc.styles().tip()).setColSpan(3);
+
+        _updaters.add(new BitsUpdater() {
+            public void addUpdates (Map<Datum.Field, FieldValue> updates) {
                 _meta.set(BREAK1_KEY, break1.getNumber().longValue());
                 _meta.set(BREAK2_KEY, break2.getNumber().longValue());
-                _datasvc.updateDatum(_ctx.cortexId, _datum.id,
-                                     Datum.Field.META, FieldValue.of(_meta.toMetaString()), this);
-                return true;
-            }
-            protected boolean gotResult (Void result) {
-                _datum.meta = _meta.toMetaString();
-                Popups.infoNear(_msgs.datumUpdated(), getPopupNear());
-                return true;
-            }
-        };
-        editor.add(Widgets.newRow(break1, break2, update));
-        editor.add(Widgets.newLabel(_msgs.breakTip()));
-    }
-
-    protected void addOrderEditor (FlowPanel editor)
-    {
-        editor.add(Widgets.newLabel("Order:", _rsrc.styles().editorTitle()));
-        _meta.setIds(ORDER_KEY, getChildOrder()); // turn list into string
-        // captain temporary!
-        final TextBox order = Widgets.newTextBox(_meta.get(ORDER_KEY, ""), -1, 40);
-        Button update = new Button("Update");
-        new ClickCallback<Void>(update, order) {
-            protected boolean callService () {
                 _meta.set(ORDER_KEY, order.getText().trim());
-                _datasvc.updateDatum(_ctx.cortexId, _datum.id,
-                                     Datum.Field.META, FieldValue.of(_meta.toMetaString()), this);
-                return true;
+                updates.put(Datum.Field.META, FieldValue.of(_meta.toMetaString()));
             }
-            protected boolean gotResult (Void result) {
+            public void applyUpdates () {
                 _datum.meta = _meta.toMetaString();
-                Popups.infoNear(_msgs.datumUpdated(), getPopupNear());
-                return true;
             }
-        };
-        editor.add(Widgets.newRow(order, update));
-        editor.add(Widgets.newLabel(_msgs.orderTip()));
+        });
     }
 
     protected List<Long> getChildOrder ()
@@ -147,10 +122,6 @@ public class PageDatumPanel extends DatumPanel
 
     protected static final String BREAK1_KEY = "break1";
     protected static final String BREAK2_KEY = "break2";
-
-    // protected static final String COLS_KEY = "columns";
-    // protected static final int DEF_COLS = 1;
-    // protected static final List<Integer> COL_CHOICES = Arrays.asList(1, 2, 3);
 
     protected static final String ORDER_KEY = "order";
 

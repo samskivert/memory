@@ -3,11 +3,14 @@
 
 package memory.client;
 
+import java.util.Map;
+
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.Widget;
 
+import com.threerings.gwt.ui.FluentTable;
 import com.threerings.gwt.ui.Popups;
 import com.threerings.gwt.ui.Widgets;
 import com.threerings.gwt.util.ClickCallback;
@@ -20,32 +23,25 @@ import memory.data.FieldValue;
  */
 public abstract class TextDatumPanel extends DatumPanel
 {
-    @Override protected void addEditor (FlowPanel editor)
+    @Override protected void addBitsEditors (FlowPanel editor, FluentTable bits)
     {
-        super.addEditor(editor);
-        editor.add(Widgets.newShim(5, 5));
+        super.addBitsEditors(editor, bits);
 
         int height = Math.max(5, Math.min(30, countNewlines(_datum.text)+2));
         final TextArea text = Widgets.newTextArea(_datum.text, -1, height);
         text.addStyleName(_rsrc.styles().width98());
         editor.add(text);
 
-        Button update = new Button("Update");
-        new ClickCallback<Void>(update) {
-            protected boolean callService () {
+        _updaters.add(new BitsUpdater() {
+            public void addUpdates (Map<Datum.Field, FieldValue> updates) {
                 _text = text.getText().trim();
-                _datasvc.updateDatum(_ctx.cortexId, _datum.id,
-                                     Datum.Field.TEXT, FieldValue.of(_text), this);
-                return true;
+                updates.put(Datum.Field.TEXT, FieldValue.of(_text));
             }
-            protected boolean gotResult (Void result) {
+            public void applyUpdates () {
                 _datum.text = _text;
-                showContents();
-                return true;
             }
             protected String _text;
-        };
-        editor.add(update);
+        });
     }
 
     @Override protected void addChildrenEditor (FlowPanel editor)

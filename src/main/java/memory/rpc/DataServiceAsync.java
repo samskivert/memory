@@ -3,6 +3,7 @@
 
 package memory.rpc;
 
+import java.util.Map;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import memory.data.Access;
 import memory.data.Datum;
@@ -14,11 +15,6 @@ import memory.data.FieldValue;
  */
 public interface DataServiceAsync
 {
-    /**
-     * The async version of {@link DataService#loadJournalData}.
-     */
-    void loadJournalData (String cortexId, long journalId, long when, AsyncCallback<Datum> callback);
-
     /**
      * The async version of {@link DataService#loadAccountInfo}.
      */
@@ -47,17 +43,17 @@ public interface DataServiceAsync
     /**
      * The async version of {@link DataService#updateDatum}.
      */
-    void updateDatum (String cortexId, long id, Datum.Field field, FieldValue value, Datum.Field arg4, FieldValue arg5, AsyncCallback<Void> callback);
-
-    /**
-     * The async version of {@link DataService#updateDatum}.
-     */
-    void updateDatum (String cortexId, long id, Datum.Field field, FieldValue value, Datum.Field arg4, FieldValue arg5, Datum.Field arg6, FieldValue arg7, AsyncCallback<Void> callback);
+    void updateDatum (String cortexId, long id, Map<Datum.Field, FieldValue> field, AsyncCallback<Void> callback);
 
     /**
      * The async version of {@link DataService#updateAccess}.
      */
     void updateAccess (String userId, String cortexId, long datumId, Access access, AsyncCallback<Void> callback);
+
+    /**
+     * The async version of {@link DataService#loadJournalData}.
+     */
+    void loadJournalData (String cortexId, long journalId, long when, AsyncCallback<Datum> callback);
 
     /**
      * The async version of {@link DataService#deleteDatum}.

@@ -51,6 +51,15 @@ ul {
   float: right;
 }
 
+.textCenter {
+  text-align: center;
+}
+
+.blockCenter {
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .popup {
   background: #FFFFFF;
   border: 1px solid;
@@ -71,9 +80,21 @@ ul {
   /* max-width: 480px; */
 }
 
+.editorBox {
+  padding: 5px;
+}
+
 .editorTitle {
   border-top: 1px solid;
   margin-top: 5px;
+}
+
+.editorLabel {
+  width: 45px;
+}
+
+.editorUpdateButton {
+  margin-left: 47px;
 }
 
 .view {
@@ -108,10 +129,6 @@ ul {
 
 .width100 {
   width: 100%;
-}
-
-.insetBox {
-  padding: 5px;
 }
 
 .stretchBox {
@@ -160,4 +177,9 @@ ul {
 
 .nonExistNote {
   margin: 10px 0px;
+}
+
+.tip {
+  font-size: small;
+  max-width: 340px;
 }

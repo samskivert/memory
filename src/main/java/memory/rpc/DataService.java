@@ -69,16 +69,7 @@ public interface DataService extends RemoteService
         throws ServiceException;
 
     /** Updates the specified fields of the specified datum. */
-    void updateDatum (String cortexId, long id,
-                      Datum.Field field1, FieldValue value1,
-                      Datum.Field field2, FieldValue value2)
-        throws ServiceException;
-
-    /** Updates the specified fields of the specified datum. */
-    void updateDatum (String cortexId, long id,
-                      Datum.Field field1, FieldValue value1,
-                      Datum.Field field2, FieldValue value2,
-                      Datum.Field field3, FieldValue value3)
+    void updateDatum (String cortexId, long id, Map<Datum.Field, FieldValue> updates)
         throws ServiceException;
 
     /** Updates access to the specified datum for the specified user. */
