@@ -20,7 +20,9 @@ public class StretchBox extends FlowPanel
         addStyleName(_rsrc.styles().stretchBox());
         _stretch = widgets[stretchIdx];
         for (Widget w : widgets) {
-            add(w);
+            if (w != null) {
+                add(w);
+            }
         }
         queueUpdateStretcher();
     }

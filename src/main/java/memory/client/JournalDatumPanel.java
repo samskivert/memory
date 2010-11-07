@@ -78,6 +78,11 @@ public class JournalDatumPanel extends ListDatumPanel
         return _today.id;
     }
 
+    @Override protected boolean allowChildReorder ()
+    {
+        return false;
+    }
+
     protected void changeDate (long when)
     {
         _datasvc.loadJournalData(_ctx.cortexId, _datum.id, when, new PopupCallback<Datum>(_popper) {

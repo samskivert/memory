@@ -165,18 +165,7 @@ public class ListDatumPanel extends DatumPanel
         editor.add(items);
         PickupDragController dragger = DnDUtil.addDnD(items, new DragHandlerAdapter() {
             public void onDragEnd (DragEndEvent event) {
-                List<Long> ids = new ArrayList<Long>();
-                for (int ii = 0, ll = items.getWidgetCount(); ii < ll; ii++) {
-                    ids.add(((ItemRow)items.getWidget(ii)).item.id);
-                }
-                _meta.setIds(ORDER_KEY, ids);
-                _datasvc.updateDatum(_ctx.cortexId, _datum.id,
-                                     Datum.Field.META, FieldValue.of(_meta.toMetaString()),
-                                     new PopupCallback<Void>(items) {
-                                         public void onSuccess (Void result) {
-                                             Popups.infoNear("Order updated.", items);
-                                         }
-                                     });
+                saveChildOrder(items);
             }
         });
 
@@ -185,10 +174,12 @@ public class ListDatumPanel extends DatumPanel
             delete.setTitle("Delete item.");
             final TextBox text = Widgets.newTextBox(item.text, -1, 20);
             final Button update = new Button("Save");
-            final Image drag = DnDUtil.newDragIcon();
+            final Image drag = allowChildReorder() ? DnDUtil.newDragIcon() : null;
             final Widget box = new ItemRow(item, 1, delete, text, update, drag).gaps(9);
             items.add(box);
-            dragger.makeDraggable(box, drag);
+            if (allowChildReorder()) {
+                dragger.makeDraggable(box, drag);
+            }
 
             // wire up our update callback
             new ClickCallback<Void>(update, text) {
@@ -220,6 +211,27 @@ public class ListDatumPanel extends DatumPanel
                 }
             };
         }
+    }
+
+    protected boolean allowChildReorder ()
+    {
+        return true;
+    }
+
+    protected void saveChildOrder (final FlowPanel items)
+    {
+        List<Long> ids = new ArrayList<Long>();
+        for (int ii = 0, ll = items.getWidgetCount(); ii < ll; ii++) {
+            ids.add(((ItemRow)items.getWidget(ii)).item.id);
+        }
+        _meta.setIds(ORDER_KEY, ids);
+        _datasvc.updateDatum(
+            _ctx.cortexId, _datum.id, Datum.Field.META, FieldValue.of(_meta.toMetaString()),
+            new PopupCallback<Void>(items) {
+            public void onSuccess (Void result) {
+                Popups.infoNear("Order updated.", items);
+            }
+        });
     }
 
     protected static class ItemRow extends StretchBox
