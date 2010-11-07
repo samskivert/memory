@@ -151,7 +151,7 @@ public abstract class DatumPanel extends FlowPanel
     {
         if (!StringUtil.isBlank(_datum.title)) {
             Widget title = Widgets.newLabel(_datum.title, _rsrc.styles().title());
-            title.setTitle("ID: " + _datum.id);
+            title.setTitle("ID: " + _datum.id + " Meta: " + _datum.meta);
             header.add(title);
         }
     }
@@ -316,6 +316,43 @@ public abstract class DatumPanel extends FlowPanel
         return row;
     }
 
+    /**
+     * Returns the list of children of this datum. Usually this is just what you'd expect, but for
+     * a journal it's something sneaky.
+     */
+    protected List<Datum> getChildData ()
+    {
+        return _datum.children;
+    }
+
+    // used by PageDatumPanel and ListDatumPanel
+    protected List<Datum> getOrderedChildren ()
+    {
+        // map the children by id
+        Map<Long,Datum> cmap = new HashMap<Long,Datum>();
+        for (Datum child : getChildData()) {
+            cmap.put(child.id, child);
+        }
+
+        // put them in a new list by order
+        List<Datum> ordered = new ArrayList<Datum>();
+        for (Long id : _meta.getIds(ORDER_KEY)) {
+            Datum child = cmap.remove(id);
+            if (child != null) {
+                ordered.add(child);
+            }
+        }
+
+        // finally add any that weren't mapped
+        for (Datum child : getChildData()) {
+            if (cmap.containsKey(child.id)) {
+                ordered.add(child);
+            }
+        }
+
+        return ordered;
+    }
+
     protected abstract void addContents ();
 
     protected Context _ctx;
@@ -349,6 +386,8 @@ public abstract class DatumPanel extends FlowPanel
         case NONEXISTENT: return new NonExistentDatumPanel();
         }
     }
+
+    protected static final String ORDER_KEY = "order";
 
     protected static final DataServiceAsync _datasvc = GWT.create(DataService.class);
     protected static final MemoryMessages _msgs = GWT.create(MemoryMessages.class);

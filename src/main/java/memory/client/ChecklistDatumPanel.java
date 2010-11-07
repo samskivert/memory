@@ -23,16 +23,14 @@ public class ChecklistDatumPanel extends ListDatumPanel
 {
     @Override protected void addItems ()
     {
-        _items = new FlowPanel();
-        for (Datum child : _datum.children) {
+        for (Datum child : getOrderedChildren()) {
             if (!_metamap.get(child.id).get(DONE, false)) {
                 addItem(_items, child);
             }
         }
-        add(_items);
 
         _doneItems = new FlowPanel();
-        for (Datum child : _datum.children) {
+        for (Datum child : getChildData()) { // we don't use custom order here
             if (_metamap.get(child.id).get(DONE, false)) {
                 addItem(_doneItems, child);
             }
@@ -40,7 +38,7 @@ public class ChecklistDatumPanel extends ListDatumPanel
         add(_doneItems);
     }
 
-    @Override protected Widget addItem (FlowPanel items, final Datum item)
+    @Override protected Widget createItemWidget (final Datum item)
     {
         final MetaData data = _metamap.get(item.id);
         final CheckBox box = new CheckBox();
@@ -52,7 +50,6 @@ public class ChecklistDatumPanel extends ListDatumPanel
         ilabel.addStyleName("inline");
 
         final Widget row = Widgets.newFlowPanel(box, ilabel);
-        items.add(row);
 
         // listen for checklist changes and toggle "done" metadata
         box.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
@@ -77,7 +74,7 @@ public class ChecklistDatumPanel extends ListDatumPanel
             }
         });
 
-        return box;
+        return row;
     }
 
     protected FlowPanel _doneItems;

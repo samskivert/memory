@@ -36,12 +36,6 @@ public class PageDatumPanel extends DatumPanel
 
     @Override protected void addContents ()
     {
-        // map the children by id as we need that to handle custom ordering
-        Map<Long,Datum> cmap = new HashMap<Long,Datum>();
-        for (Datum child : _datum.children) {
-            cmap.put(child.id, child);
-        }
-
         // support multiple columns by just splitting things up evenly for now
         long break2Id = _meta.get(BREAK2_KEY, 0L);
         long break1Id = _meta.get(BREAK1_KEY, break2Id);
@@ -58,21 +52,19 @@ public class PageDatumPanel extends DatumPanel
             add(container);
             column = null;
         }
-        for (Long id : getChildOrder()) {
+
+        for (Datum child : getOrderedChildren()) {
             if (column == null) {
                 column = Widgets.newFlowPanel(_rsrc.styles().column());
                 column.addStyleName(COL_STYLE[cols-1][col]);
                 container.add(column);
             }
-            Datum child = cmap.get(id);
-            if (child != null) {
-                Widget cpanel = DatumPanel.create(_ctx.getChild(), child);
-                cpanel.addStyleName(_rsrc.styles().pageDatum());
-                column.add(cpanel);
-                if (id == break1Id || id == break2Id) {
-                    column = null;
-                    col++;
-                }
+            Widget cpanel = DatumPanel.create(_ctx.getChild(), child);
+            cpanel.addStyleName(_rsrc.styles().pageDatum());
+            column.add(cpanel);
+            if (child.id == break1Id || child.id == break2Id) {
+                column = null;
+                col++;
             }
         }
     }
@@ -90,7 +82,7 @@ public class PageDatumPanel extends DatumPanel
         bits.add().right().setText(_msgs.breakTip(), _rsrc.styles().tip()).setColSpan(3);
 
         // captain temporary!
-        _meta.setIds(ORDER_KEY, getChildOrder()); // turn list into string
+        // _meta.setIds(ORDER_KEY, getChildOrder()); // turn list into string
         final TextBox order = Widgets.newTextBox(_meta.get(ORDER_KEY, ""), -1, 30);
         order.addStyleName(_rsrc.styles().width100());
         bits.add().setText("Order:").right().setWidget(order).setColSpan(3);
@@ -109,21 +101,8 @@ public class PageDatumPanel extends DatumPanel
         });
     }
 
-    protected List<Long> getChildOrder ()
-    {
-        List<Long> oids = _meta.getIds(ORDER_KEY);
-        for (Datum child : _datum.children) {
-            if (!oids.contains(child.id)) {
-                oids.add(child.id);
-            }
-        }
-        return oids;
-    }
-
     protected static final String BREAK1_KEY = "break1";
     protected static final String BREAK2_KEY = "break2";
-
-    protected static final String ORDER_KEY = "order";
 
     protected static final String[][] COL_STYLE = {
         { /* nothing for 1 column */ },

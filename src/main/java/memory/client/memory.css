@@ -43,6 +43,10 @@ ul {
   top: 1px;
 }
 
+.dragIcon {
+  vertical-align: middle;
+}
+
 .floatLeft {
   float: left;
 }
@@ -140,8 +144,6 @@ ul {
 }
 
 .columnCont {
-  clear: both;
-  float: left;
   width: 100%;
   overflow: hidden;
 }

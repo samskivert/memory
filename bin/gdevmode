@@ -20,6 +20,7 @@ CLASSPATH=`echo \
     $ROOT/lib_managed/scala_2.8.0/system/gwt-dev-*.jar \
     $ROOT/lib_managed/scala_2.8.0/compile/gwt-user-*.jar \
     $ROOT/lib_managed/scala_2.8.0/compile/samskivert-*.jar \
+    $ROOT/lib/gwt-dnd-*.jar \
     $GWT_UTILS_CPATH \
     $ROOT/src/main/resources \
     $ROOT/src/main/java | sed 's/ /:/g'`

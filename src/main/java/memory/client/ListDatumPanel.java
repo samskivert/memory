@@ -3,24 +3,32 @@
 
 package memory.client;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+
+import com.allen_sauer.gwt.dnd.client.DragEndEvent;
+import com.allen_sauer.gwt.dnd.client.DragHandlerAdapter;
+import com.allen_sauer.gwt.dnd.client.PickupDragController;
 
 import com.threerings.gwt.ui.Popups;
 import com.threerings.gwt.ui.Widgets;
 import com.threerings.gwt.util.ClickCallback;
+import com.threerings.gwt.util.PopupCallback;
 
 import memory.data.Datum;
 import memory.data.FieldValue;
@@ -32,6 +40,10 @@ import memory.data.Type;
  */
 public class ListDatumPanel extends DatumPanel
 {
+    public ListDatumPanel ()
+    {
+    }
+
     @Override protected void addTitle (FlowPanel header)
     {
         super.addTitle(header);
@@ -59,6 +71,8 @@ public class ListDatumPanel extends DatumPanel
             _metamap.put(child.id, new MetaData(child.meta));
         }
 
+        add(_noitems = Widgets.newLabel("<no items>", _rsrc.styles().noitems()));
+        add(_items = new FlowPanel());
         addItems();
 
         if (_ctx.canWrite()) {
@@ -109,21 +123,24 @@ public class ListDatumPanel extends DatumPanel
 
     protected void addItems ()
     {
-        add(_noitems = Widgets.newLabel("<no items>", _rsrc.styles().noitems()));
-        _items = new FlowPanel();
-        for (Datum child : getChildData()) {
+        for (Datum child : getOrderedChildren()) {
             addItem(_items, child);
         }
-        add(_items);
     }
 
     protected Widget addItem (FlowPanel items, Datum item)
     {
+        Widget iwidget = createItemWidget(item);
+        items.add(iwidget);
+        _noitems.setVisible(false);
+        return iwidget;
+    }
+
+    protected Widget createItemWidget (Datum item)
+    {
         Widget ilabel = createItemLabel(item);
         ilabel.setTitle(""+item.id);
         ilabel.addStyleName(_rsrc.styles().listItem());
-        items.add(ilabel);
-        _noitems.setVisible(false);
         return ilabel;
     }
 
@@ -139,22 +156,39 @@ public class ListDatumPanel extends DatumPanel
         }
     }
 
-    protected List<Datum> getChildData ()
-    {
-        return _datum.children;
-    }
-
     @Override protected void addChildrenEditor (FlowPanel editor)
     {
         // no children editor, instead we use item editors
         editor.add(Widgets.newLabel("Items:", _rsrc.styles().editorTitle()));
-        for (final Datum item : getChildData()) {
+
+        final FlowPanel items = Widgets.newFlowPanel();
+        editor.add(items);
+        PickupDragController dragger = DnDUtil.addDnD(items, new DragHandlerAdapter() {
+            public void onDragEnd (DragEndEvent event) {
+                List<Long> ids = new ArrayList<Long>();
+                for (int ii = 0, ll = items.getWidgetCount(); ii < ll; ii++) {
+                    ids.add(((ItemRow)items.getWidget(ii)).item.id);
+                }
+                _meta.setIds(ORDER_KEY, ids);
+                _datasvc.updateDatum(_ctx.cortexId, _datum.id,
+                                     Datum.Field.META, FieldValue.of(_meta.toMetaString()),
+                                     new PopupCallback<Void>(items) {
+                                         public void onSuccess (Void result) {
+                                             Popups.infoNear("Order updated.", items);
+                                         }
+                                     });
+            }
+        });
+
+        for (final Datum item : getOrderedChildren()) {
             final Image delete = Widgets.newImage(_rsrc.deleteImage(), _rsrc.styles().iconButton());
             delete.setTitle("Delete item.");
             final TextBox text = Widgets.newTextBox(item.text, -1, 20);
             final Button update = new Button("Save");
-            final StretchBox box = new StretchBox(1, delete, text, update).gaps(9);
-            editor.add(box);
+            final Image drag = DnDUtil.newDragIcon();
+            final Widget box = new ItemRow(item, 1, delete, text, update, drag).gaps(9);
+            items.add(box);
+            dragger.makeDraggable(box, drag);
 
             // wire up our update callback
             new ClickCallback<Void>(update, text) {
@@ -185,6 +219,16 @@ public class ListDatumPanel extends DatumPanel
                     return true;
                 }
             };
+        }
+    }
+
+    protected static class ItemRow extends StretchBox
+    {
+        public final Datum item;
+
+        public ItemRow (Datum item, int stretchIdx, Widget... widgets) {
+            super(stretchIdx, widgets);
+            this.item = item;
         }
     }
 

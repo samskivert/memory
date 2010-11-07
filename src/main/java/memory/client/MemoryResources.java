@@ -18,6 +18,7 @@ public interface MemoryResources extends ClientBundle
         String rightIconButton ();
         String floatLeft ();
         String floatRight ();
+        String dragIcon ();
         String textCenter ();
         String blockCenter ();
         String popup ();
@@ -85,4 +86,7 @@ public interface MemoryResources extends ClientBundle
 
     @Source("delete.png")
     ImageResource deleteImage ();
+
+    @Source("dragger.png")
+    ImageResource draggerImage ();
 }
