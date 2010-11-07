@@ -32,8 +32,13 @@ public class JournalDatumPanel extends ListDatumPanel
 {
     @Override protected void showContents ()
     {
-        _today = _datum.children.get(0);
-        super.showContents();
+        if (_datum.children.isEmpty()) {
+            clear();
+            add(Widgets.newLabel("Refresh the page to see your new journal."));
+        } else {
+            _today = _datum.children.get(0);
+            super.showContents();
+        }
     }
 
     @Override protected void addTitle (FlowPanel header)
