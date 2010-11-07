@@ -10,7 +10,7 @@ class Memory (info :ProjectInfo) extends DefaultWebProject(info) {
   val scalaj_collection = "org.scalaj" %% "scalaj-collection" % "1.0"
 
   // HTTP and GWT depends
-  val gwtUser = "com.google.gwt" % "gwt-user" % "2.0.4"
+  val gwtUser = "com.google.gwt" % "gwt-user" % "2.1.0"
   val gwtUtils = "com.threerings" % "gwt-utils" % "1.2-SNAPSHOT"
 
   // override def libraryDependencies = Set(
@@ -19,8 +19,8 @@ class Memory (info :ProjectInfo) extends DefaultWebProject(info) {
   // ) ++ super.libraryDependencies
 
   // we don't want these on any of our classpaths, so we make them "system" deps
-  val gwtDev = "com.google.gwt" % "gwt-dev" % "2.0.4" % "system"
-  val gwtServlet = "com.google.gwt" % "gwt-servlet" % "2.0.4" % "system"
+  val gwtDev = "com.google.gwt" % "gwt-dev" % "2.1.0" % "system"
+  val gwtServlet = "com.google.gwt" % "gwt-servlet" % "2.1.0" % "system"
   val gwtAsyncGen = "com.samskivert" % "gwt-asyncgen" % "1.0" % "system"
 
   // appengine depends
