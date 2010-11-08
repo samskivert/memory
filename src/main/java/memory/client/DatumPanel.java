@@ -376,15 +376,15 @@ public abstract class DatumPanel extends FlowPanel
     protected static DatumPanel createPanel (Type type)
     {
         switch (type) {
-        case WIKI: return new WikiDatumPanel();
         default:
+        case WIKI: return new WikiDatumPanel();
         case HTML: return new HTMLDatumPanel();
-        case EMBED: return new HTMLDatumPanel();
         case LIST: return new ListDatumPanel();
         case CHECKLIST: return new ChecklistDatumPanel();
         case JOURNAL: return new JournalDatumPanel();
         case PAGE: return new PageDatumPanel();
         case NONEXISTENT: return new NonExistentDatumPanel();
+        case LINK: return null; // should never exist (TODO: does exist right after creating?)
         }
     }
 

@@ -52,6 +52,10 @@ public interface MemoryResources extends ClientBundle
 
         String nonExistNote ();
         String tip ();
+        String wiki ();
+        String wikiHelp ();
+        String wikiExample ();
+        String wikiHelpLabel ();
     }
 
     @Source("memory.css")

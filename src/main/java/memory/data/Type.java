@@ -14,8 +14,6 @@ public enum Type
     WIKI(true),
     /** A datum that contains HTML text. */
     HTML(true),
-    /** A datum that contains a URL to content to be embedded. */
-    EMBED(false),
 
     // container types
 
@@ -30,6 +28,8 @@ public enum Type
 
     // other types
 
+    /** A symlink to another datum. */
+    LINK(false),
     /** A type for a datum that does not yet exist. */
     NONEXISTENT(false);
 

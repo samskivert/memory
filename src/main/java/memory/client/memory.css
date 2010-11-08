@@ -4,28 +4,6 @@ body {
   font-family: Helvetica, Arial, sans-serif;
 }
 
-pre {
- max-width: 100%;
- overflow: auto;
- border-top: 1px solid;
- border-bottom: 1px solid;
- padding: 5px 0px;
- margin: 5px 0px;
-}
-
-p {
-  margin: 5px 0px;
-}
-
-h1, h2, h3, h4, h5 {
-  margin: 5px 0px;
-}
-
-ul {
-  margin-top: 5px;
-  margin-bottom: 5px;
-}
-
 .iconButton {
   margin-right: 3px;
   cursor: pointer;
@@ -184,4 +162,62 @@ ul {
 .tip {
   font-size: small;
   max-width: 340px;
+}
+
+.wiki pre {
+ max-width: 100%;
+ overflow: auto;
+ border-top: 1px solid;
+ border-bottom: 1px solid;
+ padding: 5px 0px;
+ margin: 5px 0px;
+}
+
+.wiki p {
+  margin: 5px 0px;
+}
+
+.wiki h1, h2, h3, h4, h5 {
+  margin: 5px 0px;
+}
+
+.wiki ul, .wiki ol {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.wiki table {
+  border-collapse: collapse;
+}
+
+.wiki table td, .wiki table th {
+  border: 1px solid;
+  padding: 0px 3px;
+}
+
+.wiki blockquote {
+  margin-left: 5px 0px 5px 10px;
+  padding: 5px;
+  background: #EEEEEE;
+}
+
+.wikiHelp {
+  padding: 5px;
+}
+
+.wikiExample {
+  white-space: pre;
+  font-family: monospace;
+}
+
+.wikiHelp>table td {
+  border-top: 1px dashed;
+}
+
+.wikiHelp p {
+  margin: 0px;
+}
+
+.wikiHelpLabel {
+  margin-right: 25px;
 }
