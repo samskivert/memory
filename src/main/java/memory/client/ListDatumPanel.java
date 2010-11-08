@@ -219,11 +219,6 @@ public class ListDatumPanel extends DatumPanel
         public EditableItemLabel (Datum item) {
             _item = item;
             displayItem();
-            addDoubleClickHandler(new DoubleClickHandler() {
-                public void onDoubleClick (DoubleClickEvent event) {
-                    displayEditor();
-                }
-            });
         }
 
         // from interface HasDoubleClickHandlers
@@ -233,16 +228,20 @@ public class ListDatumPanel extends DatumPanel
 
         protected void displayItem () {
             setWidget(createItemWidget(_item));
+            _dcreg = addDoubleClickHandler(new DoubleClickHandler() {
+                public void onDoubleClick (DoubleClickEvent event) {
+                    displayEditor();
+                }
+            });
         }
 
         protected void displayEditor () {
+            _dcreg.removeHandler();
             ItemEditor row = new ItemEditor(_item, null) {
                 protected void onUpdated () {
                     displayItem();
                 }
             };
-            setWidget(row);
-            row.text.setFocus(true);
             row.text.addKeyDownHandler(new KeyDownHandler() {
                 public void onKeyDown (KeyDownEvent event) {
                     if (event.getNativeKeyCode() == KeyCodes.KEY_ESCAPE) {
@@ -250,9 +249,12 @@ public class ListDatumPanel extends DatumPanel
                     }
                 }
             });
+            setWidget(row);
+            row.text.setFocus(true);
         }
 
         protected Datum _item;
+        protected HandlerRegistration _dcreg;
     }
 
     protected class ItemEditor extends StretchBox
