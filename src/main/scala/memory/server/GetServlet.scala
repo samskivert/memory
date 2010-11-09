@@ -66,7 +66,7 @@ class GetServlet extends HttpServlet
       if (access == Access.NONE) user match {
         case None => throw new RedirectException(
           _usvc.createLoginURL(req.getServletPath + req.getPathInfo))
-        case _ => new Exception("You lack access to this data.")
+        case _ => throw new Exception("You lack access to this data.")
       }
 
       val xml = <div style="display: none" id="root" x:cortex={cortexId} x:access={
