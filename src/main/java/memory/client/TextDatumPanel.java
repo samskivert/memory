@@ -169,21 +169,28 @@ public abstract class TextDatumPanel extends DatumPanel
 
         form.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
             public void onSubmitComplete (FormPanel.SubmitCompleteEvent event) {
-                // parse the returned datum id and create a datum for our new media
-                Datum mdatum = new Datum();
-                mdatum.id = Long.parseLong(event.getResults().trim());
-                mdatum.parentId = _datum.id;
-                mdatum.type = Type.MEDIA;
-                mdatum.title = name.getText().trim();
-                mdatum.when = System.currentTimeMillis(); // close enough
-                addMediaChild(media, mdatum);
+                try {
+                    // parse the returned datum id and create a datum for our new media
+                    Datum mdatum = new Datum();
+                    mdatum.id = Long.parseLong(event.getResults().trim());
+                    mdatum.parentId = _datum.id;
+                    mdatum.type = Type.MEDIA;
+                    mdatum.title = name.getText().trim();
+                    mdatum.when = System.currentTimeMillis(); // close enough
+                    addMediaChild(media, mdatum);
 
-                // reset the UI
-                form.reset();
-                name.setText("");
+                    // reset the UI
+                    form.reset();
+                    name.setText("");
 
-                // and prepare for another upload
-                refreshUploadURL(form, upload);
+                    // and prepare for another upload
+                    refreshUploadURL(form, upload);
+
+                } catch (Exception e) {
+                    // cope with various random fucking Google weirdness
+                    Popups.errorNear(e.getMessage(), upload);
+                    upload.setEnabled(true);
+                }
             }
         });
 
