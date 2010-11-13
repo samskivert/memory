@@ -42,6 +42,9 @@ public class PageDatumPanel extends DatumPanel
         if (break1Id == break2Id) {
             break2Id = 0L;
         }
+        if (Window.getClientWidth() < 500) {
+            break1Id = break2Id = 0; // if we're on an iPhone etc., always lay out in one column
+        }
         int cols = (break2Id != 0) ? 3 : ((break1Id != 0) ? 2 : 1), col = 0;
 
         FlowPanel container = Widgets.newFlowPanel(_rsrc.styles().columnCont());
