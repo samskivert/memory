@@ -30,6 +30,8 @@ public enum Type
 
     /** A symlink to another datum. */
     LINK(false),
+    /** A media blob. */
+    MEDIA(false),
     /** A type for a datum that does not yet exist. */
     NONEXISTENT(false);
 

@@ -301,7 +301,7 @@ public abstract class DatumPanel extends FlowPanel
     protected EnumListBox<Type> createTypeListBox ()
     {
         return new EnumListBox<Type>(
-            Type.class, EnumSet.complementOf(EnumSet.of(Type.NONEXISTENT)));
+            Type.class, EnumSet.complementOf(EnumSet.of(Type.MEDIA, Type.NONEXISTENT)));
     }
 
     protected Widget newRow (String label, Widget... contents)

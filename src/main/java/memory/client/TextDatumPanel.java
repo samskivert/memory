@@ -5,21 +5,30 @@ package memory.client;
 
 import java.util.Map;
 
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
+import com.threerings.gwt.ui.Anchor;
+import com.threerings.gwt.ui.Bindings;
 import com.threerings.gwt.ui.FluentTable;
 import com.threerings.gwt.ui.Widgets;
 import com.threerings.gwt.util.ClickCallback;
+import com.threerings.gwt.util.Value;
 
 import memory.data.Datum;
 import memory.data.FieldValue;
+import memory.data.Type;
 
 /**
  * A base class for text datum panels.
@@ -74,7 +83,50 @@ public abstract class TextDatumPanel extends DatumPanel
 
     @Override protected void addChildrenEditor (FlowPanel editor)
     {
-        // no children of text datum
+        // add the media management interface
+        editor.add(Widgets.newLabel("Media:", _rsrc.styles().editorTitle()));
+
+        final FlowPanel media = Widgets.newFlowPanel();
+        for (Datum child : _datum.children) {
+            if (child.type != Type.MEDIA) {
+                continue;
+            }
+            if (media.getWidgetCount() > 0) {
+                media.add(Widgets.newInlineLabel(", "));
+            }
+            media.add(new Anchor(child.title, child.meta));
+        }
+        if (media.getWidgetCount() == 0) {
+            media.add(Widgets.newInlineLabel("<no media>", _rsrc.styles().noitems()));
+        }
+        Value<Boolean> uploadShowing = Value.create(false);
+        media.add(Widgets.newActionLabel("upload", _rsrc.styles().floatRight(),
+                                         Bindings.makeToggler(uploadShowing)));
+        editor.add(media);
+
+        Widget utitle = Widgets.newLabel("Upload media:", _rsrc.styles().editorTitle());
+        Bindings.bindVisible(uploadShowing, utitle);
+        editor.add(utitle);
+
+        Button upload = new Button("Upload ");
+        final TextBox name = Widgets.newTextBox("", 64, 20);
+        final FileUpload file = new FileUpload();
+        file.setName("media");
+        final FormPanel form = new FormPanel();
+        form.setAction("/todo");
+        form.setWidget(new FluentTable(0, 2).add().setText("Pick file:").right().
+                       setWidget(file).setColSpan(2).add().setText("Name:").right().
+                       setWidget(name).right().setWidget(upload).alignRight().table());
+        editor.add(form);
+        Bindings.bindVisible(uploadShowing, form);
+
+        file.addChangeHandler(new ChangeHandler() {
+            public void onChange (ChangeEvent event) {
+                if (name.getText().trim().length() == 0) {
+                    name.setText(file.getFilename());
+                }
+            }
+        });
     }
 
     protected static int countNewlines (String text)
