@@ -7,7 +7,8 @@ import scalaj.collection.Imports._
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet
 
-import com.google.appengine.api.users.{User, UserService, UserServiceFactory}
+import com.google.appengine.api.users.{User, UserServiceFactory}
+import com.google.appengine.api.blobstore.{BlobstoreServiceFactory}
 
 import memory.data.{Access, Datum, FieldValue, Type}
 import memory.persist.DB
@@ -96,6 +97,9 @@ class DataServlet extends RemoteServiceServlet with DataService
     db.deleteDatum(cortexId, id);
   }
 
+  // from DataService
+  def getUploadURL () :String = _bssvc.createUploadUrl("/upload")
+
   override def doUnexpectedFailure (e :Throwable) {
     e.printStackTrace(System.err)
     super.doUnexpectedFailure(e)
@@ -133,4 +137,5 @@ class DataServlet extends RemoteServiceServlet with DataService
   }
 
   private val _usvc = UserServiceFactory.getUserService
+  private val _bssvc = BlobstoreServiceFactory.getBlobstoreService
 }

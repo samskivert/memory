@@ -81,5 +81,10 @@ public interface DataService extends RemoteService
         throws ServiceException;
 
     /** Deletes the specified datum. */
-    void deleteDatum (String cortextId, long id);
+    void deleteDatum (String cortextId, long id)
+        throws ServiceException;
+
+    /** Returns the URL to which media may be uploaded. */
+    String getUploadURL ()
+        throws ServiceException;
 }

@@ -7,6 +7,8 @@ import java.util.Map;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.ui.Button;
@@ -22,8 +24,10 @@ import com.google.gwt.user.client.ui.Widget;
 import com.threerings.gwt.ui.Anchor;
 import com.threerings.gwt.ui.Bindings;
 import com.threerings.gwt.ui.FluentTable;
+import com.threerings.gwt.ui.Popups;
 import com.threerings.gwt.ui.Widgets;
 import com.threerings.gwt.util.ClickCallback;
+import com.threerings.gwt.util.PopupCallback;
 import com.threerings.gwt.util.Value;
 
 import memory.data.Datum;
@@ -81,7 +85,7 @@ public abstract class TextDatumPanel extends DatumPanel
         });
     }
 
-    @Override protected void addChildrenEditor (FlowPanel editor)
+    @Override protected void addChildrenEditor (final FlowPanel editor)
     {
         // add the media management interface
         editor.add(Widgets.newLabel("Media:", _rsrc.styles().editorTitle()));
@@ -91,10 +95,7 @@ public abstract class TextDatumPanel extends DatumPanel
             if (child.type != Type.MEDIA) {
                 continue;
             }
-            if (media.getWidgetCount() > 0) {
-                media.add(Widgets.newInlineLabel(", "));
-            }
-            media.add(new Anchor(child.title, child.meta));
+            addMediaChild(media, child);
         }
         if (media.getWidgetCount() == 0) {
             media.add(Widgets.newInlineLabel("<no media>", _rsrc.styles().noitems()));
@@ -108,23 +109,103 @@ public abstract class TextDatumPanel extends DatumPanel
         Bindings.bindVisible(uploadShowing, utitle);
         editor.add(utitle);
 
-        Button upload = new Button("Upload ");
+        Bindings.bindVisible(uploadShowing, new Bindings.Thunk() {
+            public Widget createWidget () {
+                return createUploadUI(editor, media);
+            }
+        });
+    }
+
+    protected void addMediaChild (FlowPanel media, Datum child)
+    {
+        if (media.getWidgetCount() > 0) {
+            media.add(Widgets.newInlineLabel(", "));
+        }
+        media.add(new Anchor(WikiUtil.makePath(_ctx.cortexId, _datum.id, child.title),
+                             child.title));
+    }
+
+    protected FormPanel createUploadUI (FlowPanel editor, final FlowPanel media)
+    {
+        final Button upload = new Button("Upload ");
         final TextBox name = Widgets.newTextBox("", 64, 20);
+        name.setName("name");
         final FileUpload file = new FileUpload();
         file.setName("media");
+
         final FormPanel form = new FormPanel();
-        form.setAction("/todo");
-        form.setWidget(new FluentTable(0, 2).add().setText("Pick file:").right().
-                       setWidget(file).setColSpan(2).add().setText("Name:").right().
-                       setWidget(name).right().setWidget(upload).alignRight().table());
-        editor.add(form);
-        Bindings.bindVisible(uploadShowing, form);
+        form.setEncoding(FormPanel.ENCODING_MULTIPART);
+        form.setMethod(FormPanel.METHOD_POST);
+        form.setWidget(new FluentTable(0, 2).add().setText("Pick file:").
+                       right().setWidget(file).setColSpan(2).
+                       add().setText("Name:").right().setWidget(name).
+                       right().setWidget(upload).alignRight().table());
+
+        refreshUploadURL(form, upload);
 
         file.addChangeHandler(new ChangeHandler() {
             public void onChange (ChangeEvent event) {
                 if (name.getText().trim().length() == 0) {
                     name.setText(file.getFilename());
                 }
+            }
+        });
+
+        form.addSubmitHandler(new FormPanel.SubmitHandler() {
+            public void onSubmit (FormPanel.SubmitEvent event) {
+                String error = null;
+                if (file.getFilename().trim().length() == 0) {
+                    error = "Please select a file for upload.";
+                } else if (name.getText().trim().length() == 0) {
+                    error = "Please enter a name for the media.";
+                }
+                if (error != null) {
+                    Popups.errorNear(error, upload);
+                    upload.setEnabled(true);
+                    event.cancel();
+                }
+            }
+        });
+
+        form.addSubmitCompleteHandler(new FormPanel.SubmitCompleteHandler() {
+            public void onSubmitComplete (FormPanel.SubmitCompleteEvent event) {
+                // parse the returned datum id and create a datum for our new media
+                Datum mdatum = new Datum();
+                mdatum.id = Long.parseLong(event.getResults().trim());
+                mdatum.parentId = _datum.id;
+                mdatum.type = Type.MEDIA;
+                mdatum.title = name.getText().trim();
+                mdatum.when = System.currentTimeMillis(); // close enough
+                addMediaChild(media, mdatum);
+
+                // reset the UI
+                form.reset();
+                name.setText("");
+
+                // and prepare for another upload
+                refreshUploadURL(form, upload);
+            }
+        });
+
+        upload.addClickHandler(new ClickHandler() {
+            public void onClick (ClickEvent event) {
+                upload.setEnabled(false);
+                form.submit();
+            }
+        });
+        editor.add(form);
+
+        return form;
+    }
+
+    protected void refreshUploadURL (final FormPanel form, final Button upload)
+    {
+        upload.setEnabled(false);
+        _datasvc.getUploadURL(new PopupCallback<String>(form) {
+            public void onSuccess (String url) {
+                String sep = (url.indexOf("?") == -1) ? "?" : "&";
+                form.setAction(url + sep + "cortexId=" + _ctx.cortexId + "&parentId=" + _datum.id);
+                upload.setEnabled(true);
             }
         });
     }

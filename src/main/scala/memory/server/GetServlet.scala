@@ -9,6 +9,7 @@ import javax.servlet.ServletConfig
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
 import com.google.appengine.api.users.{User, UserService, UserServiceFactory}
+import com.google.appengine.api.blobstore.{BlobKey, BlobstoreServiceFactory}
 
 import memory.data.{Access, Datum, Type}
 import memory.persist.DB
@@ -25,6 +26,7 @@ class GetServlet extends HttpServlet
   override def init (config :ServletConfig) {
     try {
       db.init
+      _log.info("Database initialized.")
     } catch {
       case e => println("Failed to init db " + e)
     }
@@ -69,14 +71,20 @@ class GetServlet extends HttpServlet
         case _ => throw new Exception("You lack access to this data.")
       }
 
-      val xml = <div style="display: none" id="root" x:cortex={cortexId} x:access={
-        access.toString} x:publicAccess={publicAccess.toString}>{"\n  "}{
-          toXML(MemoryLogic.resolveChildren(cortexId)(datum))}{"\n"}</div>
-      val out = rsp.getWriter
-      out.println(ServletUtil.htmlHeader(datum.title + " (" + cortexId + ")"))
-      XML.write(out, xml, null, false, null)
-      out.println(GwitBits)
-      out.println(ServletUtil.htmlFooter)
+      // if this is a media datum, call out to the blob store to serve it
+      if (datum.`type` == Type.MEDIA) {
+        _bssvc.serve(new BlobKey(datum.meta), rsp)
+
+      } else {
+        val xml = <div style="display: none" id="root" x:cortex={cortexId} x:access={
+          access.toString} x:publicAccess={publicAccess.toString}>{"\n  "}{
+            toXML(MemoryLogic.resolveChildren(cortexId)(datum))}{"\n"}</div>
+        val out = rsp.getWriter
+        out.println(ServletUtil.htmlHeader(datum.title + " (" + cortexId + ")"))
+        XML.write(out, xml, null, false, null)
+        out.println(GwitBits)
+        out.println(ServletUtil.htmlFooter)
+      }
 
     } catch {
       case re :RedirectException => rsp.sendRedirect(re.getMessage)
@@ -111,6 +119,8 @@ class GetServlet extends HttpServlet
   }
 
   private val _usvc = UserServiceFactory.getUserService
+  private val _bssvc = BlobstoreServiceFactory.getBlobstoreService
+  private val _log = java.util.logging.Logger.getLogger("GetServlet")
 
   private val Header = """
   |<?xml version="1.0" encoding="UTF-8" ?>

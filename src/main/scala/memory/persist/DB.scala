@@ -56,6 +56,9 @@ trait DB
   /** Loads the children of the specified datum. */
   def loadChildren (cortexId :String, id :Long) :Array[Datum]
 
+  /** Loads the children of the specified datum that are of the specified type. */
+  def loadChildren (cortexId :String, id :Long, typ :Type) :Array[Datum]
+
   /** Loads the specified data. */
   def loadData (cortexId :String, ids :Set[Long]) :Array[Datum]
 

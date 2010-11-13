@@ -29,6 +29,23 @@ public class WikiUtil
         return new MemoryWikiParser(cortexId, parent).formatSnippet(text);
     }
 
+    /**
+     * Creates a path to the specified child datum.
+     */
+    public static String makePath (String cortexId, long parentId, String name)
+    {
+        String path = "/c/" + cortexId + "/" + parentId + "/" + name;
+
+        // preserve the query string to make life in GWT devmode easier
+        String url = Document.get().getURL();
+        int qidx = url.indexOf("?");
+        if (qidx != -1) {
+            path = path + url.substring(qidx);
+        }
+
+        return path;
+    }
+
     protected static class MemoryWikiParser extends WikiParser
     {
         public MemoryWikiParser (String cortexId, Datum parent) {
@@ -45,18 +62,13 @@ public class WikiUtil
         }
 
         protected void appendInternalLink (String uri, String text) {
-            String path = "/c/" + _cortexId + "/" + _parent.id + "/" + uri;
-
-            // preserve the query string to make life in GWT devmode easier
-            String url = Document.get().getURL();
-            int qidx = url.indexOf("?");
-            if (qidx != -1) {
-                path = path + url.substring(qidx);
-            }
-
-            sb.append("<a href=\"" + path + "\">");
+            sb.append("<a href=\"" + makePath(_cortexId, _parent.id, uri) + "\">");
             appendText(text);
             sb.append("</a>");
+        }
+
+        protected void appendInternalImage (String uri, String text) {
+            appendExternalImage(makePath(_cortexId, _parent.id, uri), text);
         }
 
         protected String _cortexId;

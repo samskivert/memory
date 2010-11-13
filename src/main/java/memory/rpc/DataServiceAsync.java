@@ -16,6 +16,21 @@ import memory.data.FieldValue;
 public interface DataServiceAsync
 {
     /**
+     * The async version of {@link DataService#updateDatum}.
+     */
+    void updateDatum (String cortexId, long id, Datum.Field field, FieldValue value, AsyncCallback<Void> callback);
+
+    /**
+     * The async version of {@link DataService#updateDatum}.
+     */
+    void updateDatum (String cortexId, long id, Map<Datum.Field, FieldValue> field, AsyncCallback<Void> callback);
+
+    /**
+     * The async version of {@link DataService#loadJournalData}.
+     */
+    void loadJournalData (String cortexId, long journalId, long when, AsyncCallback<Datum> callback);
+
+    /**
      * The async version of {@link DataService#loadAccountInfo}.
      */
     void loadAccountInfo (AsyncCallback<DataService.AccountResult> callback);
@@ -36,27 +51,17 @@ public interface DataServiceAsync
     void createDatum (String cortexId, Datum datum, AsyncCallback<Long> callback);
 
     /**
-     * The async version of {@link DataService#updateDatum}.
-     */
-    void updateDatum (String cortexId, long id, Datum.Field field, FieldValue value, AsyncCallback<Void> callback);
-
-    /**
-     * The async version of {@link DataService#updateDatum}.
-     */
-    void updateDatum (String cortexId, long id, Map<Datum.Field, FieldValue> field, AsyncCallback<Void> callback);
-
-    /**
      * The async version of {@link DataService#updateAccess}.
      */
     void updateAccess (String userId, String cortexId, long datumId, Access access, AsyncCallback<Void> callback);
 
     /**
-     * The async version of {@link DataService#loadJournalData}.
-     */
-    void loadJournalData (String cortexId, long journalId, long when, AsyncCallback<Datum> callback);
-
-    /**
      * The async version of {@link DataService#deleteDatum}.
      */
     void deleteDatum (String cortextId, long id, AsyncCallback<Void> callback);
+
+    /**
+     * The async version of {@link DataService#getUploadURL}.
+     */
+    void getUploadURL (AsyncCallback<String> callback);
 }

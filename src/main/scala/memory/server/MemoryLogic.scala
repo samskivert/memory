@@ -18,18 +18,23 @@ object MemoryLogic
   /** Resolves the children of the supplied datum. */
   def resolveChildren (cortexId :String)(root :Datum) :Datum = {
     root.children = new ArrayList[Datum](root.`type` match {
-      case Type.LIST => resolveChildList(cortexId, root.id) // TODO: archive old bits
-      case Type.CHECKLIST => resolveChildList(cortexId, root.id) // TODO: archive old bits
+      case Type.LIST => loadAndResolveChildren(cortexId, root.id) // TODO: archive old bits
+      case Type.CHECKLIST => loadAndResolveChildren(cortexId, root.id) // TODO: archive old bits
       case Type.JOURNAL => resolveJournalChild(cortexId, root.id)
-      case Type.PAGE => resolveChildList(cortexId, root.id)
+      case Type.PAGE => loadAndResolveChildren(cortexId, root.id)
+      case Type.HTML | Type.WIKI => loadMediaChildren(cortexId, root.id)
       case _ => Collections.emptyList
     })
     root
   }
 
   /** Loads and resolves the children of the specified parent. */
-  def resolveChildList (cortexId :String, parentId :Long) =
+  def loadAndResolveChildren (cortexId :String, parentId :Long) =
     Arrays.asList(db.loadChildren(cortexId, parentId) map(resolveChildren(cortexId)) :_*)
+
+  /** Loads (but does not resolve, as it is not needed) the media children of the parent. */
+  def loadMediaChildren (cortexId :String, parentId :Long) =
+    Arrays.asList(db.loadChildren(cortexId, parentId, Type.MEDIA) :_*)
 
   /** Resolves today's child of the supplied journal parent. */
   def resolveJournalChild (cortexId :String, id :Long) =

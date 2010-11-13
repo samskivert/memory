@@ -130,6 +130,14 @@ object ObjectifyDB extends DB
   }
 
   // from trait DB
+  def loadChildren (cortexId :String, id :Long, typ :Type) :Array[Datum] = {
+    val obj = ObjectifyService.begin
+    val l = obj.query(classOf[DatumRow]).ancestor(cortexKey(cortexId)).filter(
+      "parentId", id).filter("type", typ.toString).list
+    (0 until l.size) map(ii => l.get(ii)) map(toJava) toArray
+  }
+
+  // from trait DB
   def loadData (cortexId :String, ids :Set[Long]) :Array[Datum] = {
     val obj = ObjectifyService.begin
     obj.get(ids.map(id => datumKey(cortexId, id)).asJava).values.asScala.map(toJava).toArray
