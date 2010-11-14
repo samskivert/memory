@@ -58,7 +58,7 @@ public class AccountPanel extends Composite
                 }
                 write.add(_nname);
                 addCortexenLinks(write, _readWrite);
-                Popups.infoNear("Cortex created!", getPopupNear());
+                Popups.infoBelow("Cortex created!", getPopupNear());
                 _name.setText("");
                 return true;
             }

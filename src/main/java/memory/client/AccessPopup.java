@@ -53,7 +53,7 @@ public class AccessPopup extends PopupPanel
                     DataService.NO_USER, ctx.cortexId, datum.id, pubAccess.getSelectedValue(),
                     new PopupCallback<Void>(pubAccess) {
                     public void onSuccess (Void result) {
-                        Popups.infoNear("Access updated.", pubAccess);
+                        Popups.infoBelow("Access updated.", pubAccess);
                     }
                 });
             }

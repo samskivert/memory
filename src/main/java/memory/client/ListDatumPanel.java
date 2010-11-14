@@ -207,7 +207,7 @@ public class ListDatumPanel extends DatumPanel
             _ctx.cortexId, _datum.id, Datum.Field.META, FieldValue.of(_meta.toMetaString()),
             new PopupCallback<Void>(items) {
             public void onSuccess (Void result) {
-                Popups.infoNear("Order updated.", items);
+                Popups.infoBelow("Order updated.", items);
             }
         });
     }
@@ -297,7 +297,7 @@ public class ListDatumPanel extends DatumPanel
                 }
                 protected boolean gotResult (Void result) {
                     getChildData().remove(item);
-                    Popups.infoNear("Item deleted.", getPopupNear()); // TODO: add undo?
+                    Popups.infoBelow("Item deleted.", getPopupNear()); // TODO: add undo?
                     removeFromParent();
                     return true;
                 }
@@ -305,7 +305,7 @@ public class ListDatumPanel extends DatumPanel
         }
 
         protected void onUpdated () {
-            Popups.infoNear("Item updated.", this);
+            Popups.infoBelow("Item updated.", this);
         }
     }
 

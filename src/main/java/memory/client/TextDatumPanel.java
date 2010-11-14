@@ -158,7 +158,7 @@ public abstract class TextDatumPanel extends DatumPanel
                     error = "Please enter a name for the media.";
                 }
                 if (error != null) {
-                    Popups.errorNear(error, upload);
+                    Popups.errorBelow(error, upload);
                     upload.setEnabled(true);
                     event.cancel();
                 }
@@ -186,7 +186,7 @@ public abstract class TextDatumPanel extends DatumPanel
 
                 } catch (Exception e) {
                     // cope with various random fucking Google weirdness
-                    Popups.errorNear(e.getMessage(), upload);
+                    Popups.errorBelow(e.getMessage(), upload);
                     upload.setEnabled(true);
                 }
             }

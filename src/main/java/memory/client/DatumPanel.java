@@ -281,7 +281,7 @@ public abstract class DatumPanel extends FlowPanel
                 _datum.children.add(_child);
                 addChildWidget(kids, _child);
                 title.setText("");
-                Popups.infoNear(_msgs.datumCreated(), getPopupNear());
+                Popups.infoBelow(_msgs.datumCreated(), getPopupNear());
                 return true;
             }
             protected Datum _child;

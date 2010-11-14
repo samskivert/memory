@@ -119,7 +119,7 @@ public class JournalDatumPanel extends ListDatumPanel
                 if (_popup.isShowing()) {
                     _popup.hide();
                 } else {
-                    Popups.showNear(_popup, popper);
+                    Popups.showBelow(_popup, popper);
                 }
             }
             protected PopupPanel _popup;
