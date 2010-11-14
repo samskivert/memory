@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import com.threerings.gwt.ui.Widgets;
+import com.threerings.gwt.util.Callbacks;
 import com.threerings.gwt.util.PopupCallback;
 
 import memory.data.Datum;
@@ -59,18 +60,18 @@ public class ChecklistDatumPanel extends ListDatumPanel
                 final String meta = data.toMetaString();
                 _datasvc.updateDatum(
                     _ctx.cortexId, item.id, Datum.Field.META, FieldValue.of(meta),
-                    new PopupCallback<Void>(box) {
-                    public void onSuccess (Void result) {
-                        item.meta = meta;
-                        if (isDone) {
-                            _items.remove(row);
-                            _doneItems.add(row);
-                        } else {
-                            _doneItems.remove(row);
-                            _items.add(row);
+                    Callbacks.disabler(new PopupCallback<Void>(box) {
+                        public void onSuccess (Void result) {
+                            item.meta = meta;
+                            if (isDone) {
+                                _items.remove(row);
+                                _doneItems.add(row);
+                            } else {
+                                _doneItems.remove(row);
+                                _items.add(row);
+                            }
                         }
-                    }
-                });
+                    }, box));
             }
         });
 
