@@ -203,6 +203,7 @@ body {
 
 .wikiHelp {
   padding: 5px;
+  max-width: 600px;
 }
 
 .wikiExample {

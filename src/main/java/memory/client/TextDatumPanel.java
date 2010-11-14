@@ -48,29 +48,27 @@ public abstract class TextDatumPanel extends DatumPanel
         text.addStyleName(_rsrc.styles().width98());
         editor.add(text);
 
-        Label wikiHelp = Widgets.newLabel("Wiki help", "actionLabel", _rsrc.styles().floatRight(),
-                                          _rsrc.styles().wikiHelpLabel());
-        wikiHelp.addMouseOverHandler(new MouseOverHandler() {
-            public void onMouseOver (MouseOverEvent event) {
-                if (_popup == null) {
-                    Widget title = Widgets.newLabel(
-                        "Wiki Formatting Syntax", _rsrc.styles().textTitle());
-                    FluentTable contents = new FluentTable(3, 0);
-                    for (String help : WIKI_HELP) {
-                        contents.add().setHTML(help, _rsrc.styles().wikiExample()).
-                            right().setText("→").
-                            right().setHTML(WikiUtil.format(_ctx.cortexId, _datum, help),
-                                            _rsrc.styles().wiki());
-                    }
-                    _popup = new PopupPanel(true);
-                    _popup.addStyleName(_rsrc.styles().popup());
-                    _popup.setWidget(
-                        Widgets.newFlowPanel(_rsrc.styles().wikiHelp(), title, contents));
+        Value<Boolean> helpPopped = Value.create(false);
+        Popups.bindPopped(helpPopped, new Popups.Thunk() {
+            public PopupPanel createPopup () {
+                Widget title = Widgets.newLabel(
+                    "Wiki Formatting Syntax", _rsrc.styles().textTitle());
+                FluentTable contents = new FluentTable(3, 0);
+                for (String help : WIKI_HELP) {
+                    contents.add().setHTML(help, _rsrc.styles().wikiExample()).
+                        right().setText("→").
+                        right().setHTML(WikiUtil.format(_ctx.cortexId, _datum, help),
+                                        _rsrc.styles().wiki());
                 }
-                _popup.center();
+                PopupPanel popup = new PopupPanel(true);
+                popup.addStyleName(_rsrc.styles().popup());
+                popup.setWidget(Widgets.newFlowPanel(_rsrc.styles().wikiHelp(), title, contents));
+                return popup;
             }
-            protected PopupPanel _popup;
         });
+        Label wikiHelp = Widgets.newActionLabel(
+            "Wiki help", _rsrc.styles().wikiHelpLabel(), Bindings.makeToggler(helpPopped));
+        wikiHelp.addStyleName(_rsrc.styles().floatRight());
         editor.add(wikiHelp);
 
         _updaters.add(new BitsUpdater() {
@@ -241,5 +239,7 @@ public abstract class TextDatumPanel extends DatumPanel
         "|b|table|row|\n",
         "{{{\nvoid code () {\n  // no **wiki** formatting here\n}\n}}}",
         "> quoted\n> text",
+        ">>> **FLOAT**\nText or image that floats right amidst\n" +
+        "other text. Use `<<<` for left floating.",
     };
 }
