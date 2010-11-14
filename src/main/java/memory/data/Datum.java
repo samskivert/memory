@@ -29,7 +29,7 @@ public class Datum implements Serializable
     };
 
     /** An enumeration of the fields of this datum for use in updating. */
-    public enum Field { PARENT_ID, TYPE, META, TITLE, TEXT, WHEN };
+    public enum Field { PARENT_ID, TYPE, META, TITLE, TEXT, WHEN, ARCHIVED };
 
     /** The unique identifier for this datum. */
     public long id;
@@ -51,6 +51,9 @@ public class Datum implements Serializable
 
     /** A timestamp associated with this datum (usually when it was last modified). */
     public long when;
+
+    /** Whether or not this datum has been archived (which takes it out of normal circulation). */
+    public boolean archived;
 
     /** Descendents of this datum, may be null. */
     public List<Datum> children;

@@ -44,6 +44,9 @@ public class DatumRow
     /** A timestamp associated with this datum (usually when it was last modified). */
     public long when;
 
+    /** True if this datum is archived, false otherwise. */
+    public boolean archived;
+
     @Override // from Object
     public String toString ()
     {

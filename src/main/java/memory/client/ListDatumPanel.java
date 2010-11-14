@@ -113,7 +113,6 @@ public class ListDatumPanel extends DatumPanel
                     _metamap.put(_item.id, new MetaData(_item.meta));
                     Widget row = addItem(_items, _item);
                     _itext.setText("");
-                    Popups.infoNear(_msgs.datumCreated(), row);
                     _hideTimer.schedule(10000);
                     return true;
                 }

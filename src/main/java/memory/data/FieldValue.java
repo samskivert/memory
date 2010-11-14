@@ -18,6 +18,14 @@ public class FieldValue implements IsSerializable
         }
     }
 
+    /** Contains a Boolean value. */
+    public static class BooleanValue extends FieldValue {
+        public boolean value;
+        public String toString () {
+            return String.valueOf(value);
+        }
+    }
+
     /** Contains a String value. */
     public static class StringValue extends FieldValue {
         public String value;
@@ -37,6 +45,13 @@ public class FieldValue implements IsSerializable
     /** Creates a long value. */
     public static FieldValue of (long value) {
         LongValue fvalue = new LongValue();
+        fvalue.value = value;
+        return fvalue;
+    }
+
+    /** Creates a Boolean value. */
+    public static FieldValue of (boolean value) {
+        BooleanValue fvalue = new BooleanValue();
         fvalue.value = value;
         return fvalue;
     }

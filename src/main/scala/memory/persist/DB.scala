@@ -65,6 +65,9 @@ trait DB
   /** Updates the specified fields of the specified datum. */
   def updateDatum (cortexId :String, id :Long, updates :Seq[(Datum.Field, FieldValue)]) :Unit
 
+  /** Marks the specified datum as archived. */
+  def archiveDatum (cortexId :String, id :Long) :Unit
+
   /** Creates a new datum and fills in its {@link Datum#id} field.
    * @return the newly assigned id. */
   def createDatum (cortexId :String, datum :Datum) :Long

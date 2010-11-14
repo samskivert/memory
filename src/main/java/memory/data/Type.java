@@ -35,8 +35,8 @@ public enum Type
     /** A type for a datum that does not yet exist. */
     NONEXISTENT(false);
 
-    public boolean hasText ()
-    {
+    /** Returns true if this datum type generally has textual contents. */
+    public boolean hasText () {
         return _hasText;
     }
 

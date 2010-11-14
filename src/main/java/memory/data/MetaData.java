@@ -13,6 +13,9 @@ import java.util.Map;
  */
 public class MetaData
 {
+    /** A key used to record whether a checklist item is 'done'. */
+    public static final String DONE = "done";
+
     /**
      * Parses the supplied metadata string into a more useful format.
      */

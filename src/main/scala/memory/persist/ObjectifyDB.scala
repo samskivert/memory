@@ -125,7 +125,8 @@ object ObjectifyDB extends DB
   // from trait DB
   def loadChildren (cortexId :String, id :Long) :Array[Datum] = {
     val obj = ObjectifyService.begin
-    val l = obj.query(classOf[DatumRow]).ancestor(cortexKey(cortexId)).filter("parentId", id).list
+    val l = obj.query(classOf[DatumRow]).ancestor(cortexKey(cortexId)).filter(
+      "parentId", id).filter("archived", false).list
     (0 until l.size) map(ii => l.get(ii)) map(toJava) toArray
   }
 
@@ -133,7 +134,7 @@ object ObjectifyDB extends DB
   def loadChildren (cortexId :String, id :Long, typ :Type) :Array[Datum] = {
     val obj = ObjectifyService.begin
     val l = obj.query(classOf[DatumRow]).ancestor(cortexKey(cortexId)).filter(
-      "parentId", id).filter("type", typ.toString).list
+      "parentId", id).filter("archived", false).filter("type", typ.toString).list
     (0 until l.size) map(ii => l.get(ii)) map(toJava) toArray
   }
 
@@ -154,10 +155,30 @@ object ObjectifyDB extends DB
   }
 
   // from trait DB
+  def archiveDatum (cortexId :String, id :Long) {
+    transaction { obj =>
+      var datum = obj.get(datumKey(cortexId, id))
+      datum.archived = true
+      // we don't update "when" when archiving a datum
+      obj.put(datum) :Key[DatumRow]
+    }
+  }
+
+  // from trait DB
   def createDatum (cortexId :String, d :Datum) = {
     transaction { obj =>
-      val key :Key[DatumRow] = obj.put(
-        datumRow(cortexId, d.parentId, d.`type`, d.meta, d.title, d.text, d.when))
+      val row = new DatumRow
+      row.cortex = cortexKey(cortexId)
+      row.parentId = d.parentId
+      row.`type` = d.`type`
+      row.meta = d.meta
+      row.titleKey = d.title.toLowerCase
+      row.title = d.title
+      row.text = d.text
+      row.when = d.when
+      // row.archived = false
+
+      val key :Key[DatumRow] = obj.put(row)
       d.id = key.getId
       d.id
     }
@@ -175,20 +196,6 @@ object ObjectifyDB extends DB
     row.id = id
     row.rootId = rootId
     row.ownerId = ownerId
-    row
-  }
-
-  private def datumRow (cortexId :String, parentId :Long, type_ :Type,
-                        meta :String, title :String, text :String, when :Long) = {
-    val row = new DatumRow
-    row.cortex = cortexKey(cortexId)
-    row.parentId = parentId
-    row.`type` = type_
-    row.meta = meta
-    row.titleKey = title.toLowerCase
-    row.title = title
-    row.text = text
-    row.when = when
     row
   }
 
@@ -211,15 +218,22 @@ object ObjectifyDB extends DB
 
   private def updateField (datum :DatumRow, field :Datum.Field, value :FieldValue) {
     field match {
-      case Datum.Field.PARENT_ID => datum.parentId = value.asInstanceOf[FieldValue.LongValue].value
-      case Datum.Field.TYPE => datum.`type` = value.asInstanceOf[FieldValue.TypeValue].value
-      case Datum.Field.META => datum.meta = value.asInstanceOf[FieldValue.StringValue].value
+      case Datum.Field.PARENT_ID =>
+        datum.parentId = value.asInstanceOf[FieldValue.LongValue].value
+      case Datum.Field.TYPE =>
+        datum.`type` = value.asInstanceOf[FieldValue.TypeValue].value
+      case Datum.Field.META =>
+        datum.meta = value.asInstanceOf[FieldValue.StringValue].value
       case Datum.Field.TITLE => {
         datum.title = value.asInstanceOf[FieldValue.StringValue].value
         datum.titleKey = datum.title.toLowerCase
       }
-      case Datum.Field.TEXT => datum.text = value.asInstanceOf[FieldValue.StringValue].value
-      case Datum.Field.WHEN => datum.when = value.asInstanceOf[FieldValue.LongValue].value
+      case Datum.Field.TEXT =>
+        datum.text = value.asInstanceOf[FieldValue.StringValue].value
+      case Datum.Field.WHEN =>
+        datum.when = value.asInstanceOf[FieldValue.LongValue].value
+      case Datum.Field.ARCHIVED =>
+        datum.archived = value.asInstanceOf[FieldValue.BooleanValue].value
       case _ => throw new IllegalArgumentException("Unknown field " + field)
     }
   }
@@ -233,6 +247,7 @@ object ObjectifyDB extends DB
     datum.title = row.title
     datum.text = row.text
     datum.when = row.when
+    datum.archived = row.archived
     datum
   }
 

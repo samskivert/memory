@@ -24,14 +24,14 @@ public class ChecklistDatumPanel extends ListDatumPanel
     @Override protected void addItems ()
     {
         for (Datum child : getOrderedChildren()) {
-            if (!_metamap.get(child.id).get(DONE, false)) {
+            if (!_metamap.get(child.id).get(MetaData.DONE, false)) {
                 addItem(_items, child);
             }
         }
 
         _doneItems = new FlowPanel();
         for (Datum child : getChildData()) { // we don't use custom order here
-            if (_metamap.get(child.id).get(DONE, false)) {
+            if (_metamap.get(child.id).get(MetaData.DONE, false)) {
                 addItem(_doneItems, child);
             }
         }
@@ -44,7 +44,7 @@ public class ChecklistDatumPanel extends ListDatumPanel
         final CheckBox box = new CheckBox();
         box.setEnabled(_ctx.canWrite());
         box.addStyleName("inline");
-        box.setValue(data.get(DONE, false));
+        box.setValue(data.get(MetaData.DONE, false));
 
         Widget ilabel = createItemLabel(item);
         ilabel.addStyleName("inline");
@@ -55,7 +55,7 @@ public class ChecklistDatumPanel extends ListDatumPanel
         box.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
             public void onValueChange (ValueChangeEvent<Boolean> event) {
                 final boolean isDone = event.getValue();
-                data.set(DONE, isDone);
+                data.set(MetaData.DONE, isDone);
                 final String meta = data.toMetaString();
                 _datasvc.updateDatum(
                     _ctx.cortexId, item.id, Datum.Field.META, FieldValue.of(meta),
@@ -78,6 +78,4 @@ public class ChecklistDatumPanel extends ListDatumPanel
     }
 
     protected FlowPanel _doneItems;
-
-    protected static final String DONE = "done";
 }
