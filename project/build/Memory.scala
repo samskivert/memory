@@ -34,6 +34,11 @@ class Memory (info :ProjectInfo) extends DefaultWebProject(info) {
   val objectify = "com.googlecode.objectify" % "objectify" % "2.2.1"
   val jpa = "javax.persistence" % "persistence-api" % "1.0"
 
+  // pass some useful arguments to javac
+  override def javaCompileOptions = List(
+    JavaCompileOption("-Xlint:all"), JavaCompileOption("-Xlint:-serial")
+  ) ++ super.javaCompileOptions
+
   // used to obtain the path for a specific dependency jar file
   def depPath (name :String) = managedDependencyRootPath ** (name+"*")
 
