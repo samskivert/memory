@@ -29,6 +29,7 @@ import com.threerings.gwt.util.ClickCallback;
 import com.threerings.gwt.util.StringUtil;
 
 import memory.data.Datum;
+import memory.data.DatumId;
 import memory.data.FieldValue;
 import memory.data.MetaData;
 import memory.data.Type;
@@ -142,10 +143,23 @@ public abstract class DatumPanel extends FlowPanel
 
     protected void addNavigation (FlowPanel header)
     {
-        Anchor cortex = new Anchor("/c/" + _ctx.cortexId.toLowerCase(), _ctx.cortexId);
-        cortex.addStyleName(_rsrc.styles().navigationLink());
-        header.add(cortex);
+        String cpath = _ctx.cortexId.toLowerCase();
+        header.add(newNavAnchor("/c/" + cpath, _ctx.cortexId));
         header.add(Widgets.newLabel(" - ", _rsrc.styles().navigationLink()));
+
+        for (DatumId p : _ctx.parents) {
+            if (p.parentId != 0) { // if parentId == 0, it's the root, which we added above
+                header.add(newNavAnchor("/c/" + cpath + "/" + p.parentId + "/" + p.title, p.title));
+                header.add(Widgets.newLabel(" - ", _rsrc.styles().navigationLink()));
+            }
+        }
+    }
+
+    protected Anchor newNavAnchor (String path, String text)
+    {
+        Anchor anchor = new Anchor(WikiUtil.appendQuery(path), text);
+        anchor.addStyleName(_rsrc.styles().navigationLink());
+        return anchor;
     }
 
     protected void addTitle (FlowPanel header)

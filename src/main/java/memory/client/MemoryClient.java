@@ -18,6 +18,7 @@ import com.threerings.gwt.ui.Widgets;
 
 import memory.data.Access;
 import memory.data.Datum;
+import memory.data.DatumId;
 import memory.data.Type;
 
 /**
@@ -35,6 +36,7 @@ public class MemoryClient implements EntryPoint
             Element relem = root.getElement();
             relem.removeFromParent();
             String cortexId = relem.getAttribute("x:cortex");
+            List<DatumId> parents = parseParents(RootPanel.get(PATH_DIV).getElement());
             Access access;
             try {
                 access = Enum.valueOf(Access.class, relem.getAttribute("x:access"));
@@ -43,7 +45,7 @@ public class MemoryClient implements EntryPoint
             }
             for (Datum datum : parseChildren(relem)) {
                 RootPanel.get(CLIENT_DIV).add(
-                    DatumPanel.create(new Context(true, cortexId, access), datum));
+                    DatumPanel.create(new Context(true, cortexId, access, parents), datum));
             }
         }
     }
@@ -80,6 +82,25 @@ public class MemoryClient implements EntryPoint
         return children;
     }
 
+    protected static List<DatumId> parseParents (Element elem)
+    {
+        List<DatumId> parents = new ArrayList<DatumId>();
+        for (int ii = 0, ll = elem.getChildCount(); ii < ll; ii++) {
+            Node node = elem.getChild(ii);
+            if (node.getNodeType() == Node.ELEMENT_NODE) {
+                Element enode = (Element)node;
+                try {
+                    parents.add(new DatumId(Long.parseLong(enode.getAttribute("x:parentId")),
+                                            enode.getAttribute("x:title")));
+                } catch (Exception e) {
+                    GWT.log("Failed to parse parent " + node, e);
+                }
+            }
+        }
+        return parents;
+    }
+
     protected static final String CLIENT_DIV = "client";
     protected static final String ROOT_DIV = "root";
+    protected static final String PATH_DIV = "path";
 }

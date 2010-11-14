@@ -56,6 +56,24 @@ class GetServlet extends HttpServlet
         case _ => throw new Error("Invalid path " + req.getPathInfo)
       }
 
+      def loadParents (d :Datum) :List[Datum] = {
+        if (d.parentId == 0L) Nil
+        else if (d.parentId == root.id) root :: Nil
+        else {
+          val p = db.loadDatum(cortexId, d.parentId)
+          p :: loadParents(p)
+        }
+      }
+      def trimPath (path :List[Datum]) = {
+        def trim (path :List[Datum], skip :Boolean) :List[Datum] = path match {
+          case h :: t => if (skip) trim(t, h.`type` == Type.PAGE)
+                         else h :: trim(t, h.`type` == Type.PAGE)
+          case _ => Nil
+        }
+        trim(path, false)
+      }
+      val path = trimPath(loadParents(datum).reverse)
+
       // check whether this user can access this data
       val user = Option(_usvc.getCurrentUser)
       lazy val publicAccess = db.loadAccess(DataService.NO_USER, cortexId) getOrElse(
@@ -76,12 +94,18 @@ class GetServlet extends HttpServlet
         _bssvc.serve(new BlobKey(datum.meta), rsp)
 
       } else {
+        val out = rsp.getWriter
+        out.println(ServletUtil.htmlHeader(datum.title + " (" + cortexId + ")"))
+        val pxml = <div style="display:none" id="path">{
+          path.map(p => <div x:parentId={p.parentId.toString} x:title={p.title}/>)
+        }</div>
+        XML.write(out, pxml, null, false, null)
+        out.println
         val xml = <div style="display: none" id="root" x:cortex={cortexId} x:access={
           access.toString} x:publicAccess={publicAccess.toString}>{"\n  "}{
             toXML(MemoryLogic.resolveChildren(cortexId)(datum))}{"\n"}</div>
-        val out = rsp.getWriter
-        out.println(ServletUtil.htmlHeader(datum.title + " (" + cortexId + ")"))
         XML.write(out, xml, null, false, null)
+        out.println
         out.println(GwitBits)
         out.println(ServletUtil.htmlFooter)
       }
@@ -122,17 +146,8 @@ class GetServlet extends HttpServlet
   private val _bssvc = BlobstoreServiceFactory.getBlobstoreService
   private val _log = java.util.logging.Logger.getLogger("GetServlet")
 
-  private val Header = """
-  |<?xml version="1.0" encoding="UTF-8" ?>
-  |<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
-  |<html xmlns="http://www.w3.org/1999/xhtml">
-  |<head><title>Memory</title>
-  |<meta name="viewport" content="width = device-width, user-scalable = no"/></head>
-  |<body>
-  """.stripMargin
-
   private val GwitBits = """
-  |  <div id="client"></div>
-  |  <script src="/memory/memory.nocache.js" type="text/javascript"></script>
-  """.stripMargin
+  |<div id="client"></div>
+  |<script src="/memory/memory.nocache.js" type="text/javascript"></script>
+  """.stripMargin.trim
 }

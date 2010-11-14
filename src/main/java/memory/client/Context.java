@@ -3,27 +3,34 @@
 
 package memory.client;
 
+import java.util.List;
+
 import memory.data.Access;
+import memory.data.DatumId;
 
 /**
- * Does something extraordinary.
+ * Contains information that's passed down through the UI.
  */
 public class Context
 {
     /** Whether or not we're the top-most datum. */
-    public boolean topLevel;
+    public final boolean topLevel;
 
     /** The id of the cortex we're displaying. */
-    public String cortexId;
+    public final String cortexId;
 
     /** Whether we have read or write access to this cortex. */
-    public Access access;
+    public final Access access;
 
-    public Context (boolean topLevel, String cortexId, Access access)
+    /** The parents on the path to this datum (not including the cortex root). */
+    public final List<DatumId> parents;
+
+    public Context (boolean topLevel, String cortexId, Access access, List<DatumId> parents)
     {
         this.topLevel = topLevel;
         this.cortexId = cortexId;
         this.access = access;
+        this.parents = parents;
     }
 
     /**
@@ -31,7 +38,7 @@ public class Context
      */
     public Context getChild ()
     {
-        return topLevel ? new Context(false, cortexId, access) : this;
+        return topLevel ? new Context(false, cortexId, access, parents) : this;
     }
 
     /**

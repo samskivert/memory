@@ -34,16 +34,18 @@ public class WikiUtil
      */
     public static String makePath (String cortexId, long parentId, String name)
     {
-        String path = "/c/" + cortexId + "/" + parentId + "/" + name;
+        return appendQuery("/c/" + cortexId + "/" + parentId + "/" + name);
+    }
 
+    /**
+     * Appends the current browser query string to the supplied path.
+     */
+    public static String appendQuery (String path)
+    {
         // preserve the query string to make life in GWT devmode easier
         String url = Document.get().getURL();
         int qidx = url.indexOf("?");
-        if (qidx != -1) {
-            path = path + url.substring(qidx);
-        }
-
-        return path;
+        return (qidx == -1) ? path : path + url.substring(qidx);
     }
 
     protected static class MemoryWikiParser extends WikiParser
