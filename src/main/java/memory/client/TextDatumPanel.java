@@ -131,13 +131,22 @@ public abstract class TextDatumPanel extends DatumPanel
         final FileUpload file = new FileUpload();
         file.setName("media");
 
+        // these two hidden form fields will convey additional info to the upload servlet
+        final TextBox cortexId = Widgets.newTextBox(_ctx.cortexId, -1, -1);
+        cortexId.setName("cortexId");
+        cortexId.setVisible(false);
+        final TextBox parentId = Widgets.newTextBox(""+_datum.id, -1, -1);
+        parentId.setName("parentId");
+        parentId.setVisible(false);
+
         final FormPanel form = new FormPanel();
         form.setEncoding(FormPanel.ENCODING_MULTIPART);
         form.setMethod(FormPanel.METHOD_POST);
         form.setWidget(new FluentTable(0, 2).add().setText("Pick file:").
                        right().setWidget(file).setColSpan(2).
                        add().setText("Name:").right().setWidget(name).
-                       right().setWidget(upload).alignRight().table());
+                       right().setWidget(upload).alignRight().
+                       add().setWidget(cortexId).right().setWidget(parentId).table());
 
         refreshUploadURL(form, upload);
 
@@ -208,8 +217,7 @@ public abstract class TextDatumPanel extends DatumPanel
         upload.setEnabled(false);
         _datasvc.getUploadURL(new PopupCallback<String>(form) {
             public void onSuccess (String url) {
-                String sep = (url.indexOf("?") == -1) ? "?" : "&";
-                form.setAction(url + sep + "cortexId=" + _ctx.cortexId + "&parentId=" + _datum.id);
+                form.setAction(url);
                 upload.setEnabled(true);
             }
         });
