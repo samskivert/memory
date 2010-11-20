@@ -36,15 +36,14 @@
 
     <div class="{_styles.title}">Cortices</div>
     <table>
-    <tr><td align="right">Read/write:</td>
-        <td><g:FlowPanel styleName="{_styles.cortexen}" ui:field="_readWrite"/></td></tr>
-    <tr><td align="right">Read-only:</td>
-        <td><g:FlowPanel styleName="{_styles.cortexen}" ui:field="_readOnly"/></td></tr>
-
-    <tr><td>Create cortex:</td>
-        <td><g:TextBox ui:field="_name" visibleLength="20"/>
-            <g:Button ui:field="_create">Create</g:Button></td></tr>
+    <tr><td width="250"><em>Yours</em></td><td><em>Shared with you</em></td></tr>
+    <tr><td><g:FlowPanel styleName="{_styles.cortexen}" ui:field="_owned"/></td>
+        <td><g:FlowPanel styleName="{_styles.cortexen}" ui:field="_shared"/></td></tr>
     </table>
+
+    <div class="{_styles.title}">Create Cortex</div>
+    <g:TextBox ui:field="_name" visibleLength="20"/>
+    <g:Button ui:field="_create">Create</g:Button>
 
   </g:HTMLPanel>
 </ui:UiBinder>

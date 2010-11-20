@@ -25,6 +25,9 @@ public class CortexAccess
     /** The cortex in question. */
     public String cortexId;
 
+    /** The email used to grant the user access. */
+    @Unindexed public String email;
+
     /** The user's access to the datum. */
     @Unindexed public Access access;
 }

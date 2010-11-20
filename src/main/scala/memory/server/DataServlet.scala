@@ -3,14 +3,16 @@
 
 package memory.server
 
+import scala.collection.mutable.{Seq => MSeq}
 import scalaj.collection.Imports._
 
+import java.util.{Map => JMap, List => JList, ArrayList => JArrayList}
 import com.google.gwt.user.server.rpc.RemoteServiceServlet
 
 import com.google.appengine.api.users.{User, UserServiceFactory}
 import com.google.appengine.api.blobstore.{BlobstoreServiceFactory}
 
-import memory.data.{Access, Datum, FieldValue, Type}
+import memory.data.{Access, AccessInfo, Datum, FieldValue, Type}
 import memory.persist.DB
 import memory.rpc.{DataService, ServiceException}
 
@@ -32,12 +34,24 @@ class DataServlet extends RemoteServiceServlet with DataService
     val result = new DataService.AccountResult
     result.userId = user.getUserId
     result.nickname = user.getNickname
-    result.cortexen = new java.util.HashMap[Access, java.util.List[String]]
-    for ((k, v) <- db.loadCortexAccess(user.getUserId) groupBy(_._1)) {
-      val list = new java.util.ArrayList[String]
-      v foreach { p => list.add(p._2) }
-      result.cortexen.put(k, list)
+    result.owned = new JArrayList
+    result.shared = new JArrayList
+    for (info <- db.loadAccessibleCortices(user.getUserId)) {
+      if (info.email == null || info.email == "") {
+        result.owned.add(info.cortexId)
+      } else {
+        result.shared.add(info)
+      }
     }
+    result
+  }
+
+  // from DataService
+  def loadAccessInfo (cortexId :String) :JList[AccessInfo] = {
+    if (requireUser.getUserId != db.loadOwner(cortexId))
+      throw new ServiceException("e.access_denied")
+    val result = new JArrayList[AccessInfo]
+    result.addAll(db.loadCortexAccess(cortexId).asJava)
     result
   }
 
@@ -58,6 +72,20 @@ class DataServlet extends RemoteServiceServlet with DataService
   }
 
   // from DataService
+  def shareCortex (cortexId :String, email :String, access :Access) {
+    if (requireUser.getUserId != db.loadOwner(cortexId))
+      throw new ServiceException("e.access_denied")
+    // TODO: create pending share row
+    // TODO: send email
+  }
+
+  // from DataService
+  def updateCortexAccess (id :Long, access :Access) {
+    if (!db.updateCortexAccess(id, requireUser.getUserId, access))
+      throw new ServiceException("e.access_denied")
+  }
+
+  // from DataService
   def createDatum (cortexId :String, datum :Datum) = {
     requireWriteAccess(cortexId)
     db.createDatum(cortexId, datum)
@@ -71,7 +99,7 @@ class DataServlet extends RemoteServiceServlet with DataService
   }
 
   // from DataService
-  def updateDatum (cortexId :String, id :Long, updates :java.util.Map[Datum.Field, FieldValue]) {
+  def updateDatum (cortexId :String, id :Long, updates :JMap[Datum.Field, FieldValue]) {
     import scalaj.collection.Imports._ // for asScala
     requireWriteAccess(cortexId)
     db.updateDatum(cortexId, id, updates.asScala.toSeq)
@@ -79,10 +107,10 @@ class DataServlet extends RemoteServiceServlet with DataService
   }
 
   // from DataService
-  def updateAccess (userId :String, cortexId :String, datumId :Long, access :Access) {
+  def updatePublicAccess (cortexId :String, datumId :Long, access :Access) {
     if (requireUser.getUserId != db.loadOwner(cortexId))
       throw new ServiceException("e.access_denied")
-    db.updateAccess(userId, cortexId, datumId, access)
+    db.updateDatumAccess(DataService.NO_USER, cortexId, datumId, access)
   }
 
   // from DataService

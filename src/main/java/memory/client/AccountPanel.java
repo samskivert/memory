@@ -23,6 +23,7 @@ import com.threerings.gwt.ui.Widgets;
 import com.threerings.gwt.util.ClickCallback;
 
 import memory.data.Access;
+import memory.data.AccessInfo;
 import memory.rpc.DataService;
 import memory.rpc.DataServiceAsync;
 
@@ -38,8 +39,8 @@ public class AccountPanel extends Composite
         _nickname.setText(data.nickname);
         _nickname.setTitle(data.userId);
 
-        addCortexenLinks(data.cortexen.get(Access.WRITE), _readWrite);
-        addCortexenLinks(data.cortexen.get(Access.READ), _readOnly);
+        addOwnedLinks(data.owned);
+        addSharedLinks(data.shared);
 
         new ClickCallback<Void>(_create, _name) {
             protected boolean callService () {
@@ -52,12 +53,8 @@ public class AccountPanel extends Composite
                 return true;
             }
             protected boolean gotResult (Void result) {
-                List<String> write = data.cortexen.get(Access.WRITE);
-                if (write == null) {
-                    data.cortexen.put(Access.WRITE, write = new ArrayList<String>());
-                }
-                write.add(_nname);
-                addCortexenLinks(write, _readWrite);
+                data.owned.add(_nname);
+                addOwnedLinks(data.owned);
                 Popups.infoBelow("Cortex created!", getPopupNear());
                 _name.setText("");
                 return true;
@@ -66,16 +63,29 @@ public class AccountPanel extends Composite
         };
     }
 
-    protected void addCortexenLinks (List<String> cortexen, FlowPanel target)
+    protected void addOwnedLinks (List<String> cortexen)
     {
-        target.clear();
+        _owned.clear();
         if (cortexen != null) {
             for (String cortex : cortexen) {
-                target.add(new Anchor("/c/" + cortex.toLowerCase(), cortex));
+                _owned.add(new Anchor("/c/" + cortex.toLowerCase(), cortex));
             }
         }
-        if (target.getWidgetCount() == 0) {
-            target.add(Widgets.newLabel("None", _styles.none()));
+        if (_owned.getWidgetCount() == 0) {
+            _owned.add(Widgets.newLabel("None", _styles.none()));
+        }
+    }
+
+    protected void addSharedLinks (List<AccessInfo> cortexen)
+    {
+        _shared.clear();
+        if (cortexen != null) {
+            for (AccessInfo info : cortexen) {
+                _shared.add(new Anchor("/c/" + info.cortexId.toLowerCase(), info.cortexId));
+            }
+        }
+        if (_shared.getWidgetCount() == 0) {
+            _shared.add(Widgets.newLabel("None", _styles.none()));
         }
     }
 
@@ -87,8 +97,8 @@ public class AccountPanel extends Composite
 
     protected @UiField Label _nickname;
     protected @UiField Button _logout;
-    protected @UiField FlowPanel _readWrite;
-    protected @UiField FlowPanel _readOnly;
+    protected @UiField FlowPanel _owned;
+    protected @UiField FlowPanel _shared;
 
     protected @UiField TextBox _name;
     protected @UiField Button _create;

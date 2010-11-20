@@ -11,6 +11,7 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 import memory.data.Access;
+import memory.data.AccessInfo;
 import memory.data.Datum;
 import memory.data.FieldValue;
 import memory.data.Type;
@@ -36,8 +37,11 @@ public interface DataService extends RemoteService
         /** The nickname as which the user is logged in. */
         public String nickname;
 
-        /** The cortices to which this user has access. */
-        public Map<Access, List<String>> cortexen;
+        /** The list of cortices owned by this user. */
+        public List<String> owned;
+
+        /** The list of cortices shared with this user. */
+        public List<AccessInfo> shared;
     }
 
     /** Returned by {@link #loadAccessInfo}. */
@@ -53,12 +57,23 @@ public interface DataService extends RemoteService
     /** Loads info for the authenticated account. */
     AccountResult loadAccountInfo () throws ServiceException;
 
+    /** Loads the access information for the specified cortex. */
+    List<AccessInfo> loadAccessInfo (String cortexId) throws ServiceException;
+
     /** Loads the access information for the specified datum. */
     AccessResult loadAccessInfo (String cortexId, long datumId) throws ServiceException;
 
     /** Creates a new cortex with the specified id.
      * @exception ServiceException thrown with `e.name_in_use` if the requested name is used. */
     void createCortex (String cortexId) throws ServiceException;
+
+    /** Requests to share the specified cortex with the supplied email address. */
+    void shareCortex (String cortexId, String email, Access access)
+        throws ServiceException;
+
+    /** Updates the specified existing cortex access record. */
+    void updateCortexAccess (long id, Access access)
+        throws ServiceException;
 
     /** Creates a new datum for the calling user.
      * @return the id of the newly created datum. */
@@ -72,8 +87,8 @@ public interface DataService extends RemoteService
     void updateDatum (String cortexId, long id, Map<Datum.Field, FieldValue> updates)
         throws ServiceException;
 
-    /** Updates access to the specified datum for the specified user. */
-    void updateAccess (String userId, String cortexId, long datumId, Access access)
+    /** Updates public access to the specified datum. */
+    void updatePublicAccess (String cortexId, long datumId, Access access)
         throws ServiceException;
 
     /** Loads the journal data for the specified date. */

@@ -3,9 +3,11 @@
 
 package memory.rpc;
 
+import java.util.List;
 import java.util.Map;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import memory.data.Access;
+import memory.data.AccessInfo;
 import memory.data.Datum;
 
 import memory.data.FieldValue;
@@ -26,6 +28,11 @@ public interface DataServiceAsync
     void updateDatum (String cortexId, long id, Map<Datum.Field, FieldValue> field, AsyncCallback<Void> callback);
 
     /**
+     * The async version of {@link DataService#getUploadURL}.
+     */
+    void getUploadURL (AsyncCallback<String> callback);
+
+    /**
      * The async version of {@link DataService#loadJournalData}.
      */
     void loadJournalData (String cortexId, long journalId, long when, AsyncCallback<Datum> callback);
@@ -38,7 +45,12 @@ public interface DataServiceAsync
     /**
      * The async version of {@link DataService#loadAccessInfo}.
      */
-    void loadAccessInfo (String cortexId, long datumId, AsyncCallback<DataService.AccessResult> callback);
+    void loadAccessInfo (String cortexId, AsyncCallback<List<AccessInfo>> callback);
+
+    /**
+     * The async version of {@link DataService#loadAccessInfo}.
+     */
+    void loadAccessInfo (String cortexId, long arg1, AsyncCallback<DataService.AccessResult> callback);
 
     /**
      * The async version of {@link DataService#createCortex}.
@@ -51,17 +63,22 @@ public interface DataServiceAsync
     void createDatum (String cortexId, Datum datum, AsyncCallback<Long> callback);
 
     /**
-     * The async version of {@link DataService#updateAccess}.
-     */
-    void updateAccess (String userId, String cortexId, long datumId, Access access, AsyncCallback<Void> callback);
-
-    /**
      * The async version of {@link DataService#deleteDatum}.
      */
     void deleteDatum (String cortextId, long id, AsyncCallback<Void> callback);
 
     /**
-     * The async version of {@link DataService#getUploadURL}.
+     * The async version of {@link DataService#shareCortex}.
      */
-    void getUploadURL (AsyncCallback<String> callback);
+    void shareCortex (String cortexId, String email, Access access, AsyncCallback<Void> callback);
+
+    /**
+     * The async version of {@link DataService#updateCortexAccess}.
+     */
+    void updateCortexAccess (long id, Access access, AsyncCallback<Void> callback);
+
+    /**
+     * The async version of {@link DataService#updatePublicAccess}.
+     */
+    void updatePublicAccess (String cortexId, long datumId, Access access, AsyncCallback<Void> callback);
 }

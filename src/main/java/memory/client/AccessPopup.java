@@ -49,8 +49,7 @@ public class AccessPopup extends PopupPanel
         pubAccess.setSelectedValue(access.publicAccess);
         pubAccess.addChangeHandler(new ChangeHandler() {
             public void onChange (ChangeEvent event) {
-                _datasvc.updateAccess(
-                    DataService.NO_USER, ctx.cortexId, datum.id, pubAccess.getSelectedValue(),
+                _datasvc.updatePublicAccess(ctx.cortexId, datum.id, pubAccess.getSelectedValue(),
                     new PopupCallback<Void>(pubAccess) {
                     public void onSuccess (Void result) {
                         Popups.infoBelow("Access updated.", pubAccess);

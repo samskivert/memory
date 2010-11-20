@@ -9,7 +9,7 @@ import scalaj.collection.Imports._
 import com.googlecode.objectify.{Key, Objectify, ObjectifyService}
 import com.googlecode.objectify.annotation.Unindexed
 
-import memory.data.{Access, Datum, FieldValue, Type}
+import memory.data.{Access, AccessInfo, Datum, FieldValue, Type}
 
 /**
  * Implements the database via Objectify (which builds on GAE Data Store).
@@ -56,7 +56,7 @@ object ObjectifyDB extends DB
     }
     transaction { obj =>
       // we have to force the return type below to resolve pesky overload of put()
-      obj.put(cortexAccess(ownerId, cortexId, Access.WRITE)) :Key[CortexAccess]
+      obj.put(cortexAccess(ownerId, cortexId, "", Access.WRITE)) :Key[CortexAccess]
     }
     true
   }
@@ -88,22 +88,38 @@ object ObjectifyDB extends DB
   }
 
   // from trait DB
-  def loadCortexAccess (userId :String) :Seq[(Access,String)] = {
+  def loadAccessibleCortices (userId :String) :Seq[AccessInfo] = {
     val obj = ObjectifyService.begin
-    obj.query(classOf[CortexAccess]).ancestor(userKey(userId)).list.asScala map(
-      ca => (ca.access, ca.cortexId))
+    obj.query(classOf[CortexAccess]).ancestor(userKey(userId)).list.asScala map(toAccessInfo)
   }
 
   // from trait DB
-  def updateAccess (userId :String, cortexId :String, access :Access) :Unit = {
+  def loadCortexAccess (cortexId :String) :Seq[AccessInfo] = {
+    val obj = ObjectifyService.begin
+    obj.query(classOf[CortexAccess]).filter("cortexId", cortexId).list.asScala map(toAccessInfo)
+  }
+
+  // from trait DB
+  def updateCortexAccess (id :Long, callerId :String, access :Access) = {
     transaction { obj =>
-      // TODO: if access == NONE, remove it
-      obj.put(cortexAccess(userId, cortexId, access)) :Key[CortexAccess]
+      val arow :CortexAccess = obj.get(classOf[CortexAccess], id)
+      if (arow == null) {
+        _log.info("Requested to update non-existent access [id=" + id + ", access=" + access + "]")
+        false
+      } else {
+        if (loadOwner(arow.cortexId) != callerId) false
+        else {
+          // TODO: if access == NONE, remove it
+          arow.access = access
+          obj.put(arow) :Key[CortexAccess]
+          true
+        }
+      }
     }
   }
 
   // from trait DB
-  def updateAccess (userId :String, cortexId :String, datumId :Long, access :Access) {
+  def updateDatumAccess (userId :String, cortexId :String, datumId :Long, access :Access) {
     transaction { obj =>
       obj.put(datumAccess(userId, cortexId, datumId, access)) :Key[DatumAccess]
     }
@@ -199,10 +215,11 @@ object ObjectifyDB extends DB
     row
   }
 
-  private def cortexAccess (userId :String, cortexId :String, access :Access) = {
+  private def cortexAccess (userId :String, cortexId :String, email :String, access :Access) = {
     val acc = new CortexAccess
     acc.userId = userKey(userId)
     acc.cortexId = cortexId
+    acc.email = email
     acc.access = access
     acc
   }
@@ -255,6 +272,8 @@ object ObjectifyDB extends DB
   private def cortexKey (cortexId :String) = new Key(classOf[CortexRow], cortexId)
   private def datumKey (cortexId :String, datumId :Long) =
     new Key(cortexKey(cortexId), classOf[DatumRow], datumId)
+  private def toAccessInfo (ca :CortexAccess) =
+    new AccessInfo(ca.id.longValue, ca.cortexId, ca.email, ca.access)
 
   private def transaction[T] (action :Objectify => T) = {
     if (_txobj != null) {
@@ -273,4 +292,5 @@ object ObjectifyDB extends DB
   }
 
   private[this] var _txobj :Objectify = _
+  private val _log = java.util.logging.Logger.getLogger("objdb")
 }

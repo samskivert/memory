@@ -3,7 +3,7 @@
 
 package memory.persist
 
-import memory.data.{Access, Datum, FieldValue, Type}
+import memory.data.{Access, AccessInfo, Datum, FieldValue, Type}
 
 /**
  * Defines the interface to our persistence services.
@@ -38,14 +38,17 @@ trait DB
    * @param userId the id of the user to be checked. */
   def loadAccess (userId :String, cortexId :String, datumId :Long) :Option[Access]
 
-  /** Returns the cortices to which the supplied user has access. */
-  def loadCortexAccess (userId :String) :Seq[(Access,String)]
+  /** Returns the cortices to which the supplied user has access as (access, cortexId). */
+  def loadAccessibleCortices (userId :String) :Seq[AccessInfo]
 
-  /** Updates the access permissions for the specified user for the specified cortex. */
-  def updateAccess (userId :String, cortexId :String, access :Access) :Unit
+  /** Returns the users that have access to the supplied cortex. */
+  def loadCortexAccess (cortexId :String) :Seq[AccessInfo]
+
+  /** Updates the access permissions for the specified access row. */
+  def updateCortexAccess (id :Long, callerId :String, access :Access) :Boolean
 
   /** Updates the access permissions for the specified user for the specified datum. */
-  def updateAccess (userId :String, cortexId :String, datumId :Long, access :Access) :Unit
+  def updateDatumAccess (userId :String, cortexId :String, datumId :Long, access :Access) :Unit
 
   /** Loads the specified datum. Throws an excepton if it does not exist. */
   def loadDatum (cortexId :String, id :Long) :Datum
