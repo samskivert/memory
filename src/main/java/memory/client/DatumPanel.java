@@ -25,7 +25,6 @@ import com.threerings.gwt.ui.FluentTable;
 import com.threerings.gwt.ui.NumberTextBox;
 import com.threerings.gwt.ui.Popups;
 import com.threerings.gwt.ui.Widgets;
-import com.threerings.gwt.util.ClickCallback;
 import com.threerings.gwt.util.StringUtil;
 
 import memory.data.Datum;
@@ -82,7 +81,7 @@ public abstract class DatumPanel extends FlowPanel
             header = Widgets.newFlowPanel(getHeaderStyle());
             add(header);
         }
-        if (_ctx.canWrite()) {
+        if (_ctx.canOpenEditor()) {
             addEditButton(header);
         }
         if (_ctx.topLevel) {
@@ -177,7 +176,7 @@ public abstract class DatumPanel extends FlowPanel
         final Type otype = _datum.type;
         Button update = new Button("Update");
         update.addStyleName(_rsrc.styles().editorUpdateButton());
-        new ClickCallback<Void>(update) {
+        new MClickCallback<Void>(update) {
             protected boolean callService () {
                 Map<Datum.Field, FieldValue> updates = new HashMap<Datum.Field, FieldValue>();
                 for (BitsUpdater updater : _updaters) {
@@ -267,7 +266,7 @@ public abstract class DatumPanel extends FlowPanel
         final Button add = new Button("Add");
         editor.add(newRow("Title:", title, type, add));
 
-        new ClickCallback<Long>(add) {
+        new MClickCallback<Long>(add) {
             protected boolean callService () {
                 _child = createChildDatum(type.getSelectedValue(), title.getText(), null);
                 _datasvc.createDatum(_ctx.cortexId, _child, this);

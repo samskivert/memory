@@ -11,7 +11,6 @@ import com.google.gwt.user.client.ui.Panel;
 
 import com.threerings.gwt.ui.EnumListBox;
 import com.threerings.gwt.ui.Widgets;
-import com.threerings.gwt.util.ClickCallback;
 
 import memory.data.Datum;
 import memory.data.Type;
@@ -33,7 +32,7 @@ public class NonExistentDatumPanel extends DatumPanel
         final Button create = new Button("Create");
         add(Widgets.newRow(Widgets.newLabel("Type:"), type, create));
 
-        new ClickCallback<Long>(create) {
+        new MClickCallback<Long>(create) {
             protected boolean callService () {
                 _datum.type = type.getSelectedValue();
                 if (_datum.type.hasText()) {

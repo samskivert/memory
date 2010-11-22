@@ -26,8 +26,6 @@ import com.threerings.gwt.ui.Bindings;
 import com.threerings.gwt.ui.FluentTable;
 import com.threerings.gwt.ui.Popups;
 import com.threerings.gwt.ui.Widgets;
-import com.threerings.gwt.util.ClickCallback;
-import com.threerings.gwt.util.PopupCallback;
 import com.threerings.gwt.util.Value;
 
 import memory.data.Datum;
@@ -101,17 +99,25 @@ public abstract class TextDatumPanel extends DatumPanel
         Value<Boolean> uploadShowing = Value.create(false);
         media.add(Widgets.newActionLabel("upload", _rsrc.styles().floatRight(),
                                          Bindings.makeToggler(uploadShowing)));
-        editor.add(media);
+        if (_ctx.canOpenEditor()) {
+            editor.add(media);
+        }
 
-        Widget utitle = Widgets.newLabel("Upload media:", _rsrc.styles().editorTitle());
-        Bindings.bindVisible(uploadShowing, utitle);
-        editor.add(utitle);
+        if (_ctx.canWrite()) {
+            Widget utitle = Widgets.newLabel("Upload media:", _rsrc.styles().editorTitle());
+            Bindings.bindVisible(uploadShowing, utitle);
+            editor.add(utitle);
 
-        Bindings.bindVisible(uploadShowing, new Bindings.Thunk() {
-            public Widget createWidget () {
-                return createUploadUI(editor, media);
-            }
-        });
+            Bindings.bindVisible(uploadShowing, new Bindings.Thunk() {
+                public Widget createWidget () {
+                    return createUploadUI(editor, media);
+                }
+            });
+        } else {
+            Widget demoup = Widgets.newLabel("Uploads not enabled for demo wiki.");
+            Bindings.bindVisible(uploadShowing, demoup);
+            editor.add(demoup);
+        }
     }
 
     protected void addMediaChild (FlowPanel media, Datum child)
@@ -215,7 +221,7 @@ public abstract class TextDatumPanel extends DatumPanel
     protected void refreshUploadURL (final FormPanel form, final Button upload)
     {
         upload.setEnabled(false);
-        _datasvc.getUploadURL(new PopupCallback<String>(form) {
+        _datasvc.getUploadURL(new MPopupCallback<String>(form) {
             public void onSuccess (String url) {
                 form.setAction(url);
                 upload.setEnabled(true);

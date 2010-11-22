@@ -43,7 +43,7 @@ public class ChecklistDatumPanel extends ListDatumPanel
     {
         final MetaData data = _metamap.get(item.id);
         final CheckBox box = new CheckBox();
-        box.setEnabled(_ctx.canWrite());
+        box.setEnabled(_ctx.canOpenEditor());
         box.addStyleName("inline");
         box.setValue(data.get(MetaData.DONE, false));
 

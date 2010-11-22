@@ -19,7 +19,6 @@ import com.threerings.gwt.ui.ItemListBox;
 import com.threerings.gwt.ui.NumberTextBox;
 import com.threerings.gwt.ui.Popups;
 import com.threerings.gwt.ui.Widgets;
-import com.threerings.gwt.util.ClickCallback;
 
 import memory.data.Datum;
 import memory.data.FieldValue;

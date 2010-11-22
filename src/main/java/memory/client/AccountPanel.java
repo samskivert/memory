@@ -22,7 +22,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.threerings.gwt.ui.Anchor;
 import com.threerings.gwt.ui.Popups;
 import com.threerings.gwt.ui.Widgets;
-import com.threerings.gwt.util.ClickCallback;
 
 import memory.data.Access;
 import memory.data.AccessInfo;
@@ -44,7 +43,7 @@ public class AccountPanel extends Composite
         addOwnedLinks(data.owned);
         addSharedLinks(data.shared);
 
-        new ClickCallback<Void>(_create, _name) {
+        new MClickCallback<Void>(_create, _name) {
             protected boolean callService () {
                 _nname = _name.getText().trim();
                 if (_nname.length() < 4) {

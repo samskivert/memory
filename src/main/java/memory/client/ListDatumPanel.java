@@ -36,8 +36,6 @@ import com.allen_sauer.gwt.dnd.client.PickupDragController;
 
 import com.threerings.gwt.ui.Popups;
 import com.threerings.gwt.ui.Widgets;
-import com.threerings.gwt.util.ClickCallback;
-import com.threerings.gwt.util.PopupCallback;
 
 import memory.data.Datum;
 import memory.data.FieldValue;
@@ -88,7 +86,7 @@ public class ListDatumPanel extends DatumPanel
         add(_items = new FlowPanel());
         addItems();
 
-        if (_ctx.canWrite()) {
+        if (_ctx.canOpenEditor()) {
             _itext = Widgets.newTextBox("", -1, 20);
             _itext.addStyleName(_rsrc.styles().width99());
             final Button add = new Button("Add");
@@ -96,7 +94,7 @@ public class ListDatumPanel extends DatumPanel
             add(_addui);
             maybeHideAddUI();
 
-            new ClickCallback<Long>(add, _itext) {
+            new MClickCallback<Long>(add, _itext) {
                 protected boolean callService () {
                     String text = _itext.getText().trim();
                     if (text.length() == 0) {
@@ -205,7 +203,7 @@ public class ListDatumPanel extends DatumPanel
         _meta.setIds(ORDER_KEY, ids);
         _datasvc.updateDatum(
             _ctx.cortexId, _datum.id, Datum.Field.META, FieldValue.of(_meta.toMetaString()),
-            new PopupCallback<Void>(items) {
+            new MPopupCallback<Void>(items) {
             public void onSuccess (Void result) {
                 Popups.infoBelow("Order updated.", items);
             }
@@ -274,7 +272,7 @@ public class ListDatumPanel extends DatumPanel
             gaps(9);
 
             // wire up our update callback
-            new ClickCallback<Void>(update, text) {
+            new MClickCallback<Void>(update, text) {
                 protected boolean callService () {
                     _text = text.getText().trim();
                     _datasvc.updateDatum(_ctx.cortexId, item.id,
@@ -290,7 +288,7 @@ public class ListDatumPanel extends DatumPanel
             };
 
             // wire up our delete callback
-            new ClickCallback<Void>(delete) {
+            new MClickCallback<Void>(delete) {
                 protected boolean callService () {
                     _datasvc.deleteDatum(_ctx.cortexId, item.id, this);
                     return true;

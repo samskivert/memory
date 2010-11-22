@@ -42,10 +42,18 @@ public class Context
     }
 
     /**
+     * Whether or not we can activate the editor in this context.
+     */
+    public boolean canOpenEditor ()
+    {
+        return true; // return canWrite() || access == Access.DEMO;
+    }
+
+    /**
      * Whether or not we can make modifications in this context.
      */
     public boolean canWrite ()
     {
-        return access == Access.WRITE;
+        return false; // return access == Access.WRITE;
     }
 }

@@ -157,8 +157,12 @@ class DataServlet extends RemoteServiceServlet with DataService
   }
 
   private def requireWriteAccess (cortexId :String) {
-    if (db.loadAccess(requireUser.getUserId, cortexId).getOrElse(Access.NONE) != Access.WRITE)
-      throw new ServiceException("e.lack_write_access")
+    throw new ServiceException("e.in_demo_mode")
+    // db.loadAccess(requireUser.getUserId, cortexId).getOrElse(Access.NONE) match {
+    //   case Access.WRITE => // peachy
+    //   case Access.DEMO => throw new ServiceException("e.in_demo_mode")
+    //   case _ => throw new ServiceException("e.lack_write_access")
+    // }
   }
 
   private def createRoot (cortexId :String) = {
