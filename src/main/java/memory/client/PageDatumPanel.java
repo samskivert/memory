@@ -120,18 +120,25 @@ public class PageDatumPanel extends DatumPanel
         _break2 = Widgets.newLabel("Column 3", _rsrc.styles().editorChildItem(),
                                    _rsrc.styles().textCenter());
 
-        for (Datum child : _datum.children) {
+        for (Datum child : getOrderedChildren()) {
             addChildWidget(kids, child);
+            if (_meta.get(BREAK1_KEY, 0L) == child.id) {
+                kids.addItem(-1L, _break1);
+            } else if (_meta.get(BREAK2_KEY, 0L) == child.id) {
+                kids.addItem(-2L, _break2);
+            }
         }
 
         // if we haven't already added our column breaks, add them now
         if (_break1.getParent() == null) {
             kids.addItem(-1L, _break1);
         }
-        _break1.getParent().setVisible(_break1Id != 0L);
         if (_break2.getParent() == null) {
             kids.addItem(-2L, _break2);
         }
+
+        // adjust the visibility of the breaks based on column settings
+        _break1.getParent().setVisible(_break1Id != 0L);
         _break2.getParent().setVisible(_break2Id != 0L);
 
         editor.add(kids);
@@ -170,12 +177,6 @@ public class PageDatumPanel extends DatumPanel
         stable.setText(0, 1, getTitle(child));
         stable.getFlexCellFormatter().setWidth(0, 1, "300px");
         stable.setWidget(0, 2, kids.addItem(child.id, stable));
-
-        if (_meta.get(BREAK1_KEY, 0L) == child.id) {
-            kids.addItem(-1L, _break1);
-        } else if (_meta.get(BREAK2_KEY, 0L) == child.id) {
-            kids.addItem(-2L, _break2);
-        }
     }
 
     @Override protected void childOrderUpdated (List<Long> ids, Widget trigger)
