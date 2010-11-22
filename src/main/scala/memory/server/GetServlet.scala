@@ -45,8 +45,9 @@ class GetServlet extends HttpServlet
       require(bits.length >= 2, "Missing cortex name.")
       val cortexId = bits(1)
 
-      val root = db.loadRoot(cortexId) getOrElse(
+      val cortex = db.loadCortex(cortexId) getOrElse(
         throw new Exception("No such cortex '" + cortexId + "'."))
+      val root = db.loadDatum(cortexId, cortex.rootId)
 
       val datum = bits.length match {
         case 2 => root
@@ -76,8 +77,8 @@ class GetServlet extends HttpServlet
 
       // check whether this user can access this data
       val user = Option(_usvc.getCurrentUser)
-      lazy val publicAccess = db.loadAccess(DataService.NO_USER, cortexId) getOrElse(
-        db.loadAccess(DataService.NO_USER, cortexId, datum.id) getOrElse(Access.NONE))
+      lazy val publicAccess = db.loadAccess(DataService.NO_USER, cortexId, datum.id) getOrElse(
+        cortex.publicAccess)
       val access = user map(_.getUserId) match {
         case Some(userId) => db.loadAccess(userId, cortexId) getOrElse(
           db.loadAccess(userId, cortexId, datum.id) getOrElse(publicAccess))

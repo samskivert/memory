@@ -69,14 +69,11 @@ public abstract class DatumPanel extends FlowPanel
 
         // if we're top-level and a writer, add an access control icon
         if (_ctx.topLevel && _ctx.canWrite()) {
-            final Image accessIcon = Widgets.newImage(
-                _rsrc.accessImage(), _rsrc.styles().iconButton(), _rsrc.styles().floatRight());
-            Widgets.makeActionImage(accessIcon, _msgs.accessTip(), new ClickHandler() {
+            add(AccessPopup.createAccessIcon(new ClickHandler() {
                 public void onClick (ClickEvent event) {
-                    AccessPopup.show(_ctx, _datum, accessIcon);
+                    DatumAccessPopup.show(_ctx, _datum, (Widget)event.getSource());
                 }
-            });
-            add(accessIcon);
+            }, _rsrc.styles().floatRight()));
         }
 
         // this is a twisty maze of header logic; beware static analyses

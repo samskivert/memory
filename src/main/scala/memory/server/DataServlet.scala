@@ -47,11 +47,13 @@ class DataServlet extends RemoteServiceServlet with DataService
   }
 
   // from DataService
-  def loadAccessInfo (cortexId :String) :JList[AccessInfo] = {
-    if (requireUser.getUserId != db.loadOwner(cortexId))
-      throw new ServiceException("e.access_denied")
-    val result = new JArrayList[AccessInfo]
-    result.addAll(db.loadCortexAccess(cortexId).asJava)
+  def loadAccessInfo (cortexId :String) = {
+    val cortex = requireOwnedCortex(cortexId, requireUser.getUserId)
+    val result = new DataService.AccessResult
+    val access = db.loadCortexAccess(cortexId)
+    result.publicAccess = cortex.publicAccess
+    result.userAccess = new JArrayList[AccessInfo]
+    result.userAccess.addAll(access.asJava)
     result
   }
 
@@ -73,10 +75,15 @@ class DataServlet extends RemoteServiceServlet with DataService
 
   // from DataService
   def shareCortex (cortexId :String, email :String, access :Access) {
-    if (requireUser.getUserId != db.loadOwner(cortexId))
-      throw new ServiceException("e.access_denied")
+    val cortex = requireOwnedCortex(cortexId, requireUser.getUserId)
     // TODO: create pending share row
     // TODO: send email
+  }
+
+  // from DataService
+  def updateCortexPublicAccess (cortexId :String, access :Access) {
+    requireOwnedCortex(cortexId, requireUser.getUserId)
+    db.updateCortexPublicAccess(cortexId, access)
   }
 
   // from DataService
@@ -108,8 +115,7 @@ class DataServlet extends RemoteServiceServlet with DataService
 
   // from DataService
   def updatePublicAccess (cortexId :String, datumId :Long, access :Access) {
-    if (requireUser.getUserId != db.loadOwner(cortexId))
-      throw new ServiceException("e.access_denied")
+    requireOwnedCortex(cortexId, requireUser.getUserId)
     db.updateDatumAccess(DataService.NO_USER, cortexId, datumId, access)
   }
 
@@ -137,6 +143,17 @@ class DataServlet extends RemoteServiceServlet with DataService
     val user = _usvc.getCurrentUser
     if (user == null) throw new ServiceException("e.not_logged_in")
     else user
+  }
+
+  private def requireCortex (cortexId :String) = db.loadCortex(cortexId) match {
+    case None => throw new ServiceException("e.no_such_cortex")
+    case Some(cortex) => cortex
+  }
+
+  private def requireOwnedCortex (cortexId :String, userId :String) = {
+    val cortex = requireCortex(cortexId)
+    if (cortex.ownerId != userId) throw new ServiceException("e.access_denied")
+    cortex
   }
 
   private def requireWriteAccess (cortexId :String) {

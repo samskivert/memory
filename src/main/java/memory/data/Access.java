@@ -13,6 +13,8 @@ public enum Access
     NONE,
     /** Read access. */
     READ,
+    /** Read access, write controls enabled but writes rejected. */
+    DEMO,
     /** Read/write access. */
     WRITE;
 }

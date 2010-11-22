@@ -3,11 +3,9 @@
 
 package memory.rpc;
 
-import java.util.List;
 import java.util.Map;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import memory.data.Access;
-import memory.data.AccessInfo;
 import memory.data.Datum;
 
 import memory.data.FieldValue;
@@ -45,7 +43,7 @@ public interface DataServiceAsync
     /**
      * The async version of {@link DataService#loadAccessInfo}.
      */
-    void loadAccessInfo (String cortexId, AsyncCallback<List<AccessInfo>> callback);
+    void loadAccessInfo (String cortexId, AsyncCallback<DataService.AccessResult> callback);
 
     /**
      * The async version of {@link DataService#loadAccessInfo}.
@@ -81,4 +79,9 @@ public interface DataServiceAsync
      * The async version of {@link DataService#updatePublicAccess}.
      */
     void updatePublicAccess (String cortexId, long datumId, Access access, AsyncCallback<Void> callback);
+
+    /**
+     * The async version of {@link DataService#updateCortexPublicAccess}.
+     */
+    void updateCortexPublicAccess (String cortexId, Access access, AsyncCallback<Void> callback);
 }

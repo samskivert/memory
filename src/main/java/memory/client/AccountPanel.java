@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -67,8 +69,16 @@ public class AccountPanel extends Composite
     {
         _owned.clear();
         if (cortexen != null) {
-            for (String cortex : cortexen) {
-                _owned.add(new Anchor("/c/" + cortex.toLowerCase(), cortex));
+            for (final String cortex : cortexen) {
+                FlowPanel bits = new FlowPanel();
+                bits.add(new Anchor("/c/" + cortex.toLowerCase(), cortex));
+                bits.add(Widgets.newInlineLabel(" "));
+                bits.add(AccessPopup.createAccessIcon(new ClickHandler() {
+                    public void onClick (ClickEvent event) {
+                        CortexAccessPopup.show(cortex, (Widget)event.getSource());
+                    }
+                }));
+                _owned.add(bits);
             }
         }
         if (_owned.getWidgetCount() == 0) {

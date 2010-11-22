@@ -3,7 +3,7 @@
 
 package memory.persist
 
-import memory.data.{Access, AccessInfo, Datum, FieldValue, Type}
+import memory.data.{Access, AccessInfo, Cortex, Datum, FieldValue, Type}
 
 /**
  * Defines the interface to our persistence services.
@@ -24,8 +24,8 @@ trait DB
    * @returns true if the cortex was created, false if said cortex already exists. */
   def createCortex (cortexId :String, ownerId :String, root :Datum, contents :Datum) :Boolean
 
-  /** Loads the userId of the owner of the specified cortex. */
-  def loadOwner (cortexId :String) :String
+  /** Loads the metadata for the specified cortex. */
+  def loadCortex (cortexId: String) :Option[Cortex]
 
   /** Loads the root datum for the specified cortex. */
   def loadRoot (cortexId: String) :Option[Datum]
@@ -41,10 +41,13 @@ trait DB
   /** Returns the cortices to which the supplied user has access as (access, cortexId). */
   def loadAccessibleCortices (userId :String) :Seq[AccessInfo]
 
-  /** Returns the users that have access to the supplied cortex. */
+  /** Returns a list of users that have custom access to the supplied cortex. */
   def loadCortexAccess (cortexId :String) :Seq[AccessInfo]
 
-  /** Updates the access permissions for the specified access row. */
+  /** Updates the public access permissions for the specified cortex. */
+  def updateCortexPublicAccess (cortexId :String, access :Access) :Unit
+
+  /** Updates the permissions for the specified cortex access row. */
   def updateCortexAccess (id :Long, callerId :String, access :Access) :Boolean
 
   /** Updates the access permissions for the specified user for the specified datum. */

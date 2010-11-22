@@ -9,7 +9,7 @@ import scalaj.collection.Imports._
 import com.googlecode.objectify.{Key, Objectify, ObjectifyService}
 import com.googlecode.objectify.annotation.Unindexed
 
-import memory.data.{Access, AccessInfo, Datum, FieldValue, Type}
+import memory.data.{Access, AccessInfo, Cortex, Datum, FieldValue, Type}
 
 /**
  * Implements the database via Objectify (which builds on GAE Data Store).
@@ -52,7 +52,13 @@ object ObjectifyDB extends DB
       createDatum(cortexId, root)
       contents.parentId = root.id
       createDatum(cortexId, contents)
-      obj.put(cortexRow(cortexId, root.id, ownerId)) :Key[CortexRow]
+
+      val row = new CortexRow
+      row.id = cortexId
+      row.rootId = root.id
+      row.ownerId = ownerId
+      row.publicAccess = Access.NONE
+      obj.put(row) :Key[CortexRow]
     }
     transaction { obj =>
       // we have to force the return type below to resolve pesky overload of put()
@@ -62,9 +68,19 @@ object ObjectifyDB extends DB
   }
 
   // from trait DB
-  def loadOwner (cortexId :String) = {
+  def loadCortex (cortexId: String) :Option[Cortex] = {
     val obj = ObjectifyService.begin
-    obj.get(cortexKey(cortexId)).ownerId
+    obj.get(cortexKey(cortexId)) match {
+      case null => None
+      case cortex => {
+        // TEMP: handle legacy cortices that lack a publicAccess field
+        if (cortex.publicAccess == null) {
+          cortex.publicAccess = Access.NONE
+          transaction { o2 => o2.put(cortex) :Key[CortexRow] }
+        }
+        Some(toJava(cortex))
+      }
+    }
   }
 
   // from trait DB
@@ -100,6 +116,15 @@ object ObjectifyDB extends DB
   }
 
   // from trait DB
+  def updateCortexPublicAccess (cortexId :String, access :Access) {
+    transaction { obj =>
+      val ctx = obj.get(cortexKey(cortexId))
+      ctx.publicAccess = access
+      obj.put(ctx) :Key[CortexRow]
+    }
+  }
+
+  // from trait DB
   def updateCortexAccess (id :Long, callerId :String, access :Access) = {
     transaction { obj =>
       val arow :CortexAccess = obj.get(classOf[CortexAccess], id)
@@ -107,7 +132,7 @@ object ObjectifyDB extends DB
         _log.info("Requested to update non-existent access [id=" + id + ", access=" + access + "]")
         false
       } else {
-        if (loadOwner(arow.cortexId) != callerId) false
+        if (loadCortex(arow.cortexId).map(_.ownerId).getOrElse("") != callerId) false
         else {
           // TODO: if access == NONE, remove it
           arow.access = access
@@ -207,14 +232,6 @@ object ObjectifyDB extends DB
     }
   }
 
-  private def cortexRow (id :String, rootId :Long, ownerId :String) = {
-    val row = new CortexRow
-    row.id = id
-    row.rootId = rootId
-    row.ownerId = ownerId
-    row
-  }
-
   private def cortexAccess (userId :String, cortexId :String, email :String, access :Access) = {
     val acc = new CortexAccess
     acc.userId = userKey(userId)
@@ -253,6 +270,15 @@ object ObjectifyDB extends DB
         datum.archived = value.asInstanceOf[FieldValue.BooleanValue].value
       case _ => throw new IllegalArgumentException("Unknown field " + field)
     }
+  }
+
+  private def toJava (row :CortexRow) = {
+    val cortex = new Cortex
+    cortex.id = row.id
+    cortex.rootId = row.rootId
+    cortex.ownerId = row.ownerId
+    cortex.publicAccess = row.publicAccess
+    cortex
   }
 
   private def toJava (row :DatumRow) = {

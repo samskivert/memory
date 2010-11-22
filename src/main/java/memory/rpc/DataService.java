@@ -50,15 +50,15 @@ public interface DataService extends RemoteService
         /** The public access setting for this datum. */
         public Access publicAccess;
 
-        /** A map from userId to access privileges for users with custom access. */
-        public Map<String, Access> userAccess;
+        /** A list of users who have custom access. */
+        public List<AccessInfo> userAccess;
     }
 
     /** Loads info for the authenticated account. */
     AccountResult loadAccountInfo () throws ServiceException;
 
     /** Loads the access information for the specified cortex. */
-    List<AccessInfo> loadAccessInfo (String cortexId) throws ServiceException;
+    AccessResult loadAccessInfo (String cortexId) throws ServiceException;
 
     /** Loads the access information for the specified datum. */
     AccessResult loadAccessInfo (String cortexId, long datumId) throws ServiceException;
@@ -69,6 +69,10 @@ public interface DataService extends RemoteService
 
     /** Requests to share the specified cortex with the supplied email address. */
     void shareCortex (String cortexId, String email, Access access)
+        throws ServiceException;
+
+    /** Updates the public access for the specified cortex. */
+    void updateCortexPublicAccess (String cortexId, Access access)
         throws ServiceException;
 
     /** Updates the specified existing cortex access record. */
