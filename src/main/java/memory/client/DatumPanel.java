@@ -16,6 +16,7 @@ import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -26,6 +27,10 @@ import com.threerings.gwt.ui.NumberTextBox;
 import com.threerings.gwt.ui.Popups;
 import com.threerings.gwt.ui.Widgets;
 import com.threerings.gwt.util.StringUtil;
+
+import com.allen_sauer.gwt.dnd.client.DragEndEvent;
+import com.allen_sauer.gwt.dnd.client.DragHandlerAdapter;
+import com.allen_sauer.gwt.dnd.client.PickupDragController;
 
 import memory.data.Datum;
 import memory.data.DatumId;
@@ -253,41 +258,6 @@ public abstract class DatumPanel extends FlowPanel
 
     protected void addChildrenEditor (FlowPanel editor)
     {
-        editor.add(Widgets.newLabel("Children (id):", _rsrc.styles().editorTitle()));
-        final FlowPanel kids = new FlowPanel();
-        for (Datum child : _datum.children) {
-            addChildWidget(kids, child);
-        }
-        editor.add(kids);
-
-        editor.add(Widgets.newLabel("Add child:", _rsrc.styles().editorTitle()));
-        final EnumListBox<Type> type = createTypeListBox();
-        final TextBox title = Widgets.newTextBox("", Datum.MAX_TITLE_LENGTH, 20);
-        final Button add = new Button("Add");
-        editor.add(newRow("Title:", title, type, add));
-
-        new MClickCallback<Long>(add) {
-            protected boolean callService () {
-                _child = createChildDatum(type.getSelectedValue(), title.getText(), null);
-                _datasvc.createDatum(_ctx.cortexId, _child, this);
-                return true;
-            }
-            protected boolean gotResult (Long datumId) {
-                _child.id = datumId;
-                _datum.children.add(_child);
-                addChildWidget(kids, _child);
-                title.setText("");
-                Popups.infoBelow(_msgs.datumCreated(), getPopupNear());
-                return true;
-            }
-            protected Datum _child;
-        };
-    }
-
-    protected void addChildWidget (FlowPanel kids, Datum child)
-    {
-        kids.add(Widgets.newLabel(child.type + " (" + child.id + "): " + getTitle(child),
-                                  _rsrc.styles().listItem()));
     }
 
     protected Datum createChildDatum (Type type, String title, String text)
@@ -301,6 +271,25 @@ public abstract class DatumPanel extends FlowPanel
         child.when = System.currentTimeMillis();
         child.children = new ArrayList<Datum>();
         return child;
+    }
+
+    protected Image createDeleteButton (final Datum item, final Widget box)
+    {
+        Image delete = Widgets.newImage(_rsrc.deleteImage(), _rsrc.styles().iconButton());
+        delete.setTitle("Delete item.");
+        new MClickCallback<Void>(delete) {
+            protected boolean callService () {
+                _datasvc.deleteDatum(_ctx.cortexId, item.id, this);
+                return true;
+            }
+            protected boolean gotResult (Void result) {
+                getChildData().remove(item);
+                Popups.infoBelow("Item deleted.", getPopupNear()); // TODO: add undo?
+                box.removeFromParent();
+                return true;
+            }
+        }.setConfirmText("Please confirm that you wish to delete this item.");
+        return delete;
     }
 
     protected long getParentIdForChild ()
@@ -364,12 +353,61 @@ public abstract class DatumPanel extends FlowPanel
         return ordered;
     }
 
+    /**
+     * Called when childs are dragged into a new order. Should update the metadata to reflect any
+     * pertinent information relating to the children's order.
+     */
+    protected void childOrderUpdated (List<Long> ids, final Widget trigger)
+    {
+        _meta.setIds(ORDER_KEY, ids);
+        _datasvc.updateDatum(
+            _ctx.cortexId, _datum.id, Datum.Field.META, FieldValue.of(_meta.toMetaString()),
+            new MPopupCallback<Void>(this) {
+                public void onSuccess (Void result) {
+                    Popups.infoBelow("Order updated.", trigger);
+                }
+            });
+    }
+
     protected abstract void addContents ();
+
+    public class OrderedChildPanel extends FlowPanel
+    {
+        public Image addItem (long id, Widget item) {
+            Image drag = DnDUtil.newDragIcon();
+            DragItem wrapper = new DragItem(id, item);
+            add(wrapper);
+            _dragger.makeDraggable(wrapper, drag);
+            return drag;
+        }
+
+        public void updateChildOrder () {
+            List<Long> ids = new ArrayList<Long>();
+            for (int ii = 0, ll = getWidgetCount(); ii < ll; ii++) {
+                ids.add(((DragItem)getWidget(ii)).id);
+            }
+            childOrderUpdated(ids, OrderedChildPanel.this);
+        }
+
+        protected PickupDragController _dragger = DnDUtil.addDnD(this, new DragHandlerAdapter() {
+            public void onDragEnd (DragEndEvent event) {
+                updateChildOrder();
+            }
+        });
+    }
 
     protected Context _ctx;
     protected Datum _datum;
     protected MetaData _meta;
     protected List<BitsUpdater> _updaters = new ArrayList<BitsUpdater>();
+
+    protected static class DragItem extends SimplePanel {
+        public final long id;
+        public DragItem (long id, Widget child) {
+            this.id = id;
+            setWidget(child);
+        }
+    }
 
     protected static interface BitsUpdater {
         void addUpdates (Map<Datum.Field, FieldValue> updates);

@@ -46,7 +46,7 @@ public class Context
      */
     public boolean canOpenEditor ()
     {
-        return true; // return canWrite() || access == Access.DEMO;
+        return canWrite() || access == Access.DEMO;
     }
 
     /**
@@ -54,6 +54,6 @@ public class Context
      */
     public boolean canWrite ()
     {
-        return false; // return access == Access.WRITE;
+        return access == Access.WRITE;
     }
 }

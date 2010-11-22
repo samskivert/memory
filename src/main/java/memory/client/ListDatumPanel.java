@@ -30,10 +30,6 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
-import com.allen_sauer.gwt.dnd.client.DragEndEvent;
-import com.allen_sauer.gwt.dnd.client.DragHandlerAdapter;
-import com.allen_sauer.gwt.dnd.client.PickupDragController;
-
 import com.threerings.gwt.ui.Popups;
 import com.threerings.gwt.ui.Widgets;
 
@@ -171,20 +167,14 @@ public class ListDatumPanel extends DatumPanel
         // no children editor, instead we use item editors
         editor.add(Widgets.newLabel("Items:", _rsrc.styles().editorTitle()));
 
-        final FlowPanel items = Widgets.newFlowPanel();
+        final OrderedChildPanel items = new OrderedChildPanel();
         editor.add(items);
-        PickupDragController dragger = DnDUtil.addDnD(items, new DragHandlerAdapter() {
-            public void onDragEnd (DragEndEvent event) {
-                saveChildOrder(items);
-            }
-        });
 
         for (final Datum item : getOrderedChildren()) {
-            final Image drag = allowChildReorder() ? DnDUtil.newDragIcon() : null;
-            final Widget iedit = new ItemEditor(item, drag);
-            items.add(iedit);
+            ItemEditor row = new ItemEditor(item);
+            Image drag = items.addItem(item.id, row);
             if (allowChildReorder()) {
-                dragger.makeDraggable(iedit, drag);
+                row.add(drag);
             }
         }
     }
@@ -192,22 +182,6 @@ public class ListDatumPanel extends DatumPanel
     protected boolean allowChildReorder ()
     {
         return true;
-    }
-
-    protected void saveChildOrder (final FlowPanel items)
-    {
-        List<Long> ids = new ArrayList<Long>();
-        for (int ii = 0, ll = items.getWidgetCount(); ii < ll; ii++) {
-            ids.add(((ItemEditor)items.getWidget(ii)).item.id);
-        }
-        _meta.setIds(ORDER_KEY, ids);
-        _datasvc.updateDatum(
-            _ctx.cortexId, _datum.id, Datum.Field.META, FieldValue.of(_meta.toMetaString()),
-            new MPopupCallback<Void>(items) {
-            public void onSuccess (Void result) {
-                Popups.infoBelow("Order updated.", items);
-            }
-        });
     }
 
     protected class EditableItemLabel extends SimplePanel
@@ -234,7 +208,7 @@ public class ListDatumPanel extends DatumPanel
 
         protected void displayEditor () {
             _dcreg.removeHandler();
-            ItemEditor row = new ItemEditor(_item, null) {
+            ItemEditor row = new ItemEditor(_item) {
                 protected void onUpdated () {
                     displayItem();
                 }
@@ -257,18 +231,15 @@ public class ListDatumPanel extends DatumPanel
     protected class ItemEditor extends StretchBox
     {
         public final Datum item;
-        public final Image delete;
         public final TextBox text;
         public final Button update;
 
-        public ItemEditor (Datum eitem, Image drag) {
+        public ItemEditor (Datum eitem) {
             item = eitem;
-            delete = Widgets.newImage(_rsrc.deleteImage(), _rsrc.styles().iconButton());
-            delete.setTitle("Delete item.");
             text = Widgets.newTextBox(item.text, -1, 20);
             update = new Button("Save");
 
-            setWidgets(1, delete, text, update, drag);
+            setWidgets(1, createDeleteButton(item, this), text, update);
             gaps(9);
 
             // wire up our update callback
@@ -285,20 +256,6 @@ public class ListDatumPanel extends DatumPanel
                     return true;
                 }
                 protected String _text;
-            };
-
-            // wire up our delete callback
-            new MClickCallback<Void>(delete) {
-                protected boolean callService () {
-                    _datasvc.deleteDatum(_ctx.cortexId, item.id, this);
-                    return true;
-                }
-                protected boolean gotResult (Void result) {
-                    getChildData().remove(item);
-                    Popups.infoBelow("Item deleted.", getPopupNear()); // TODO: add undo?
-                    removeFromParent();
-                    return true;
-                }
             };
         }
 

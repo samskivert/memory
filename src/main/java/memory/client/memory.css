@@ -79,6 +79,11 @@ body {
   margin-left: 47px;
 }
 
+.editorChildItem {
+  border-bottom: 1px solid #CCCCCC;
+  width: 348px;
+}
+
 .view {
 }
 
@@ -134,25 +139,23 @@ body {
 }
 
 .column12 {
-  width: 49%;
-  left: 0%;
+  width: 49.5%;
+  padding-right: 1%;
 }
 .column22 {
-  width: 49%;
-  left: 2%;
+  width: 49.5%;
 }
 
 .column13 {
   width: 33%;
-  left: 0%;
+  padding-right: 0.5%;
 }
 .column23 {
   width: 33%;
-  left: 2%;
+  padding-right: 0.5%;
 }
 .column33 {
   width: 33%;
-  left: 2%;
 }
 
 .nonExistNote {

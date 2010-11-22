@@ -80,7 +80,11 @@ public class StretchBox extends FlowPanel
                 avail -= w.getOffsetWidth();
             }
         }
-        _stretch.setWidth(avail + "px");
+        if (avail < 0) {
+            GWT.log("Invalid stretcher? " + getOffsetWidth() + " / " + avail);
+        } else {
+            _stretch.setWidth(avail + "px");
+        }
     }
 
     protected int _gaps;
