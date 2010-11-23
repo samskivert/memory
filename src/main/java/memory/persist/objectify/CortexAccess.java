@@ -30,4 +30,10 @@ public class CortexAccess
 
     /** The user's access to the datum. */
     @Unindexed public Access access;
+
+    @Override // from Object
+    public String toString ()
+    {
+        return userId.getName() + "@" + cortexId + "=" + access;
+    }
 }
