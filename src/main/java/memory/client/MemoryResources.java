@@ -28,6 +28,7 @@ public interface MemoryResources extends ClientBundle
         String editorBox ();
         String editor ();
         String editorTitle ();
+        String editorSelfLink ();
         String editorLabel ();
         String editorChildItem ();
         String editorUpdateButton ();

@@ -71,6 +71,14 @@ body {
   margin-top: 5px;
 }
 
+.editorSelfLink {
+  text-decoration: none;
+  display: inline;
+  float: right;
+  padding-right: 5px;
+  font-size: 14px;
+}
+
 .editorLabel {
   width: 45px;
 }

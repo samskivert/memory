@@ -116,6 +116,12 @@ public abstract class DatumPanel extends FlowPanel
             }
         });
         add(close);
+
+        String here = "/c/" + _ctx.cortexId.toLowerCase() + "/" + _datum.id;
+        Anchor link = new Anchor(here, "link", "_blank");
+        link.addStyleName(_rsrc.styles().editorSelfLink());
+        add(link);
+
         FlowPanel editor = Widgets.newFlowPanel(_rsrc.styles().editorBox());
         addEditor(editor);
         add(editor);
