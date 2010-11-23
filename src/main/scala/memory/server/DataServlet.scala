@@ -34,6 +34,7 @@ class DataServlet extends RemoteServiceServlet with DataService
     val result = new DataService.AccountResult
     result.userId = user.getUserId
     result.nickname = user.getNickname
+    result.logoutURL = _usvc.createLogoutURL("/")
     result.owned = new JArrayList
     result.shared = new JArrayList
     for (info <- db.loadAccessibleCortices(user.getUserId)) {

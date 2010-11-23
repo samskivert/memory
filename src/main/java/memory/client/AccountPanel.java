@@ -12,6 +12,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -19,7 +20,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
-import com.threerings.gwt.ui.Anchor;
 import com.threerings.gwt.ui.Popups;
 import com.threerings.gwt.ui.Widgets;
 
@@ -39,6 +39,7 @@ public class AccountPanel extends Composite
 
         _nickname.setText(data.nickname);
         _nickname.setTitle(data.userId);
+        _logout.setHref(data.logoutURL);
 
         addOwnedLinks(data.owned);
         addSharedLinks(data.shared);
@@ -105,7 +106,7 @@ public class AccountPanel extends Composite
     protected @UiField Styles _styles;
 
     protected @UiField Label _nickname;
-    protected @UiField Button _logout;
+    protected @UiField Anchor _logout;
     protected @UiField FlowPanel _owned;
     protected @UiField FlowPanel _shared;
 

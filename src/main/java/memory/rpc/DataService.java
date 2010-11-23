@@ -37,6 +37,9 @@ public interface DataService extends RemoteService
         /** The nickname as which the user is logged in. */
         public String nickname;
 
+        /** A URL for logging out. */
+        public String logoutURL;
+
         /** The list of cortices owned by this user. */
         public List<String> owned;
 

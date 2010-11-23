@@ -31,7 +31,7 @@
     <div class="{_styles.title}">User</div>
     <div>
       Logged in as: <g:InlineLabel ui:field="_nickname" styleName="{_styles.nickname}"/>
-      <g:Button ui:field="_logout">Logout</g:Button>
+      [<g:Anchor ui:field="_logout">logout</g:Anchor>]
     </div>
 
     <div class="{_styles.title}">Cortices</div>
