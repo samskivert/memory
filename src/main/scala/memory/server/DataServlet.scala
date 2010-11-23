@@ -158,21 +158,22 @@ class DataServlet extends RemoteServiceServlet with DataService
   }
 
   private def requireReadAccess (cortexId :String) {
-      val userAccess = Option(_usvc.getCurrentUser) map(u => db.loadAccess(u.getUserId, cortexId))
-    userAccess getOrElse(requireCortex(cortexId).publicAccess) match {
+    getAccess(cortexId) match {
       case Access.NONE => throw new ServiceException("e.access_denied")
       case _ => // peachy
     }
   }
 
   private def requireWriteAccess (cortexId :String) {
-    val user = Option(_usvc.getCurrentUser) map(_.getUserId) getOrElse(DataService.NO_USER)
-    db.loadAccess(user, cortexId).getOrElse(Access.NONE) match {
+    getAccess(cortexId) match {
       case Access.WRITE => // peachy
       case Access.DEMO => throw new ServiceException("e.in_demo_mode")
       case _ => throw new ServiceException("e.lack_write_access")
     }
   }
+
+  private def getAccess (cortexId :String) = Option(_usvc.getCurrentUser) map(
+    u => db.loadAccess(u.getUserId, cortexId)) getOrElse(requireCortex(cortexId).publicAccess)
 
   private def createRoot (cortexId :String) = {
     val root = new Datum
