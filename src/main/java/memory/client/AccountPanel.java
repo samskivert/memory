@@ -71,7 +71,7 @@ public class AccountPanel extends Composite
         if (cortexen != null) {
             for (final String cortex : cortexen) {
                 FlowPanel bits = new FlowPanel();
-                bits.add(new Anchor("/c/" + cortex.toLowerCase(), cortex));
+                bits.add(new Anchor(cortex, "/c/" + cortex.toLowerCase()));
                 bits.add(Widgets.newInlineLabel(" "));
                 bits.add(AccessPopup.createAccessIcon(new ClickHandler() {
                     public void onClick (ClickEvent event) {
