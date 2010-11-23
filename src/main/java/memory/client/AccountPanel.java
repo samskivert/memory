@@ -73,7 +73,8 @@ public class AccountPanel extends Composite
             protected boolean gotResult (Void result) {
                 data.owned.add(_nname);
                 addOwnedLinks(data.owned);
-                Popups.infoBelow("Cortex created!", getPopupNear());
+                Popups.infoBelow(
+                    "Cortex created! Click the link above to start using it.", getPopupNear());
                 _name.setText("");
                 processName();
                 return false;
@@ -99,7 +100,7 @@ public class AccountPanel extends Composite
             }
         }
         if (_owned.getWidgetCount() == 0) {
-            _owned.add(Widgets.newLabel("None", _styles.none()));
+            _owned.add(Widgets.newLabel("(none)", _styles.none()));
         }
     }
 
@@ -112,7 +113,7 @@ public class AccountPanel extends Composite
             }
         }
         if (_shared.getWidgetCount() == 0) {
-            _shared.add(Widgets.newLabel("None", _styles.none()));
+            _shared.add(Widgets.newLabel("(none)", _styles.none()));
         }
     }
 

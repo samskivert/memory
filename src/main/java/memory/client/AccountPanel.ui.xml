@@ -21,8 +21,11 @@
     .nickname {
       font-weight: bold;
     }
+    .cortexen {
+      font-size: large;
+    }
     .none {
-      color: #666666;
+      color: #999999;
     }
     .tip {
       font-size: small;
@@ -37,11 +40,11 @@
     <table width="800px" cellpadding="0" cellspacing="0"><tr><td valign="top">
 
     <div class="{_styles.title}">Cortices</div>
-    <table>
+    <table cellpadding="0" cellspacing="0">
     <tr><td width="250"><em>Yours</em></td><td><em>Shared with you</em></td></tr>
-    <tr><td valign="top"><g:FlowPanel ui:field="_owned"/></td>
-        <td valign="top"><g:FlowPanel ui:field="_shared"/></td></tr>
-    <tr><td colspan="2" class="{_styles.tip}">
+    <tr><td valign="top"><g:FlowPanel styleName="{_styles.cortexen}" ui:field="_owned"/></td>
+        <td valign="top"><g:FlowPanel styleName="{_styles.cortexen}" ui:field="_shared"/></td></tr>
+    <tr><td colspan="2" class="{_styles.tip}" style="padding-top: 5px">
       You can make a cortex private, or share it with other people. Click the
       icon next to a cortex's name to edit sharing settings.
     </td></tr>
