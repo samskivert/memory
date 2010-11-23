@@ -172,8 +172,10 @@ class DataServlet extends RemoteServiceServlet with DataService
     }
   }
 
-  private def getAccess (cortexId :String) = Option(_usvc.getCurrentUser) map(
-    u => db.loadAccess(u.getUserId, cortexId)) getOrElse(requireCortex(cortexId).publicAccess)
+  private def getAccess (cortexId :String) :Access = {
+    Option(_usvc.getCurrentUser) flatMap(
+      u => db.loadAccess(u.getUserId, cortexId)) getOrElse(requireCortex(cortexId).publicAccess)
+  }
 
   private def createRoot (cortexId :String) = {
     val root = new Datum
