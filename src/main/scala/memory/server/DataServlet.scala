@@ -158,8 +158,8 @@ class DataServlet extends RemoteServiceServlet with DataService
   }
 
   private def requireReadAccess (cortexId :String) {
-    val user = Option(_usvc.getCurrentUser) map(_.getUserId) getOrElse(DataService.NO_USER)
-    db.loadAccess(user, cortexId).getOrElse(Access.NONE) match {
+      val userAccess = Option(_usvc.getCurrentUser) map(u => db.loadAccess(u.getUserId, cortexId))
+    userAccess getOrElse(requireCortex(cortexId).publicAccess) match {
       case Access.NONE => throw new ServiceException("e.access_denied")
       case _ => // peachy
     }
