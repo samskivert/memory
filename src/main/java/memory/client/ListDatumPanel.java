@@ -154,7 +154,7 @@ public class ListDatumPanel extends DatumPanel
     {
         switch (item.type) {
         case WIKI:
-            return Widgets.newHTML(WikiUtil.formatSnippet(_ctx.cortexId, _datum, item.text));
+            return Widgets.newHTML(WikiUtil.formatSnippet(_ctx.cortexId, item, item.text));
         case HTML:
             return Widgets.newHTML(item.text);
         default:
