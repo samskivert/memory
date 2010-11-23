@@ -11,7 +11,6 @@ import com.google.gwt.user.client.ui.Widget;
 
 import com.threerings.gwt.ui.Widgets;
 import com.threerings.gwt.util.Callbacks;
-import com.threerings.gwt.util.PopupCallback;
 
 import memory.data.Datum;
 import memory.data.FieldValue;
@@ -60,7 +59,7 @@ public class ChecklistDatumPanel extends ListDatumPanel
                 final String meta = data.toMetaString();
                 _datasvc.updateDatum(
                     _ctx.cortexId, item.id, Datum.Field.META, FieldValue.of(meta),
-                    Callbacks.disabler(new PopupCallback<Void>(box) {
+                    Callbacks.disabler(new MPopupCallback<Void>(box) {
                         public void onSuccess (Void result) {
                             item.meta = meta;
                             if (isDone) {
