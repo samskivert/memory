@@ -5,6 +5,7 @@ package memory.server
 
 import scala.xml.{Node, NodeSeq, XML}
 
+import java.util.TimeZone
 import javax.servlet.ServletConfig
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
@@ -90,6 +91,9 @@ class GetServlet extends HttpServlet
         case _ => throw new Exception("You lack access to this data.")
       }
 
+      // TODO: allow the user to customize their time zone
+      val now = System.currentTimeMillis + TimeZone.getTimeZone("PST8PDT").getRawOffset
+
       // if this is a media datum, call out to the blob store to serve it
       if (datum.`type` == Type.MEDIA) {
         _bssvc.serve(new BlobKey(datum.meta), rsp)
@@ -104,7 +108,7 @@ class GetServlet extends HttpServlet
         out.println
         val xml = <div style="display: none" id="root" x:cortex={cortexId} x:access={
           access.toString} x:publicAccess={publicAccess.toString}>{"\n  "}{
-            toXML(MemoryLogic.resolveChildren(cortexId)(datum))}{"\n"}</div>
+            toXML(MemoryLogic.resolveChildren(cortexId, now)(datum))}{"\n"}</div>
         XML.write(out, xml, null, false, null)
         out.println
         out.println(GwitBits)

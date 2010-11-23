@@ -15,13 +15,17 @@ object MemoryLogic
 {
   val db :DB = memory.persist.objectify.ObjectifyDB
 
-  /** Resolves the children of the supplied datum. */
-  def resolveChildren (cortexId :String)(root :Datum) :Datum = {
+  /** Resolves the children of the supplied datum.
+   * @param cortexId the cortex in which the datum exists.
+   * @param when the time to use when resolving journal data.
+   * @param root the datum whose children are to be resolved.
+   */
+  def resolveChildren (cortexId :String, when :Long)(root :Datum) :Datum = {
     root.children = new ArrayList[Datum](root.`type` match {
-      case Type.LIST => loadAndResolveChildren(cortexId, root.id)
-      case Type.CHECKLIST => loadAndResolveChildren(cortexId, root.id)
-      case Type.JOURNAL => resolveJournalChild(cortexId, root.id)
-      case Type.PAGE => loadAndResolveChildren(cortexId, root.id)
+      case Type.LIST => loadAndResolveChildren(cortexId, root.id, when)
+      case Type.CHECKLIST => loadAndResolveChildren(cortexId, root.id, when)
+      case Type.JOURNAL => resolveJournalChild(cortexId, root.id, when)
+      case Type.PAGE => loadAndResolveChildren(cortexId, root.id, when)
       case Type.HTML | Type.WIKI => loadMediaChildren(cortexId, root.id)
       case _ => Collections.emptyList
     })
@@ -32,21 +36,21 @@ object MemoryLogic
   }
 
   /** Loads and resolves the children of the specified parent. */
-  def loadAndResolveChildren (cortexId :String, parentId :Long) =
-    Arrays.asList(db.loadChildren(cortexId, parentId) map(resolveChildren(cortexId)) :_*)
+  def loadAndResolveChildren (cortexId :String, parentId :Long, when :Long) =
+    Arrays.asList(db.loadChildren(cortexId, parentId) map(resolveChildren(cortexId, when)) :_*)
 
   /** Loads (but does not resolve, as it is not needed) the media children of the parent. */
   def loadMediaChildren (cortexId :String, parentId :Long) =
     Arrays.asList(db.loadChildren(cortexId, parentId, Type.MEDIA) :_*)
 
   /** Resolves today's child of the supplied journal parent. */
-  def resolveJournalChild (cortexId :String, id :Long) =
-    Arrays.asList(resolveJournalDatum(cortexId, id, System.currentTimeMillis))
+  def resolveJournalChild (cortexId :String, id :Long, when :Long) =
+    Arrays.asList(resolveJournalDatum(cortexId, id, when))
 
   /** Loads and resolves the journal datum for the specified date, creating it if necessary. */
-  def resolveJournalDatum (cortexId :String, journalId :Long, date :Long) :Datum = {
-    val title = journalTitle(date)
-    resolveChildren(cortexId)(db.loadDatum(cortexId, journalId, title) match {
+  def resolveJournalDatum (cortexId :String, journalId :Long, when :Long) :Datum = {
+    val title = journalTitle(when)
+    resolveChildren(cortexId, when)(db.loadDatum(cortexId, journalId, title) match {
       case Some(datum) => datum
       case None => {
         val datum = new Datum
