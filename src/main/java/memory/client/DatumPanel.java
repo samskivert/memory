@@ -282,7 +282,7 @@ public abstract class DatumPanel extends FlowPanel
     protected Image createDeleteButton (final Datum item, final Widget box)
     {
         Image delete = Widgets.newImage(_rsrc.deleteImage(), _rsrc.styles().iconButton());
-        delete.setTitle("Delete item.");
+        delete.setTitle("Delete item. (" + item.id + ")");
         new MClickCallback<Void>(delete) {
             protected boolean callService () {
                 _datasvc.deleteDatum(_ctx.cortexId, item.id, this);
