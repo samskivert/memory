@@ -7,7 +7,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
 
 import com.threerings.gwt.ui.Popups;
-import com.threerings.gwt.util.PopupCallback;
 
 import memory.data.Access;
 import memory.rpc.DataService;
@@ -19,7 +18,7 @@ public class CortexAccessPopup extends AccessPopup
 {
     public static void show (final String cortexId, final Widget near)
     {
-        _datasvc.loadAccessInfo(cortexId, new PopupCallback<DataService.AccessResult>(near) {
+        _datasvc.loadAccessInfo(cortexId, new MPopupCallback<DataService.AccessResult>(near) {
             public void onSuccess (DataService.AccessResult access) {
                 Popups.showBelow(new CortexAccessPopup(cortexId, access), near);
             }

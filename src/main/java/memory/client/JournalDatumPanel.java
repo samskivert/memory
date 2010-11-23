@@ -21,7 +21,6 @@ import com.google.gwt.user.datepicker.client.DatePicker;
 
 import com.threerings.gwt.ui.Popups;
 import com.threerings.gwt.ui.Widgets;
-import com.threerings.gwt.util.PopupCallback;
 
 import memory.data.Datum;
 
@@ -90,7 +89,8 @@ public class JournalDatumPanel extends ListDatumPanel
 
     protected void changeDate (long when)
     {
-        _datasvc.loadJournalData(_ctx.cortexId, _datum.id, when, new PopupCallback<Datum>(_popper) {
+        _datasvc.loadJournalData(_ctx.cortexId, _datum.id, when,
+                                 new MPopupCallback<Datum>(_popper) {
             public void onSuccess (Datum datum) {
                 _datum.children.set(0, datum);
                 showContents();

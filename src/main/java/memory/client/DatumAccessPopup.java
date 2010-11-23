@@ -6,8 +6,6 @@ package memory.client;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
 
-import com.threerings.gwt.util.PopupCallback;
-
 import memory.data.Access;
 import memory.data.Datum;
 import memory.rpc.DataService;
@@ -20,7 +18,7 @@ public class DatumAccessPopup extends AccessPopup
     public static void show (final Context ctx, final Datum datum, final Widget near)
     {
         _datasvc.loadAccessInfo(
-            ctx.cortexId, datum.id, new PopupCallback<DataService.AccessResult>(near) {
+            ctx.cortexId, datum.id, new MPopupCallback<DataService.AccessResult>(near) {
             public void onSuccess (DataService.AccessResult access) {
                 DatumAccessPopup popup = new DatumAccessPopup(ctx, datum, access);
                 popup.setVisible(false);

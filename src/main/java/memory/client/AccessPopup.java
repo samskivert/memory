@@ -18,7 +18,6 @@ import com.threerings.gwt.ui.EnumListBox;
 import com.threerings.gwt.ui.FluentTable;
 import com.threerings.gwt.ui.Popups;
 import com.threerings.gwt.ui.Widgets;
-import com.threerings.gwt.util.PopupCallback;
 
 import memory.data.Access;
 import memory.data.Datum;
@@ -51,7 +50,7 @@ public abstract class AccessPopup extends PopupPanel
         publicBox.addChangeHandler(new ChangeHandler() {
             public void onChange (ChangeEvent event) {
                 updatePublicAccess(
-                    publicBox.getSelectedValue(), new PopupCallback<Void>(publicBox) {
+                    publicBox.getSelectedValue(), new MPopupCallback<Void>(publicBox) {
                     public void onSuccess (Void result) {
                         Popups.infoBelow("Access updated.", publicBox);
                     }
