@@ -11,7 +11,7 @@ class Memory (info :ProjectInfo) extends DefaultWebProject(info) {
 
   // HTTP and GWT depends
   val gwtUser = "com.google.gwt" % "gwt-user" % "2.1.0"
-  val gwtUtils = "com.threerings" % "gwt-utils" % "1.2-SNAPSHOT"
+  val gwtUtils = "com.threerings" % "gwt-utils" % "1.3-SNAPSHOT"
 
   // override def libraryDependencies = Set(
   //   "org.eclipse.jetty" % "jetty-server" % "7.0.0.v20091005" % "test",
