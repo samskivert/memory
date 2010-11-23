@@ -17,9 +17,6 @@
     .nickname {
       font-weight: bold;
     }
-    .cortexen div {
-      display: inline;
-    }
     .none {
       color: #666666;
     }
@@ -37,8 +34,8 @@
     <div class="{_styles.title}">Cortices</div>
     <table>
     <tr><td width="250"><em>Yours</em></td><td><em>Shared with you</em></td></tr>
-    <tr><td><g:FlowPanel styleName="{_styles.cortexen}" ui:field="_owned"/></td>
-        <td><g:FlowPanel styleName="{_styles.cortexen}" ui:field="_shared"/></td></tr>
+    <tr><td valign="top"><g:FlowPanel ui:field="_owned"/></td>
+        <td valign="top"><g:FlowPanel ui:field="_shared"/></td></tr>
     </table>
 
     <div class="{_styles.title}">Create Cortex</div>
