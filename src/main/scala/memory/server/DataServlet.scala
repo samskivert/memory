@@ -122,7 +122,7 @@ class DataServlet extends RemoteServiceServlet with DataService
 
   // from DataService
   def loadJournalData (cortexId :String, journalId :Long, when :Long) :Datum = {
-    requireWriteAccess(cortexId) // TODO: allow read-only access (disabling creation)?
+    requireReadAccess(cortexId)
     MemoryLogic.resolveJournalDatum(cortexId, journalId, when)
   }
 
@@ -157,8 +157,17 @@ class DataServlet extends RemoteServiceServlet with DataService
     cortex
   }
 
+  private def requireReadAccess (cortexId :String) {
+    val user = Option(_usvc.getCurrentUser) map(_.getUserId) getOrElse(DataService.NO_USER)
+    db.loadAccess(user, cortexId).getOrElse(Access.NONE) match {
+      case Access.NONE => throw new ServiceException("e.access_denied")
+      case _ => // peachy
+    }
+  }
+
   private def requireWriteAccess (cortexId :String) {
-    db.loadAccess(requireUser.getUserId, cortexId).getOrElse(Access.NONE) match {
+    val user = Option(_usvc.getCurrentUser) map(_.getUserId) getOrElse(DataService.NO_USER)
+    db.loadAccess(user, cortexId).getOrElse(Access.NONE) match {
       case Access.WRITE => // peachy
       case Access.DEMO => throw new ServiceException("e.in_demo_mode")
       case _ => throw new ServiceException("e.lack_write_access")
