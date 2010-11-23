@@ -5,6 +5,9 @@
              ui:generateKeys="com.google.gwt.i18n.rebind.keygen.MD5KeyGenerator"
              ui:generateLocales="default">
   <ui:style type="memory.client.AccountPanel.Styles" field="_styles">
+    p {
+      margin: 0px 0px 10px 0px;
+    }
     .header {
       font-family: Trebuchet MS, serif;
       font-size: 24px;
@@ -13,6 +16,7 @@
       font-family: Trebuchet MS, serif;
       font-size: 18px;
       margin-top: 10px;
+      border-bottom: 1px dashed;
     }
     .nickname {
       font-weight: bold;
@@ -20,10 +24,39 @@
     .none {
       color: #666666;
     }
+    .tip {
+      font-size: small;
+    }
+    .urlTip {
+      margin-top: 10px;
+    }
   </ui:style>
 
   <g:HTMLPanel>
-    <div class="{_styles.header}">Your account:</div>
+    <div class="{_styles.header}">Spare Cortex</div>
+    <table width="800px" cellpadding="0" cellspacing="0"><tr><td valign="top">
+
+    <div class="{_styles.title}">Cortices</div>
+    <table>
+    <tr><td width="250"><em>Yours</em></td><td><em>Shared with you</em></td></tr>
+    <tr><td valign="top"><g:FlowPanel ui:field="_owned"/></td>
+        <td valign="top"><g:FlowPanel ui:field="_shared"/></td></tr>
+    <tr><td colspan="2" class="{_styles.tip}">
+      You can make a cortex private, or share it with other people. Click the
+      icon next to a cortex's name to edit sharing settings.
+    </td></tr>
+    </table>
+
+    <div class="{_styles.title}">Create Cortex</div>
+    <p>A cortex is a collection of pages, lists and media. You can create
+    one cortex to hold all of your data or separate cortices for each project.</p>
+    <p>The name of your cortex will be a part of its URL so you must use all
+    lowercase letters and avoid spaces and punctuation.</p>
+    <g:TextBox ui:field="_name" visibleLength="20"/>
+    <g:Button ui:field="_create">Create</g:Button>
+
+    <g:HTML styleName="{_styles.urlTip}" ui:field="_urltip"></g:HTML>
+    </td><td>&nbsp;&nbsp;&nbsp;</td><td valign="top">
 
     <div class="{_styles.title}">User</div>
     <div>
@@ -31,16 +64,7 @@
       [<g:Anchor ui:field="_logout">logout</g:Anchor>]
     </div>
 
-    <div class="{_styles.title}">Cortices</div>
-    <table>
-    <tr><td width="250"><em>Yours</em></td><td><em>Shared with you</em></td></tr>
-    <tr><td valign="top"><g:FlowPanel ui:field="_owned"/></td>
-        <td valign="top"><g:FlowPanel ui:field="_shared"/></td></tr>
-    </table>
-
-    <div class="{_styles.title}">Create Cortex</div>
-    <g:TextBox ui:field="_name" visibleLength="20"/>
-    <g:Button ui:field="_create">Create</g:Button>
+    </td></tr></table>
 
   </g:HTMLPanel>
 </ui:UiBinder>
