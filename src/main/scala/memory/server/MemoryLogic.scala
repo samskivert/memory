@@ -3,7 +3,7 @@
 
 package memory.server
 
-import java.util.{Arrays, ArrayList, Calendar, Collections}
+import java.util.{Arrays, ArrayList, Calendar, Collections, TimeZone}
 
 import memory.data.{Datum, MetaData, Type}
 import memory.persist.DB
@@ -66,7 +66,7 @@ object MemoryLogic
 
   /** Returns the title of the journal page that falls on the supplied date. */
   def journalTitle (when :Long) = {
-    val cal = Calendar.getInstance
+    val cal = Calendar.getInstance(UTC)
     cal.setTimeInMillis(when)
     cal.set(Calendar.HOUR_OF_DAY, 12) // noon!
     cal.set(Calendar.MINUTE, 0)
@@ -89,5 +89,6 @@ object MemoryLogic
     }
   }
 
+  private val UTC = TimeZone.getTimeZone("GMT")
   private val DEFAULT_EXPIRY_TIME = 2 * 24*60*60*1000L
 }
