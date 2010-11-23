@@ -50,7 +50,7 @@ public class ListDatumPanel extends DatumPanel
     @Override protected void addTitle (FlowPanel header)
     {
         super.addTitle(header);
-        if (autoHideAdd()) {
+        if (_ctx.canOpenEditor() && autoHideAdd()) {
             addAddIcon(header);
         }
     }
