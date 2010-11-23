@@ -173,7 +173,7 @@ public abstract class DatumPanel extends FlowPanel
     {
         if (!StringUtil.isBlank(_datum.title)) {
             Widget title = Widgets.newLabel(_datum.title, _rsrc.styles().title());
-            title.setTitle("ID: " + _datum.id + " Meta: " + _datum.meta);
+            title.setTitle("ID: " + _datum.id);
             header.add(title);
         }
     }
