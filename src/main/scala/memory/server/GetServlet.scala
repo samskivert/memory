@@ -96,6 +96,7 @@ class GetServlet extends HttpServlet
 
       // if this is a media datum, call out to the blob store to serve it
       if (datum.`type` == Type.MEDIA) {
+        rsp.setDateHeader("Last-modified", datum.when)
         _bssvc.serve(new BlobKey(datum.meta), rsp)
 
       } else {
