@@ -13,6 +13,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
@@ -20,7 +21,6 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
-import com.threerings.gwt.ui.Anchor;
 import com.threerings.gwt.ui.EnumListBox;
 import com.threerings.gwt.ui.FluentTable;
 import com.threerings.gwt.ui.NumberTextBox;
@@ -71,13 +71,21 @@ public abstract class DatumPanel extends FlowPanel
         removeStyleName(_rsrc.styles().editor());
         addStyleName(_rsrc.styles().view());
 
-        // if we're top-level and a writer, add an access control icon
+        // if we're top-level and a writer, add access control and help icons
         if (_ctx.topLevel && _ctx.canWrite()) {
             add(AccessPopup.createAccessIcon(new ClickHandler() {
                 public void onClick (ClickEvent event) {
                     DatumAccessPopup.show(_ctx, _datum, (Widget)event.getSource());
                 }
-            }, _rsrc.styles().floatRight()));
+            }, _rsrc.styles().rightIconButton()));
+
+            Anchor anchor = new Anchor();
+            anchor.setHref("/c/help");
+            anchor.setTitle(_msgs.helpTip());
+            anchor.addStyleName(_rsrc.styles().rightIconButton());
+            anchor.setTarget("_blank");
+            anchor.getElement().appendChild(new Image(_rsrc.helpImage()).getElement());
+            add(anchor);
         }
 
         // this is a twisty maze of header logic; beware static analyses
@@ -118,7 +126,7 @@ public abstract class DatumPanel extends FlowPanel
         add(close);
 
         String here = "/c/" + _ctx.cortexId.toLowerCase() + "/" + _datum.id;
-        Anchor link = new Anchor(here, "link", "_blank");
+        Anchor link = new Anchor("link", here, "_blank");
         link.addStyleName(_rsrc.styles().editorSelfLink());
         add(link);
 
@@ -164,7 +172,7 @@ public abstract class DatumPanel extends FlowPanel
 
     protected Anchor newNavAnchor (String path, String text)
     {
-        Anchor anchor = new Anchor(WikiUtil.appendQuery(path), text);
+        Anchor anchor = new Anchor(text, WikiUtil.appendQuery(path));
         anchor.addStyleName(_rsrc.styles().navigationLink());
         return anchor;
     }
