@@ -17,7 +17,7 @@ class AccountServlet extends HttpServlet
       rsp.sendRedirect(_usvc.createLoginURL("/account"))
     } else {
       val out = rsp.getWriter
-      out.println(ServletUtil.htmlHeader("Memory Account"))
+      out.println(ServletUtil.htmlHeader("Spare Cortex Account"))
       out.println(GwitBits)
       out.println(ServletUtil.htmlFooter)
     }
