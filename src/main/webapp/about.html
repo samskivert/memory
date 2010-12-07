@@ -6,10 +6,10 @@
   <style>
     body {
       font-family: "Palatino", "Times New Roman", Times, serif;
-      width: 880px;
+      margin: 0px auto;
+      max-width: 880px;
     }
     h1, h2 {
-      font-family: 'Trebuchet MS', serif;
       margin: 0px;
     }
     h2 {
@@ -17,15 +17,24 @@
       margin-bottom: 5px;
     }
     p {
-      margin: 0px 0px 10px 0px;
+      margin: 10px 0px;
     }
     a, a:visited {
-      color: #336600;
+      color: #333333;
+    }
+    .header, .footer {
+      padding: 5px;
+    }
+    .header {
+      border-bottom: 1px solid;
+    }
+    .footer {
+      border-top: 1px solid;
+      text-align: center;
     }
     .navi {
       padding-top: 10px;
       font-family: Helvetica, Arial, sans-serif;
-      font-variant: small-caps;
       float: right;
       font-size: 12px;
     }
@@ -35,12 +44,12 @@
   </style>
 </head>
 <body>
-  <div class="navi">
-    <a href="/">Home</a>
-    <a href="http://github.com/samskivert/memory/">Source</a>
+  <div class="header">
+    <div class="navi"><a href="/">HOME</a></div>
+    <h1>Spare Cortex Manifesto</h1>
   </div>
 
-  <h1>Spare Cortex Manifesto</h1>
+  <div class="contents">
 
   <p> I have progressed through a broad variety of personal information
       management tools over the course of my life, and they invariably fail to
@@ -142,5 +151,15 @@
       display of raw enthusiasm for something of such little consequence,
       please <a href="/">give Spare Cortex a whirl</a>. </p>
 
+  </div>
+  <div class="footer">
+    <a href="/">Spare Cortex</a>
+    &nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;
+    Copyright &copy; 2010 Michael Bayne
+    &nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;
+    <a href="http://groups.google.com/group/spare-cortex">Discuss It</a>
+    &nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;
+    <a href="http://github.com/samskivert/memory">Fork it</a>
+  </div>
 </body>
 </html>

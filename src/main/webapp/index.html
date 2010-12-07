@@ -5,44 +5,59 @@
   <title>Spare Cortex</title>
   <style>
     body {
-      font-family: Helvetica, Arial, sans-serif;
-      width: 880px;
+      font-family: "Palatino", "Times New Roman", Times, serif;
+      margin: 0px auto;
+      max-width: 880px;
     }
     h1, h2 {
-      font-family: 'Trebuchet MS', serif;
+      /*font-family: "Palatino", "Times New Roman", Times, serif;*/
+      /*font-family: 'Trebuchet MS', serif;*/
       margin: 0px;
     }
     h2 {
-      border-bottom: 1px dashed;
       margin-bottom: 5px;
     }
     p {
       margin: 0px 0px 10px 0px;
     }
     a, a:visited {
-      color: #336600;
+      color: #333333;
+    }
+    .header, .footer {
+      padding: 5px;
+    }
+    .header {
+      border-bottom: 1px solid;
+    }
+    .footer {
+      border-top: 1px solid;
+      text-align: center;
+    }
+    .contents {
+      margin: 5px;
     }
     .login {
       float: right;
-      margin: 10px;
-      padding: 10px 25px;
-      background: #99CC66;
-      border-radius: 15px;
-      -moz-border-radius: 15px;
+      padding: 5px 25px;
+      font-family: Helvetica, Arial, sans-serif;
+      letter-spacing: -1px;
       font-weight: bold;
       font-size: 24px;
     }
     .screenshot {
-      border: 5px solid #999999;
+      border: 5px solid #ECF3FE;
     }
   </style>
 </head>
 <body>
-  <div class="login"><a href="/account">LOGIN</a></div>
+  <div class="header">
+    <div class="login"><a href="/account">LOGIN</a></div>
+    <h1>Spare Cortex</h1>
+  </div>
 
-  <h1>Spare Cortex</h1>
+  <div class="contents">
 
-  <p style="width: 600px">Spare Cortex is a wiki that has been souped up with
+  <p>Spare Cortex is a wiki that has been souped up with
   personal and project information management features.</p>
 
   <h2>Features</h2>
@@ -97,9 +112,15 @@
   <li> Direct comments, questions, and feedback to the
        <a href="http://groups.google.com/group/spare-cortex">Spare Cortex
        Google Group</a>. </li>
-  <li> Peruse <a href="http://github.com/samskivert/memory">the code for Spare
-       Cortex</a> on Github. </li>
   </ul>
 
+  </div>
+  <div class="footer">
+    Copyright &copy; 2010 Michael Bayne
+    &nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;
+    <a href="http://groups.google.com/group/spare-cortex">Discuss It</a>
+    &nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;
+    <a href="http://github.com/samskivert/memory">Fork it</a>
+  </div>
 </body>
 </html>
