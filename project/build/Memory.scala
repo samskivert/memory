@@ -24,11 +24,11 @@ class Memory (info :ProjectInfo) extends DefaultWebProject(info) {
   val gwtAsyncGen = "com.samskivert" % "gwt-asyncgen" % "1.0" % "system"
 
   // appengine depends
-  val gae = "com.google.appengine" % "appengine-api-1.0-sdk" % "1.3.8"
-  // val gaeTools = "com.google.appengine" % "appengine-tools-sdk" % "1.3.8" % "test"
-  val gaeTesting = "com.google.appengine" % "appengine-testing" % "1.3.8" % "test"
-  val gaeStubs = "com.google.appengine" % "appengine-api-stubs" % "1.3.8" % "test"
-  val gaeLabs = "com.google.appengine" % "appengine-api-labs" % "1.3.8" % "test"
+  val gae = "com.google.appengine" % "appengine-api-1.0-sdk" % "1.4.0"
+  // val gaeTools = "com.google.appengine" % "appengine-tools-sdk" % "1.4.0" % "test"
+  val gaeTesting = "com.google.appengine" % "appengine-testing" % "1.4.0" % "test"
+  val gaeStubs = "com.google.appengine" % "appengine-api-stubs" % "1.4.0" % "test"
+  val gaeLabs = "com.google.appengine" % "appengine-api-labs" % "1.4.0" % "test"
 
   // database depends
   val objectify = "com.googlecode.objectify" % "objectify" % "2.2.1"
