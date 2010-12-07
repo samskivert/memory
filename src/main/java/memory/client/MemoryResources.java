@@ -66,6 +66,9 @@ public interface MemoryResources extends ClientBundle
     @Source("edit.png")
     ImageResource editImage ();
 
+    @Source("help.png")
+    ImageResource helpImage ();
+
     @Source("close.png")
     ImageResource closeImage ();
 

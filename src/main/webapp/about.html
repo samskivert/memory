@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:fb="http://www.facebook.com/2008/fbml">
+<head>
+  <title>Spare Cortex</title>
+  <style>
+    body {
+      font-family: "Palatino", "Times New Roman", Times, serif;
+      width: 880px;
+    }
+    h1, h2 {
+      font-family: 'Trebuchet MS', serif;
+      margin: 0px;
+    }
+    h2 {
+      border-bottom: 1px dashed;
+      margin-bottom: 5px;
+    }
+    p {
+      margin: 0px 0px 10px 0px;
+    }
+    a, a:visited {
+      color: #336600;
+    }
+    .navi {
+      padding-top: 10px;
+      font-family: Helvetica, Arial, sans-serif;
+      font-variant: small-caps;
+      float: right;
+      font-size: 12px;
+    }
+    .screenshot {
+      border: 5px solid #999999;
+    }
+  </style>
+</head>
+<body>
+  <div class="navi">
+    <a href="/">Home</a>
+    <a href="http://github.com/samskivert/memory/">Source</a>
+  </div>
+
+  <h1>Spare Cortex Manifesto</h1>
+
+  <p> I have progressed through a broad variety of personal information
+      management tools over the course of my life, and they invariably fail to
+      meet my needs in one way or another. This periodically motivates a flurry
+      of note taking on what would comprise the “perfect” personal information
+      management system, which I generally record using whatever duct tape and
+      baling wire contraption I am currently using to keep track of things, and
+      then promptly forget about. </p>
+
+  <p> About half a decade ago, I wrote
+      a <a href="http://samskivert.com/code/jikan">standalone application</a>
+      that handled the parts of PIM that were done wrongly, in my opinion, by
+      other tools (keeping lists of tasks to do, a journal of daily doings, and
+      seeing at a glance what events were upcoming and recently past). It kept
+      the urges to write a more comprehensive system at bay, and I got by with
+      my tool, a haphazard collection of wikis and text files, and Google
+      calendar. </p>
+
+  <p> My entry into the world of computer science research last year triggered
+      a dramatic increase in my generation of notes and ideas that needed
+      keeping track of, not to mention a much more finely divided schedule. To
+      meet my increased PIM needs, I
+      tried <a href="http://code.google.com/p/w2wiki/">minimalist
+      solutions</a>, <a href="http://twiki.org/">maximalist solutions</a>, and
+      <a href="https://sites.google.com/">Googly solutions</a>
+      (among <a href="http://culturedcode.com/things/">a</a>
+      <a href="http://www.rememberthemilk.com/">dozen</a>
+      <a href="http://www.evernote.com/">others</a>
+      <a href="http://www.google.com/notebook/">.</a>
+      <a href="http://backpackit.com/">.</a>
+      <a href="http://projects.gnome.org/tomboy/">.</a>).
+      Each rewarded my substantial organizational efforts with eventual
+      dissatisfaction and malaise. My resolve eventually eroded and I succumbed
+      to my perennial urge to write my own all-singing, all-dancing,
+      wiki/todo/calendar/datastore/dwim application. </p>
+
+  <p> I thus wrote <a href="/">Spare Cortex</a>, an unabashed indulgence in my
+      own personal information management needs. To atone for the sin of
+      polluting the world with yet another wiki, I have strived to make it
+      usable by people other than its author. I have provided
+      a <a href="http://sparecortex.com/c/demo">demonstration of its basic
+      functionality</a> to help interested parties determine whether it is
+      worth the time investment of trying out. </p>
+
+  <p> My motivations in creating the system (which you may compare to your own
+      PIM motivations to gauge your interest) were as follows: </p>
+
+  <ul>
+  <li> It should not extravagantly waste a quarter or more of its screen real
+       estate on headers, banners, navigation links and other wikijunk (to
+       paraphrase <a href="http://en.wikipedia.org/wiki/Chartjunk">Tufte</a>). </li>
+
+  <li> It should be hierarchical. The flat namespace of most wiki systems
+       breaks down once you add half a dozen projects each with a dozen pages
+       of content. Prefixing the name of every page with the name of its
+       parents scales poorly. </li>
+
+  <li> It should support structured content (most importantly checklists, and
+       what I call “pages”) natively. Configuring half a dozen poorly
+       implemented and unmaintained plugins is a punishment I’d rather
+       avoid. </li>
+
+  <li> With regard to checklists, having to open the wiki editor and scroll
+       down through a sea of text to find a todo item to check off (or edit, or
+       move up or down in priority) is painful. </li>
+
+  <li> With regard to pages, any project that does not die an early death will
+       eventually accumulate sort of “dashboard” at its top-level, containing
+       outstanding todo items, lists of useful resources, and the top-level
+       links to the copious notes that you’ve taken as the project evolves.
+       Basic page layout capabilities enable one to organize this dashboard
+       page in a way that allows easy viewing of what’s going on with the
+       project and easy updating of ephemeral data. </li>
+
+  <li> Furthermore, I don’t want that data landlocked amidst semi-structured
+       text. I should be able to see all of the tasks across all of my
+       projects, or tag individual tasks and place a view of tasks with e.g.
+       the today tag on my top-level “life dashboard” page, alongside my
+       appointments and journal (note: the tagging feature is not yet complete,
+       but is forthcoming). </li>
+
+  <li> Parts of pages, like checklists, should be accessible at individual URLs
+       which are mobile web browser friendly, so that you can readily access
+       any task list while on the go, and quickly add whatever thought popped
+       into your head. </li>
+
+  <li> It should support the attachment of media to individual pages, again not
+       constrained by a global namespace. </li>
+
+  <li> It should be searchable (not yet implemented) and support bulk import
+       and export (also not yet implemented). </li>
+
+  <li> It should support access controls to enable sharing subtrees (or an
+       entire tree) in a read-only or read-write manner with other people, or
+       with the anonymous public (partly implemented). </li>
+  </ul>
+
+  <p> If you’ve managed to read this far and are not simply in shock at this
+      display of raw enthusiasm for something of such little consequence,
+      please <a href="/">give Spare Cortex a whirl</a>. </p>
+
+</body>
+</html>

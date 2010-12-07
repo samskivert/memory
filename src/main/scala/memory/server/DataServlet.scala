@@ -192,7 +192,8 @@ class DataServlet extends RemoteServiceServlet with DataService
     contents.meta = ""
     contents.title = ""
     contents.text = "This is the main page for **" + cortexId + "**. " +
-      "Click the edit button to the right to edit it."
+      "Click the wrench icon up above to edit it. Or check out the " +
+      "[[http://www.sparecortex.com/c/help|help and tutorials]]."
     contents.when = System.currentTimeMillis
     contents
   }

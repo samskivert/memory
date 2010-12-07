@@ -178,8 +178,8 @@ body {
 .wiki pre {
  max-width: 100%;
  overflow: auto;
- border-top: 1px solid;
- border-bottom: 1px solid;
+ border-top: 1px dashed #E0E0E0;
+ border-bottom: 1px dashed #E0E0E0;
  padding: 5px 0px;
  margin: 5px 0px;
 }
@@ -189,7 +189,24 @@ body {
 }
 
 .wiki h1, h2, h3, h4, h5 {
-  margin: 5px 0px;
+  margin: 0.75em 0px;
+}
+
+.wiki h2 {
+  border-top: 4px solid #E0E0E0;
+  font-size: 150%;
+  margin-top: 1em;
+  padding-top: 0.25em;
+}
+
+.wiki h2:first-child {
+  border-top: none;
+  margin-top: 0.75px;
+  padding-top: 0px;
+}
+
+.wiki h3 {
+  border-bottom: 1px solid #E0E0E0;
 }
 
 .wiki ul, .wiki ol {
