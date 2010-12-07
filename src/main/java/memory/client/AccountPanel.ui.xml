@@ -14,7 +14,6 @@
       font-weight: bold;
     }
     .title {
-      font-family: "Palatino", "Times New Roman", Times, serif;
       font-size: 18px;
       margin-top: 10px;
       border-bottom: 1px dashed;
