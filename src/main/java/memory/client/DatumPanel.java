@@ -188,7 +188,7 @@ public abstract class DatumPanel extends FlowPanel
 
     protected void addEditor (FlowPanel editor)
     {
-        final TextBox title = Widgets.newTextBox(_datum.title, Datum.MAX_TITLE_LENGTH, 20);
+        final TextBox title = Widgets.newTextBox(_datum.title, Datum.MAX_TITLE_LENGTH, 30);
         _updaters.add(new BitsUpdater() {
             public void addUpdates (Map<Datum.Field, FieldValue> updates) {
                 _title = title.getText().trim();
