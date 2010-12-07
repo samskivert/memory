@@ -37,9 +37,9 @@ import memory.data.Type;
  */
 public abstract class TextDatumPanel extends DatumPanel
 {
-    @Override protected void addBitsEditors (FlowPanel editor, FluentTable bits)
+    @Override protected void addContentEditors (FlowPanel editor)
     {
-        super.addBitsEditors(editor, bits);
+        super.addContentEditors(editor);
 
         int height = Math.max(5, Math.min(30, countNewlines(_datum.text)+2));
         final TextArea text = Widgets.newTextArea(_datum.text, -1, height);

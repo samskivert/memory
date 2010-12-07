@@ -154,7 +154,7 @@ public class PageDatumPanel extends DatumPanel
 
         new MClickCallback<Long>(add) {
             protected boolean callService () {
-                _child = createChildDatum(type.getSelectedValue(), title.getText(), null);
+                _child = createChildDatum(type.getSelectedValue(), title.getText(), "");
                 _datasvc.createDatum(_ctx.cortexId, _child, this);
                 return true;
             }

@@ -188,13 +188,27 @@ public abstract class DatumPanel extends FlowPanel
 
     protected void addEditor (FlowPanel editor)
     {
+        final TextBox title = Widgets.newTextBox(_datum.title, Datum.MAX_TITLE_LENGTH, 20);
+        _updaters.add(new BitsUpdater() {
+            public void addUpdates (Map<Datum.Field, FieldValue> updates) {
+                _title = title.getText().trim();
+                updates.put(Datum.Field.TITLE, FieldValue.of(_title));
+            }
+            public void applyUpdates () {
+                title.setText(_title);
+                _datum.title = _title;
+            }
+            protected String _title;
+        });
+
         FluentTable bits = new FluentTable(0, 1);
+        bits.add().setWidget(title);
         editor.add(bits);
-        addBitsEditors(editor, bits);
+
+        addContentEditors(editor);
 
         final Type otype = _datum.type;
         Button update = new Button("Update");
-        update.addStyleName(_rsrc.styles().editorUpdateButton());
         new MClickCallback<Void>(update) {
             protected boolean callService () {
                 Map<Datum.Field, FieldValue> updates = new HashMap<Datum.Field, FieldValue>();
@@ -213,35 +227,20 @@ public abstract class DatumPanel extends FlowPanel
             }
             protected String _title;
         };
-        editor.add(update);
+
+        if (editor.getWidgetCount() == 1) {
+            bits.at(0, bits.getCellCount(0)).setWidget(update);
+        } else {
+            update.addStyleName(_rsrc.styles().editorUpdateButton());
+            editor.add(update);
+        }
 
         addChildrenEditor(editor);
     }
 
-    protected void addBitsEditors (FlowPanel editor, FluentTable bits)
+    protected void addContentEditors (FlowPanel editor)
     {
-        addTitleEditor(bits);
-        addTypeParentEditor(bits);
-    }
-
-    protected void addTitleEditor (FluentTable bits)
-    {
-        final TextBox title = Widgets.newTextBox(_datum.title, Datum.MAX_TITLE_LENGTH, 20);
-        title.addStyleName(_rsrc.styles().width100());
-        bits.add().setText("Title:", _rsrc.styles().editorLabel()).
-            right().setWidget(title).setColSpan(3);
-
-        _updaters.add(new BitsUpdater() {
-            public void addUpdates (Map<Datum.Field, FieldValue> updates) {
-                _title = title.getText().trim();
-                updates.put(Datum.Field.TITLE, FieldValue.of(_title));
-            }
-            public void applyUpdates () {
-                title.setText(_title);
-                _datum.title = _title;
-            }
-            protected String _title;
-        });
+        // nada
     }
 
     protected void addTypeParentEditor (FluentTable bits)
