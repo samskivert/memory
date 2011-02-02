@@ -190,6 +190,7 @@ public abstract class TextDatumPanel extends DatumPanel
                     mdatum.type = Type.MEDIA;
                     mdatum.title = name.getText().trim();
                     mdatum.when = System.currentTimeMillis(); // close enough
+                    _datum.children.add(mdatum);
                     addMediaChild(media, mdatum);
 
                     // reset the UI
