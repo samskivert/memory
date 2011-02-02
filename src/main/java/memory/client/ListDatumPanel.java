@@ -199,11 +199,13 @@ public class ListDatumPanel extends DatumPanel
 
         protected void displayItem () {
             setWidget(createItemWidget(_item));
-            _dcreg = addDoubleClickHandler(new DoubleClickHandler() {
-                public void onDoubleClick (DoubleClickEvent event) {
-                    displayEditor();
-                }
-            });
+            if (_ctx.canOpenEditor()) {
+                _dcreg = addDoubleClickHandler(new DoubleClickHandler() {
+                    public void onDoubleClick (DoubleClickEvent event) {
+                        displayEditor();
+                    }
+                });
+            }
         }
 
         protected void displayEditor () {
