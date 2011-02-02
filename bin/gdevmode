@@ -13,7 +13,7 @@ else
     GWT_UTILS_CPATH="$ROOT/lib_managed/scala_2.8.0/compile/gwt-utils-*.jar"
 fi
 
-GAE=/home/mdb/ops/appengine-java-sdk-1.3.8
+GAE=/home/mdb/ops/appengine-java-sdk-1.4.0
 
 CLASSPATH=`echo \
     $GAE/lib/appengine-tools-api.jar \
