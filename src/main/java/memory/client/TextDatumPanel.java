@@ -86,21 +86,16 @@ public abstract class TextDatumPanel extends DatumPanel
         // add the media management interface
         editor.add(Widgets.newLabel("Media:", _rsrc.styles().editorTitle()));
 
-        final FlowPanel media = Widgets.newFlowPanel();
-        for (Datum child : _datum.children) {
-            if (child.type != Type.MEDIA) {
-                continue;
-            }
-            addMediaChild(media, child);
-        }
-        if (media.getWidgetCount() == 0) {
-            media.add(Widgets.newInlineLabel("<no media>", _rsrc.styles().noitems()));
-        }
+        final FlowPanel mpanel = Widgets.newFlowPanel();
+        editor.add(mpanel);
+
+        mpanel.add(_media = Widgets.newFlowPanel("inline"));
+        refreshMedia();
+
         Value<Boolean> uploadShowing = Value.create(false);
-        media.add(Widgets.newActionLabel("upload", _rsrc.styles().floatRight(),
-                                         Bindings.makeToggler(uploadShowing)));
         if (_ctx.canOpenEditor()) {
-            editor.add(media);
+            mpanel.add(Widgets.newActionLabel("upload", _rsrc.styles().floatRight(),
+                                             Bindings.makeToggler(uploadShowing)));
         }
 
         if (_ctx.canWrite()) {
@@ -110,7 +105,7 @@ public abstract class TextDatumPanel extends DatumPanel
 
             Bindings.bindVisible(uploadShowing, new Bindings.Thunk() {
                 public Widget createWidget () {
-                    return createUploadUI(editor, media);
+                    return createUploadUI(editor);
                 }
             });
         } else {
@@ -120,16 +115,25 @@ public abstract class TextDatumPanel extends DatumPanel
         }
     }
 
-    protected void addMediaChild (FlowPanel media, Datum child)
+    protected void refreshMedia ()
     {
-        if (media.getWidgetCount() > 0) {
-            media.add(Widgets.newInlineLabel(", "));
+        _media.clear();
+        for (Datum child : _datum.children) {
+            if (child.type != Type.MEDIA) {
+                continue;
+            }
+            if (_media.getWidgetCount() > 0) {
+                _media.add(Widgets.newInlineLabel(", "));
+            }
+            _media.add(new Anchor(WikiUtil.makePath(_ctx.cortexId, _datum.id, child.title),
+                                  child.title));
         }
-        media.add(new Anchor(WikiUtil.makePath(_ctx.cortexId, _datum.id, child.title),
-                             child.title));
+        if (_media.getWidgetCount() == 0) {
+            _media.add(Widgets.newInlineLabel("<no media>", _rsrc.styles().noitems()));
+        }
     }
 
-    protected FormPanel createUploadUI (FlowPanel editor, final FlowPanel media)
+    protected FormPanel createUploadUI (FlowPanel editor)
     {
         final Button upload = new Button("Upload ");
         final TextBox name = Widgets.newTextBox("", 64, 20);
@@ -191,7 +195,7 @@ public abstract class TextDatumPanel extends DatumPanel
                     mdatum.title = name.getText().trim();
                     mdatum.when = System.currentTimeMillis(); // close enough
                     _datum.children.add(mdatum);
-                    addMediaChild(media, mdatum);
+                    refreshMedia();
 
                     // reset the UI
                     form.reset();
@@ -238,6 +242,8 @@ public abstract class TextDatumPanel extends DatumPanel
         }
         return nl;
     }
+
+    protected FlowPanel _media;
 
     protected static final String[] WIKI_HELP = {
         "//italics//",
