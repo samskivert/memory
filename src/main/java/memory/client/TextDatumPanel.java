@@ -85,19 +85,19 @@ public abstract class TextDatumPanel extends DatumPanel
     {
         // add the media management interface
         editor.add(Widgets.newLabel("Media:", _rsrc.styles().editorTitle()));
-
         final FlowPanel mpanel = Widgets.newFlowPanel();
-        editor.add(mpanel);
-
         mpanel.add(_media = Widgets.newFlowPanel("inline"));
-        refreshMedia();
-
         Value<Boolean> uploadShowing = Value.create(false);
         if (_ctx.canOpenEditor()) {
             mpanel.add(Widgets.newActionLabel("upload", _rsrc.styles().floatRight(),
                                              Bindings.makeToggler(uploadShowing)));
         }
+        editor.add(mpanel);
 
+        // populate said interface with the current media
+        refreshMedia();
+
+        // add the interface shown when the user clicks 'upload'
         if (_ctx.canWrite()) {
             Widget utitle = Widgets.newLabel("Upload media:", _rsrc.styles().editorTitle());
             Bindings.bindVisible(uploadShowing, utitle);
@@ -122,11 +122,11 @@ public abstract class TextDatumPanel extends DatumPanel
             if (child.type != Type.MEDIA) {
                 continue;
             }
-            if (_media.getWidgetCount() > 0) {
-                _media.add(Widgets.newInlineLabel(", "));
-            }
-            _media.add(new Anchor(WikiUtil.makePath(_ctx.cortexId, _datum.id, child.title),
-                                  child.title));
+            FlowPanel box = Widgets.newFlowPanel(_rsrc.styles().mediaBox());
+            box.add(createDeleteButton(child, box));
+            box.add(new Anchor(WikiUtil.makePath(_ctx.cortexId, _datum.id, child.title),
+                               child.title));
+            _media.add(box);
         }
         if (_media.getWidgetCount() == 0) {
             _media.add(Widgets.newInlineLabel("<no media>", _rsrc.styles().noitems()));

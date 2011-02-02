@@ -130,6 +130,11 @@ body {
   white-space: nowrap;
 }
 
+.mediaBox {
+  display: inline;
+  padding-right: 10px;
+}
+
 .noitems {
   color: #666666;
 }

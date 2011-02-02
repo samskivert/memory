@@ -38,6 +38,7 @@ public interface MemoryResources extends ClientBundle
         String textTitle ();
         String listItem ();
         String stretchBox ();
+        String mediaBox ();
         String noitems ();
 
         String width98 ();
