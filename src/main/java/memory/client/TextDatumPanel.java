@@ -246,7 +246,8 @@ public abstract class TextDatumPanel extends DatumPanel
         "# Numbered list\n# Second item\n## Sub item",
         "Link to [[wikipage]]",
         "[[http://www.google.com/|Google]]",
-        "== Large heading\n=== Medium heading\n==== Small heaing",
+        "{{http://sparecortex.com/favicon.ico|Logo}}",
+        "== Large heading\n=== Medium heading\n==== Small heading",
         "Horizontal line:\n----",
         "|=|=table|=header|\n"+
         "|a|table|row|\n"+
