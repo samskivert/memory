@@ -10,7 +10,8 @@ class Memory (info :ProjectInfo) extends DefaultWebProject(info) {
   val scalaj_collection = "org.scalaj" %% "scalaj-collection" % "1.0"
 
   // HTTP and GWT depends
-  val gwtUser = "com.google.gwt" % "gwt-user" % "2.2.0"
+  val gwtVers = "2.2.0"
+  val gwtUser = "com.google.gwt" % "gwt-user" % gwtVers
   val gwtUtils = "com.threerings" % "gwt-utils" % "1.3-SNAPSHOT"
 
   // override def libraryDependencies = Set(
@@ -19,16 +20,17 @@ class Memory (info :ProjectInfo) extends DefaultWebProject(info) {
   // ) ++ super.libraryDependencies
 
   // we don't want these on any of our classpaths, so we make them "system" deps
-  val gwtDev = "com.google.gwt" % "gwt-dev" % "2.2.0" % "system"
-  val gwtServlet = "com.google.gwt" % "gwt-servlet" % "2.2.0" % "system"
+  val gwtDev = "com.google.gwt" % "gwt-dev" % gwtVers % "system"
+  val gwtServlet = "com.google.gwt" % "gwt-servlet" % gwtVers % "system"
   val gwtAsyncGen = "com.samskivert" % "gwt-asyncgen" % "1.0" % "system"
 
   // appengine depends
-  val gae = "com.google.appengine" % "appengine-api-1.0-sdk" % "1.4.0"
-  // val gaeTools = "com.google.appengine" % "appengine-tools-sdk" % "1.4.0" % "test"
-  val gaeTesting = "com.google.appengine" % "appengine-testing" % "1.4.0" % "test"
-  val gaeStubs = "com.google.appengine" % "appengine-api-stubs" % "1.4.0" % "test"
-  val gaeLabs = "com.google.appengine" % "appengine-api-labs" % "1.4.0" % "test"
+  val gaeVers = "1.4.2"
+  val gae = "com.google.appengine" % "appengine-api-1.0-sdk" % gaeVers
+  // val gaeTools = "com.google.appengine" % "appengine-tools-sdk" % gaeVers % "test"
+  val gaeTesting = "com.google.appengine" % "appengine-testing" % gaeVers % "test"
+  val gaeStubs = "com.google.appengine" % "appengine-api-stubs" % gaeVers % "test"
+  val gaeLabs = "com.google.appengine" % "appengine-api-labs" % gaeVers % "test"
 
   // database depends
   val objectify = "com.googlecode.objectify" % "objectify" % "2.2.1"
