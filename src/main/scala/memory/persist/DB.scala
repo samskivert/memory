@@ -3,6 +3,7 @@
 
 package memory.persist
 
+import java.io.{InputStream, OutputStream}
 import memory.data.{Access, AccessInfo, Cortex, Datum, FieldValue, Type}
 
 /**
@@ -80,4 +81,12 @@ trait DB
 
   /** Deletes the specified datum. */
   def deleteDatum (cortexId :String, id :Long) :Unit
+
+  /** Dumps the contents of the database in text form to the supplied writer. Note that media is
+   * not included in the dump. */
+  def dump (out :OutputStream) :Unit
+
+  /** Loads a database dump from the supplied reader. This is only guaranteed to work on a blank
+   * database. Otherwise key conflicts may occur. */
+  def undump (in :InputStream) :Unit
 }

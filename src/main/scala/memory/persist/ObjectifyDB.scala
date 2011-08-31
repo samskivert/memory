@@ -4,6 +4,7 @@
 package memory.persist
 package objectify
 
+import java.io.{InputStream, OutputStream}
 import scalaj.collection.Imports._
 
 import com.googlecode.objectify.{Key, Objectify, ObjectifyService}
@@ -230,6 +231,31 @@ object ObjectifyDB extends DB
     transaction { obj =>
       obj.delete(datumKey(cortexId, id))
     }
+  }
+
+  // from trait DB
+  def dump (out :OutputStream) {
+    // TODO
+    import java.io._
+    val dout = new DataOutputStream(new BufferedOutputStream(out))
+    transaction { obj =>
+      // first dump the cortex rows
+      val iter = obj.query(classOf[CortexRow])
+      while (iter.hasNext) {
+        val cr = iter.next
+        System.out.println("CR: " + cr)
+        dout.writeUTF8("CortexRow")
+        dout.writeUTF8(cr.id);
+        dout.writeLong(cr.rootId);
+        dout.writeUTF8(cr.ownerId);
+        dout.writeUTF8(cr.publicAccess.toString);
+      }
+    }
+  }
+
+  // from trait DB
+  def undump (in :InputStream) {
+    // TODO
   }
 
   private def cortexAccess (userId :String, cortexId :String, email :String, access :Access) = {
