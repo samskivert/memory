@@ -89,6 +89,6 @@ object MemoryLogic
     }
   }
 
-  private val UTC = TimeZone.getTimeZone("GMT")
-  private val DEFAULT_EXPIRY_TIME = 2 * 24*60*60*1000L
+  private final val UTC = TimeZone.getTimeZone("GMT")
+  private final val DEFAULT_EXPIRY_TIME = 2 * 24*60*60*1000L
 }

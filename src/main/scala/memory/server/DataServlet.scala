@@ -3,8 +3,8 @@
 
 package memory.server
 
+import scala.collection.JavaConversions._
 import scala.collection.mutable.{Seq => MSeq}
-import scalaj.collection.Imports._
 
 import java.util.{Map => JMap, List => JList, ArrayList => JArrayList}
 import com.google.gwt.user.server.rpc.RemoteServiceServlet
@@ -54,7 +54,7 @@ class DataServlet extends RemoteServiceServlet with DataService
     val access = db.loadCortexAccess(cortexId)
     result.publicAccess = cortex.publicAccess
     result.userAccess = new JArrayList[AccessInfo]
-    result.userAccess.addAll(access.asJava)
+    result.userAccess.addAll(access)
     result
   }
 
@@ -108,9 +108,8 @@ class DataServlet extends RemoteServiceServlet with DataService
 
   // from DataService
   def updateDatum (cortexId :String, id :Long, updates :JMap[Datum.Field, FieldValue]) {
-    import scalaj.collection.Imports._ // for asScala
     requireWriteAccess(cortexId)
-    db.updateDatum(cortexId, id, updates.asScala.toSeq)
+    db.updateDatum(cortexId, id, updates.toSeq)
     // TODO: handle archived
   }
 

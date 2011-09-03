@@ -3,10 +3,10 @@
 
 package memory.server
 
+import scala.collection.JavaConversions._
+
 import java.util.logging.Level
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
-
-import scalaj.collection.Imports._
 
 import com.google.appengine.api.blobstore.BlobstoreServiceFactory
 
@@ -59,7 +59,7 @@ class UploadServlet extends HttpServlet
           case _ => _log.log(Level.WARNING, t.getMessage, t) // log the whole stack trace
         }
         // delete any uploaded blobs
-        blobs.values.asScala.map(bkey => _bssvc.delete(bkey))
+        blobs.values.map(bkey => _bssvc.delete(bkey))
         rsp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, t.getMessage)
       }
     }

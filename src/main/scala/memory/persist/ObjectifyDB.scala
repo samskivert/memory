@@ -5,7 +5,7 @@ package memory.persist
 package objectify
 
 import java.io.{InputStream, OutputStream}
-import scalaj.collection.Imports._
+import scala.collection.JavaConversions._
 
 import com.googlecode.objectify.{Key, Objectify, ObjectifyService}
 import com.googlecode.objectify.annotation.Unindexed
@@ -107,13 +107,13 @@ object ObjectifyDB extends DB
   // from trait DB
   def loadAccessibleCortices (userId :String) :Seq[AccessInfo] = {
     val obj = ObjectifyService.begin
-    obj.query(classOf[CortexAccess]).ancestor(userKey(userId)).list.asScala map(toAccessInfo)
+    obj.query(classOf[CortexAccess]).ancestor(userKey(userId)).list map(toAccessInfo)
   }
 
   // from trait DB
   def loadCortexAccess (cortexId :String) :Seq[AccessInfo] = {
     val obj = ObjectifyService.begin
-    obj.query(classOf[CortexAccess]).filter("cortexId", cortexId).list.asScala map(toAccessInfo)
+    obj.query(classOf[CortexAccess]).filter("cortexId", cortexId).list map(toAccessInfo)
   }
 
   // from trait DB
@@ -183,7 +183,7 @@ object ObjectifyDB extends DB
   // from trait DB
   def loadData (cortexId :String, ids :Set[Long]) :Array[Datum] = {
     val obj = ObjectifyService.begin
-    obj.get(ids.map(id => datumKey(cortexId, id)).asJava).values.asScala.map(toJava).toArray
+    obj.get(ids.map(id => datumKey(cortexId, id))).values.map(toJava).toArray
   }
 
   // from trait DB
@@ -235,22 +235,22 @@ object ObjectifyDB extends DB
 
   // from trait DB
   def dump (out :OutputStream) {
-    // TODO
-    import java.io._
-    val dout = new DataOutputStream(new BufferedOutputStream(out))
-    transaction { obj =>
-      // first dump the cortex rows
-      val iter = obj.query(classOf[CortexRow])
-      while (iter.hasNext) {
-        val cr = iter.next
-        System.out.println("CR: " + cr)
-        dout.writeUTF8("CortexRow")
-        dout.writeUTF8(cr.id);
-        dout.writeLong(cr.rootId);
-        dout.writeUTF8(cr.ownerId);
-        dout.writeUTF8(cr.publicAccess.toString);
-      }
-    }
+    // // TODO
+    // import java.io._
+    // val dout = new DataOutputStream(new BufferedOutputStream(out))
+    // transaction { obj =>
+    //   // first dump the cortex rows
+    //   val iter = obj.query(classOf[CortexRow])
+    //   while (iter.hasNext) {
+    //     val cr = iter.next
+    //     System.out.println("CR: " + cr)
+    //     dout.writeUTF8("CortexRow")
+    //     dout.writeUTF8(cr.id);
+    //     dout.writeLong(cr.rootId);
+    //     dout.writeUTF8(cr.ownerId);
+    //     dout.writeUTF8(cr.publicAccess.toString);
+    //   }
+    // }
   }
 
   // from trait DB

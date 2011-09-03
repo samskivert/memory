@@ -3,6 +3,7 @@
 
 package memory.server
 
+import scala.collection.JavaConversions._
 import scala.xml.{Node, NodeSeq, XML}
 
 import java.util.TimeZone
@@ -127,13 +128,12 @@ class GetServlet extends HttpServlet
   }
 
   private def toXML (datum :Datum) :Node = {
-    import scalaj.collection.Imports._
     <def id={datum.id.toString} x:parentId={datum.parentId.toString}
          x:type={datum.`type`.toString} x:meta={datum.meta} title={datum.title}
          x:when={datum.when.toString}>{datum.text}
       {datum.children match {
         case null => Array[Node]()
-        case children => children.asScala map(toXML)
+        case children => children map(toXML)
       }}
     </def>
   }
