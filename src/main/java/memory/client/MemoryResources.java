@@ -37,6 +37,8 @@ public interface MemoryResources extends ClientBundle
         String pageDatum ();
         String textTitle ();
         String listItem ();
+        String unsavedItem ();
+        String failedItem ();
         String stretchBox ();
         String mediaBox ();
         String noitems ();

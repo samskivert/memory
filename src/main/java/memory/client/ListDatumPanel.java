@@ -30,6 +30,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
+import com.threerings.gwt.ui.EnterClickAdapter;
 import com.threerings.gwt.ui.Popups;
 import com.threerings.gwt.ui.Widgets;
 
@@ -90,28 +91,27 @@ public class ListDatumPanel extends DatumPanel
             add(_addui);
             maybeHideAddUI();
 
-            new MClickCallback<Long>(add, _itext) {
-                protected boolean callService () {
+            ClickHandler onAdd = new ClickHandler() {
+                public void onClick (ClickEvent event) {
                     String text = _itext.getText().trim();
                     if (text.length() == 0) {
                         maybeHideAddUI();
-                        return false;
+                        return;
                     }
-                    _item = createChildDatum(Type.WIKI, "", text);
-                    _datasvc.createDatum(_ctx.cortexId, _item, this);
-                    return true;
-                }
-                protected boolean gotResult (Long itemId) {
-                    _item.id = itemId;
-                    getChildData().add(_item);
-                    _metamap.put(_item.id, new MetaData(_item.meta));
-                    Widget row = addItem(_items, _item);
+
+                    // clear out the item text and queue hiding timer
                     _itext.setText("");
                     _hideTimer.schedule(10000);
-                    return true;
+
+                    // add the UI row and instruct it to create the item
+                    Datum item = createChildDatum(Type.WIKI, "", text);
+                    getChildData().add(item);
+                    EditableItemLabel row = addItem(_items, item, new MetaData(item.meta));
+                    row.createItem();
                 }
-                protected Datum _item;
             };
+            add.addClickHandler(onAdd);
+            EnterClickAdapter.bind(_itext, onAdd);
         }
     }
 
@@ -130,23 +130,26 @@ public class ListDatumPanel extends DatumPanel
     protected void addItems ()
     {
         for (Datum child : getOrderedChildren()) {
-            addItem(_items, child);
+            addItem(_items, child, _metamap.get(child.id));
         }
     }
 
-    protected Widget addItem (FlowPanel items, Datum item)
+    protected EditableItemLabel addItem (FlowPanel items, Datum item, MetaData data)
     {
-        Widget iwidget = new EditableItemLabel(item);
+        EditableItemLabel iwidget = new EditableItemLabel(item, data);
         items.add(iwidget);
         _noitems.setVisible(false);
         return iwidget;
     }
 
-    protected Widget createItemWidget (Datum item)
+    protected Widget createItemWidget (Datum item, MetaData data)
     {
         Widget ilabel = createItemLabel(item);
         ilabel.setTitle(""+item.id);
         ilabel.addStyleName(_rsrc.styles().listItem());
+        if (item.id == 0) {
+            ilabel.addStyleName(_rsrc.styles().unsavedItem());
+        }
         return ilabel;
     }
 
@@ -187,9 +190,26 @@ public class ListDatumPanel extends DatumPanel
     protected class EditableItemLabel extends SimplePanel
         implements HasDoubleClickHandlers
     {
-        public EditableItemLabel (Datum item) {
+        public EditableItemLabel (Datum item, MetaData data) {
             _item = item;
+            _data = data;
             displayItem();
+        }
+
+        public void createItem () {
+            _datasvc.createDatum(_ctx.cortexId, _item, new MPopupCallback<Long>(this) {
+                public void onSuccess (Long itemId) {
+                    _item.id = itemId;
+                    _metamap.put(itemId, _data);
+                    displayItem(); // redisplay the item now that it's created
+                }
+                public void onFailure (Throwable cause) {
+                    super.onFailure(cause);
+                    getWidget().removeStyleName(_rsrc.styles().unsavedItem());
+                    getWidget().addStyleName(_rsrc.styles().failedItem());
+                    // TODO: display a UI That allows us to reinitiate the save
+                }
+            });
         }
 
         // from interface HasDoubleClickHandlers
@@ -198,8 +218,8 @@ public class ListDatumPanel extends DatumPanel
         }
 
         protected void displayItem () {
-            setWidget(createItemWidget(_item));
-            if (_ctx.canOpenEditor()) {
+            setWidget(createItemWidget(_item, _data));
+            if (_ctx.canOpenEditor() && _item.id != 0) {
                 _dcreg = addDoubleClickHandler(new DoubleClickHandler() {
                     public void onDoubleClick (DoubleClickEvent event) {
                         displayEditor();
@@ -227,6 +247,7 @@ public class ListDatumPanel extends DatumPanel
         }
 
         protected Datum _item;
+        protected MetaData _data;
         protected HandlerRegistration _dcreg;
     }
 

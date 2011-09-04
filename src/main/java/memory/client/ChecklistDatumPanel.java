@@ -24,23 +24,29 @@ public class ChecklistDatumPanel extends ListDatumPanel
     @Override protected void addItems ()
     {
         for (Datum child : getOrderedChildren()) {
-            if (!_metamap.get(child.id).get(MetaData.DONE, false)) {
-                addItem(_items, child);
+            MetaData data = _metamap.get(child.id);
+            if (!data.get(MetaData.DONE, false)) {
+                addItem(_items, child, data);
             }
         }
 
         _doneItems = new FlowPanel();
         for (Datum child : getChildData()) { // we don't use custom order here
-            if (_metamap.get(child.id).get(MetaData.DONE, false)) {
-                addItem(_doneItems, child);
+            MetaData data = _metamap.get(child.id);
+            if (data.get(MetaData.DONE, false)) {
+                addItem(_doneItems, child, data);
             }
         }
         add(_doneItems);
     }
 
-    @Override protected Widget createItemWidget (final Datum item)
+    @Override protected Widget createItemWidget (final Datum item, final MetaData data)
     {
-        final MetaData data = _metamap.get(item.id);
+        // if the item is not yet saved, just display the label
+        if (item.id == 0) {
+            return super.createItemWidget(item, data);
+        }
+
         final CheckBox box = new CheckBox();
         box.setEnabled(_ctx.canOpenEditor());
         box.addStyleName("inline");

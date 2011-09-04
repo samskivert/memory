@@ -114,6 +114,14 @@ body {
   display: list-item;
 }
 
+.unsavedItem {
+  color: #999999;
+}
+
+.failedItem {
+  color: #990000;
+}
+
 .width98 {
   width: 98%;
 }
