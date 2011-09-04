@@ -17,6 +17,7 @@ object MemoryBuild extends Build {
       name             := "memory",
       version          := "1.1-SNAPSHOT",
       scalaVersion     := "2.9.0-1",
+      scalacOptions    ++= Seq("-unchecked", "-deprecation"),
 
       gwtVersion       := "2.3.0",
       gaeSdkPath       := Some("/Users/mdb/ops/appengine-java-sdk-1.5.3"),
