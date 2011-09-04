@@ -69,8 +69,7 @@ class DataServlet extends RemoteServiceServlet with DataService
 
   // from DataService
   def createCortex (cortexId :String) {
-    val created = db.createCortex(
-      cortexId, requireUser.getUserId, createRoot(cortexId), createRootContents(cortexId))
+    val created = MemoryLogic.createCortex(cortexId, requireUser.getUserId)
     if (!created) throw new ServiceException("e.cortex_name_in_use")
   }
 
@@ -174,27 +173,6 @@ class DataServlet extends RemoteServiceServlet with DataService
   private def getAccess (cortexId :String) :Access = {
     Option(_usvc.getCurrentUser) flatMap(
       u => db.loadAccess(u.getUserId, cortexId)) getOrElse(requireCortex(cortexId).publicAccess)
-  }
-
-  private def createRoot (cortexId :String) = {
-    val root = new Datum
-    root.`type` = Type.PAGE
-    root.meta = ""
-    root.title = cortexId
-    root.when = System.currentTimeMillis
-    root
-  }
-
-  private def createRootContents (cortexId :String) = {
-    val contents = new Datum
-    contents.`type` = Type.WIKI
-    contents.meta = ""
-    contents.title = ""
-    contents.text = "This is the main page for **" + cortexId + "**. " +
-      "Click the wrench icon up above to edit it. Or check out the " +
-      "[[http://www.sparecortex.com/c/help|help and tutorials]]."
-    contents.when = System.currentTimeMillis
-    contents
   }
 
   private val _usvc = UserServiceFactory.getUserService

@@ -15,6 +15,28 @@ object MemoryLogic
 {
   val db :DB = memory.persist.objectify.ObjectifyDB
 
+  /** Creates a new cortex with the specified name and owner.
+   * @return true if the cortex was created, false if the name was in use.
+   */
+  def createCortex (cortexId :String, ownerId :String) :Boolean = {
+    val root = new Datum
+    root.`type` = Type.PAGE
+    root.meta = ""
+    root.title = cortexId
+    root.when = System.currentTimeMillis
+
+    val contents = new Datum
+    contents.`type` = Type.WIKI
+    contents.meta = ""
+    contents.title = ""
+    contents.text = "This is the main page for **" + cortexId + "**. " +
+      "Click the wrench icon up above to edit it. Or check out the " +
+      "[[http://www.sparecortex.com/c/help|help and tutorials]]."
+    contents.when = System.currentTimeMillis
+
+    db.createCortex(cortexId, ownerId, root, contents)
+  }
+
   /** Resolves the children of the supplied datum.
    * @param cortexId the cortex in which the datum exists.
    * @param when the time to use when resolving journal data.
