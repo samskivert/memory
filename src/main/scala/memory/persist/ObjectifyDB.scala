@@ -7,7 +7,7 @@ package objectify
 import java.io.{InputStream, OutputStream}
 import scala.collection.JavaConversions._
 
-import com.googlecode.objectify.{Key, Objectify, ObjectifyService}
+import com.googlecode.objectify.{Key, NotFoundException, Objectify, ObjectifyService}
 import com.googlecode.objectify.annotation.Unindexed
 
 import memory.data.{Access, AccessInfo, Cortex, Datum, FieldValue, Type}
@@ -34,7 +34,7 @@ object ObjectifyDB extends DB
   // from trait DB
   def noteUser (userId :String) {
     transaction { obj =>
-      val row = obj.get(userKey(userId))
+      val row = obj.find(userKey(userId))
       if (row == null) {
         val nrow = new UserRow
         nrow.id = userId
@@ -69,25 +69,23 @@ object ObjectifyDB extends DB
   }
 
   // from trait DB
-  def loadCortex (cortexId: String) :Option[Cortex] = {
+  def loadCortex (cortexId: String) :Option[Cortex] = try {
     val obj = ObjectifyService.begin
-    obj.get(cortexKey(cortexId)) match {
-      case null => None
-      case cortex => {
-        // TEMP: handle legacy cortices that lack a publicAccess field
-        if (cortex.publicAccess == null) {
-          cortex.publicAccess = Access.NONE
-          transaction { o2 => o2.put(cortex) :Key[CortexRow] }
-        }
-        Some(toJava(cortex))
-      }
+    val cortex = obj.get(cortexKey(cortexId))
+    // TEMP: handle legacy cortices that lack a publicAccess field
+    if (cortex.publicAccess == null) {
+      cortex.publicAccess = Access.NONE
+      transaction { o2 => o2.put(cortex) :Key[CortexRow] }
     }
+    Some(toJava(cortex))
+  } catch {
+    case e :NotFoundException => None
   }
 
   // from trait DB
   def loadRoot (cortexId: String) :Option[Datum] = {
     val obj = ObjectifyService.begin
-    Option(obj.get(cortexKey(cortexId))) map(c => obj.get(datumKey(cortexId, c.rootId))) map(toJava)
+    Option(obj.find(cortexKey(cortexId))) map(c => obj.get(datumKey(cortexId, c.rootId))) map(toJava)
   }
 
   // from trait DB
@@ -126,21 +124,21 @@ object ObjectifyDB extends DB
   }
 
   // from trait DB
-  def updateCortexAccess (id :Long, callerId :String, access :Access) = {
+  def updateCortexAccess (id :Long, callerId :String, access :Access) = try {
     transaction { obj =>
       val arow :CortexAccess = obj.get(classOf[CortexAccess], id)
-      if (arow == null) {
-        _log.info("Requested to update non-existent access [id=" + id + ", access=" + access + "]")
-        false
-      } else {
-        if (loadCortex(arow.cortexId).map(_.ownerId).getOrElse("") != callerId) false
-        else {
-          // TODO: if access == NONE, remove it
-          arow.access = access
-          obj.put(arow) :Key[CortexAccess]
-          true
-        }
+      if (loadCortex(arow.cortexId).map(_.ownerId).getOrElse("") != callerId) false
+      else {
+        // TODO: if access == NONE, remove it
+        arow.access = access
+        obj.put(arow) :Key[CortexAccess]
+        true
       }
+    }
+  } catch {
+    case e :NotFoundException => {
+      _log.info("Requested to update non-existent access [id=" + id + ", access=" + access + "]")
+      false
     }
   }
 
@@ -154,7 +152,7 @@ object ObjectifyDB extends DB
   // from trait DB
   def loadDatum (cortexId :String, id :Long) :Datum = {
     val obj = ObjectifyService.begin
-    Option(obj.get(datumKey(cortexId, id))) map(toJava) getOrElse(error("No such datum " + id))
+    Option(obj.find(datumKey(cortexId, id))) map(toJava) getOrElse(error("No such datum " + id))
   }
 
   // from trait DB
