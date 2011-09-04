@@ -152,7 +152,7 @@ object ObjectifyDB extends DB
   // from trait DB
   def loadDatum (cortexId :String, id :Long) :Datum = {
     val obj = ObjectifyService.begin
-    Option(obj.find(datumKey(cortexId, id))) map(toJava) getOrElse(error("No such datum " + id))
+    toJava(obj.get(datumKey(cortexId, id)))
   }
 
   // from trait DB
