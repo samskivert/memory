@@ -7,6 +7,7 @@ import scala.collection.JavaConversions._
 import scala.xml.{Node, NodeSeq, XML}
 
 import java.util.TimeZone
+import java.util.logging.Level
 import javax.servlet.ServletConfig
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
@@ -48,7 +49,7 @@ class GetServlet extends HttpServlet
       val cortexId = bits(1)
 
       val cortex = db.loadCortex(cortexId) getOrElse(
-        throw new Exception("No such cortex '" + cortexId + "'."))
+        throw new BadRequestException("No such cortex '" + cortexId + "'."))
       val root = db.loadDatum(cortexId, cortex.rootId)
 
       val datum = bits.length match {
@@ -56,7 +57,7 @@ class GetServlet extends HttpServlet
         case 3 => db.loadDatum(cortexId, bits(2).toInt)
         case 4 => db.loadDatum(cortexId, bits(2).toInt, bits(3)) getOrElse(
           mkStub(bits(2).toInt, bits(3)))
-        case _ => throw new Error("Invalid path " + req.getPathInfo)
+        case _ => throw new BadRequestException("Invalid path " + req.getPathInfo)
       }
 
       def loadParents (d :Datum) :List[Datum] = {
@@ -89,7 +90,7 @@ class GetServlet extends HttpServlet
       if (access == Access.NONE) user match {
         case None => throw new RedirectException(
           _usvc.createLoginURL(req.getServletPath + req.getPathInfo))
-        case _ => throw new Exception("You lack access to this data.")
+        case _ => throw new BadRequestException("You lack access to this data.")
       }
 
       // TODO: allow the user to customize their time zone
@@ -119,12 +120,17 @@ class GetServlet extends HttpServlet
 
     } catch {
       case re :RedirectException => rsp.sendRedirect(re.getMessage)
-      case e => e.printStackTrace; rsp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage)
+      case e => {
+        if (!e.isInstanceOf[BadRequestException]) {
+          _log.log(Level.WARNING, "Unexpected error [uri=" + req.getRequestURI + "]", e)
+        }
+        rsp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage)
+      }
     }
   }
 
   private def require (condition : => Boolean, error :String) {
-    if (!condition) throw new Exception(error)
+    if (!condition) throw new BadRequestException(error)
   }
 
   private def toXML (datum :Datum) :Node = {
