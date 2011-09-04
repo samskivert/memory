@@ -17,7 +17,9 @@ object MemoryBuild extends Build {
       name             := "memory",
       version          := "1.1-SNAPSHOT",
       scalaVersion     := "2.9.0-1",
+
       gwtVersion       := "2.3.0",
+      gaeSdkPath       := Some("/Users/mdb/ops/appengine-java-sdk-1.5.3"),
       javacOptions     ++= Seq("-Xlint", "-Xlint:-serial"),
 
       resolvers ++= Seq(
@@ -33,7 +35,6 @@ object MemoryBuild extends Build {
 
         // appengine depends
         "com.google.appengine" % "appengine-api-1.0-sdk" % gaeVers,
-        // val gaeTools = "com.google.appengine" % "appengine-tools-sdk" % gaeVers % "test",
         "com.google.appengine" % "appengine-testing" % gaeVers % "test",
         "com.google.appengine" % "appengine-api-stubs" % gaeVers % "test",
         "com.google.appengine" % "appengine-api-labs" % gaeVers % "test",
