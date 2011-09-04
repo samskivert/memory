@@ -30,6 +30,15 @@ class GetServlet extends HttpServlet
     try {
       db.init
       _log.info("Database initialized.")
+
+      // create a test cortex if we're running in devmode
+      if (System.getProperty("com.google.appengine.runtime.environment") == "Development") {
+        if (MemoryLogic.createCortex("test", "none")) {
+          db.updateCortexPublicAccess("test", Access.WRITE)
+          _log.info("Created 'test' cortex. Test like the wind!")
+        }
+      }
+
     } catch {
       case e => println("Failed to init db " + e)
     }
