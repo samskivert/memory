@@ -20,11 +20,11 @@ object MemoryBuild extends Build {
       scalacOptions    ++= Seq("-unchecked", "-deprecation"),
 
       gwtVersion       := "2.3.0",
-      gaeSdkPath       := Some("/Users/mdb/ops/appengine-java-sdk-1.5.3"),
+      gaeSdkPath       := Some(Path.userHome + "ops/appengine-java-sdk-1.5.3"),
       javacOptions     ++= Seq("-Xlint", "-Xlint:-serial"),
 
       resolvers ++= Seq(
-        "Local Maven Repository" at Path.userHome.asURL + "/.m2/repository",
+        "Local Maven Repository" at Path.userHome.asURL + ".m2/repository",
         "Objectify repo" at "http://objectify-appengine.googlecode.com/svn/maven"
       ),
 
