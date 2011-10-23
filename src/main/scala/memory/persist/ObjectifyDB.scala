@@ -8,7 +8,6 @@ import java.io.{InputStream, OutputStream}
 import scala.collection.JavaConversions._
 
 import com.googlecode.objectify.{Key, NotFoundException, Objectify, ObjectifyService}
-import com.googlecode.objectify.annotation.Unindexed
 
 import memory.data.{Access, AccessInfo, Cortex, Datum, FieldValue, Type}
 
