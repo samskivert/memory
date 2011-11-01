@@ -4,11 +4,33 @@ import com.github.siasia.WebPlugin.webSettings
 import net.thunderklaus.GwtPlugin._
 
 object MemoryBuild extends Build {
-  val gaeVers = "1.5.3"
-
-  val TooolsConfig = config("tools") extend(Compile)
   val asyncGen = TaskKey[Unit]("async-gen", "Generates GWT service Async classes")
+  private def asyncGenTask =
+    (streams, sourceDirectory, classDirectory in Compile, dependencyClasspath in Compile) map {
+      (s, sourceDir, classes, depCP) => {
+        val cp = (classes +: depCP.map(_.data)) map(_.toURI.toURL)
+        val loader = java.net.URLClassLoader.newInstance(cp.toArray)
+        val genner = new com.samskivert.asyncgen.AsyncGenerator(loader, null) {
+          override def fail (message :String, cause :Throwable) =
+            new RuntimeException(message, cause)
+        }
+        val sources = (sourceDir ** "*Service.java").get
+        s.log.debug("Generating async interfaces for: " + sources.mkString(", "))
+        sources foreach { genner.processInterface(_) }
+      }
+    }
 
+  val i18nSync = TaskKey[Unit]("i18n-sync", "Generates i18n Messages interfaces from properties")
+  private def i18nSyncTask =
+    (streams, sourceDirectory) map {
+      (s, sourceDir) => {
+        val props = (sourceDir ** "*Messages.properties").get
+        s.log.debug("Generating i18n interfaces for: " + props.mkString(", "))
+        props foreach { f => com.threerings.gwt.tools.I18nSync.processFile(sourceDir, f) }
+      }
+    }
+
+  val gaeVers = "1.5.5"
   val extSettings = Defaults.defaultSettings ++ webSettings ++ gwtSettings
 
   val memory = Project(
@@ -19,8 +41,8 @@ object MemoryBuild extends Build {
       scalaVersion     := "2.9.0-1",
       scalacOptions    ++= Seq("-unchecked", "-deprecation"),
 
-      gwtVersion       := "2.3.0",
-      gaeSdkPath       := Some(Path.userHome + "ops/appengine-java-sdk-1.5.3"),
+      gwtVersion       := "2.4.0",
+      gaeSdkPath       := Some(Path.userHome + "/ops/appengine-java-sdk-" + gaeVers),
       javacOptions     ++= Seq("-Xlint", "-Xlint:-serial"),
 
       resolvers ++= Seq(
@@ -31,8 +53,8 @@ object MemoryBuild extends Build {
       autoScalaLibrary := true, // GWT plugin turns this off for some reason
       libraryDependencies ++= Seq(
         // we only need these for the GWT build, so we use "provided"
-        "com.threerings" % "gwt-utils" % "1.3-SNAPSHOT" % "provided",
-        "allen_sauer" % "gwt-dnd" % "3.1.1" % "provided",
+        "com.threerings" % "gwt-utils" % "1.5" % "provided",
+        "com.allen-sauer.gwt.dnd" % "gwt-dnd" % "3.1.2" % "provided",
 
         // appengine depends
         "com.google.appengine" % "appengine-api-1.0-sdk" % gaeVers,
@@ -46,50 +68,10 @@ object MemoryBuild extends Build {
 
         // test dependencies
         "org.scalatest" % "scalatest" % "1.2" % "test"
-
-        // tool dependencies
-        // "com.samskivert" % "gwt-asyncgen" % "1.0" % "tools"
       ),
 
-      asyncGen <<= asyncGenTask
+      asyncGen <<= asyncGenTask,
+      i18nSync <<= i18nSyncTask
     )
   )
-
-  private def asyncGenTask = (streams, sourceDirectory) map {
-    (s, sourceDir) => {
-      val sources = (sourceDir ** "*Service.java").get.map(_.getPath)
-      s.log.info("Generating async interfaces for: " + sources.mkString(", "))
-      // com.samskivert.asyncgen.AsyncGenTool.main(sources.toArray)
-    }
-  }
-
-  // // used to obtain the path for a specific dependency jar file
-  // def depPath (name :String) = managedDependencyRootPath ** (name+"*")
-
-  // // generates FooServiceAsync classes from FooService classes for GWT RPC
-  // lazy val genasync = runTask(Some("com.samskivert.asyncgen.AsyncGenTool"),
-  //                             compileClasspath +++ depPath("gwt-asyncgen"),
-  //                             (mainJavaSourcePath ** "*Service.java" getPaths).toList)
-
-  // // generates FooMessages.java from FooMessages.properties for GWT i18n
-  // lazy val i18nsync = runTask(Some("com.threerings.gwt.tools.I18nSync"), compileClasspath,
-  //                             mainJavaSourcePath.absolutePath :: (
-  //                               mainJavaSourcePath ** "*Messages.properties" getPaths).toList)
-
-  // // compiles our GWT client
-  // def gwtc (module :String) = runTask(
-  //   Some("com.google.gwt.dev.Compiler"),
-  //   compileClasspath +++ depPath("gwt-dev") +++ mainJavaSourcePath +++ mainResourcesPath,
-  //   List("-war", "target/scala_2.8.0/webapp", module))
-  // lazy val memoryc = gwtc("memory") dependsOn(copyResources)
-  // lazy val accountc = gwtc("account") dependsOn(copyResources)
-
-  // // copy our compiled classes to WEB-INF/classes after compiling
-  // override def compileAction = task {
-  //   mainCompileConditional.run
-  //   FileUtilities.copy(mainClasses.get, jettyWebappPath / "WEB-INF" / "classes", log).left.toOption
-  // } dependsOn(i18nsync) // regenerate our i18n classes every time we compile
-
-  // // prepares our webapp for shipping
-  // lazy val prepShip = prepareWebappAction && memoryc && accountc
 }
