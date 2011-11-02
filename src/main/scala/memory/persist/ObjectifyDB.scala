@@ -228,8 +228,7 @@ object ObjectifyDB extends DB
     row.token = token
     row.cortexId = cortexId
     row.access = access
-    transaction { _.put(row) :Key[ShareRow] }
-    row.id
+    transaction { _.put(row) :Key[ShareRow] } getId
   }
 
   // from trait DB
@@ -249,7 +248,7 @@ object ObjectifyDB extends DB
   } isDefined
 
   // from trait DB
-  def deleteShareRequest (shareId :String) {
+  def deleteShareRequest (shareId :Long) {
     transaction { _.delete(new Key(classOf[ShareRow], shareId)) }
   }
 

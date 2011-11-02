@@ -15,7 +15,7 @@ import memory.data.Access;
 public class ShareRow
 {
     /** The id of this share request. */
-    @Id public String id;
+    @Id public Long id;
 
     /** The randomly generated token for this share request. */
     public String token;

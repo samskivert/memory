@@ -84,7 +84,7 @@ trait DB
 
   /** Stores a share request with the supplied metadata.
    * @return the id of the share request. */
-  def createShareRequest (token :String, cortexId :String, access :Access) :String
+  def createShareRequest (token :String, cortexId :String, access :Access) :Long
 
   /** Loads the name of the cortex being shared by the specified request. */
   def loadShareInfo (token :String) :Option[String]
@@ -94,7 +94,7 @@ trait DB
   def acceptShareRequest (token :String, userId :String, email :String) :Boolean
 
   /** Deletes the share request with the specified id. */
-  def deleteShareRequest (id :String) :Unit
+  def deleteShareRequest (id :Long) :Unit
 
   /** Dumps the contents of the database in text form to the supplied writer. Note that media is
    * not included in the dump. */
