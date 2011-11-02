@@ -239,8 +239,12 @@ object ObjectifyDB extends DB
   def acceptShareRequest (token :String, userId :String, email :String) = mapShareInfo(token) {
     info =>
       deleteShareRequest(info.id)
-      transaction {
-        _.put(cortexAccess(userId, info.cortexId, email, info.access)) :Key[CortexAccess]
+      transaction { obj =>
+        // delete any previous cortex access rows for this user+cortex
+        obj.query(classOf[CortexAccess]).ancestor(userKey(userId)).filter(
+          "cortexId", info.cortexId).list foreach obj.delete
+        // store their new access
+        obj.put(cortexAccess(userId, info.cortexId, email, info.access)) :Key[CortexAccess]
       }
   } isDefined
 
