@@ -19,11 +19,8 @@ object ObjectifyDB extends DB
 {
   // from trait DB
   def init {
-    ObjectifyService.register(classOf[UserRow])
-    ObjectifyService.register(classOf[DatumRow])
-    ObjectifyService.register(classOf[CortexRow])
-    ObjectifyService.register(classOf[CortexAccess])
-    ObjectifyService.register(classOf[DatumAccess])
+    List(classOf[UserRow], classOf[DatumRow], classOf[CortexRow], classOf[ShareRow],
+         classOf[CortexAccess], classOf[DatumAccess]) map(ObjectifyService.register)
   }
 
   // from trait DB
@@ -61,9 +58,9 @@ object ObjectifyDB extends DB
       row.publicAccess = Access.NONE
       obj.put(row) :Key[CortexRow]
     }
-    transaction { obj =>
+    transaction {
       // we have to force the return type below to resolve pesky overload of put()
-      obj.put(cortexAccess(ownerId, cortexId, "", Access.WRITE)) :Key[CortexAccess]
+      _.put(cortexAccess(ownerId, cortexId, "", Access.WRITE)) :Key[CortexAccess]
     }
     true
   }
@@ -75,7 +72,7 @@ object ObjectifyDB extends DB
     // TEMP: handle legacy cortices that lack a publicAccess field
     if (cortex.publicAccess == null) {
       cortex.publicAccess = Access.NONE
-      transaction { o2 => o2.put(cortex) :Key[CortexRow] }
+      transaction { _.put(cortex) :Key[CortexRow] }
     }
     Some(toJava(cortex))
   } catch {
@@ -144,9 +141,7 @@ object ObjectifyDB extends DB
 
   // from trait DB
   def updateDatumAccess (userId :String, cortexId :String, datumId :Long, access :Access) {
-    transaction { obj =>
-      obj.put(datumAccess(userId, cortexId, datumId, access)) :Key[DatumAccess]
-    }
+    transaction { _.put(datumAccess(userId, cortexId, datumId, access)) :Key[DatumAccess] }
   }
 
   // from trait DB
@@ -206,29 +201,52 @@ object ObjectifyDB extends DB
 
   // from trait DB
   def createDatum (cortexId :String, d :Datum) = {
-    transaction { obj =>
-      val row = new DatumRow
-      row.cortex = cortexKey(cortexId)
-      row.parentId = d.parentId
-      row.`type` = d.`type`
-      row.meta = d.meta
-      row.titleKey = d.title.toLowerCase
-      row.title = d.title
-      row.text = d.text
-      row.when = d.when
-      // row.archived = false
+    val row = new DatumRow
+    row.cortex = cortexKey(cortexId)
+    row.parentId = d.parentId
+    row.`type` = d.`type`
+    row.meta = d.meta
+    row.titleKey = d.title.toLowerCase
+    row.title = d.title
+    row.text = d.text
+    row.when = d.when
+    // row.archived = false
 
-      val key :Key[DatumRow] = obj.put(row)
-      d.id = key.getId
-      d.id
-    }
+    val key = transaction { _.put(row) :Key[DatumRow] }
+    d.id = key.getId
+    d.id
   }
 
   // from trait DB
   def deleteDatum (cortexId :String, id :Long) {
-    transaction { obj =>
-      obj.delete(datumKey(cortexId, id))
-    }
+    transaction { _.delete(datumKey(cortexId, id)) }
+  }
+
+  // from trait DB
+  def createShareRequest (token :String, cortexId :String, access :Access) = {
+    val row = new ShareRow
+    row.token = token
+    row.cortexId = cortexId
+    row.access = access
+    transaction { _.put(row) :Key[ShareRow] }
+    row.id
+  }
+
+  // from trait DB
+  def loadShareInfo (token :String) :Option[String] = mapShareInfo(token) { _.cortexId }
+
+  // from trait DB
+  def acceptShareRequest (token :String, userId :String, email :String) = mapShareInfo(token) {
+    info =>
+      deleteShareRequest(info.id)
+      transaction {
+        _.put(cortexAccess(userId, info.cortexId, email, info.access)) :Key[CortexAccess]
+      }
+  } isDefined
+
+  // from trait DB
+  def deleteShareRequest (shareId :String) {
+    transaction { _.delete(new Key(classOf[ShareRow], shareId)) }
   }
 
   // from trait DB
@@ -272,6 +290,11 @@ object ObjectifyDB extends DB
     acc.datumId = datumId
     acc.access = access
     acc
+  }
+
+  private def mapShareInfo[T] (token :String)(f :(ShareRow => T)) :Option[T] = {
+    val obj = ObjectifyService.begin
+    obj.query(classOf[ShareRow]).filter("token", token).list.headOption.map(f)
   }
 
   private def updateField (datum :DatumRow, field :Datum.Field, value :FieldValue) {

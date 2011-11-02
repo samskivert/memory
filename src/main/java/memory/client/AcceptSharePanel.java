@@ -7,6 +7,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
@@ -22,23 +23,34 @@ import memory.rpc.DataServiceAsync;
  */
 public class AcceptSharePanel extends Composite
 {
-    public AcceptSharePanel (String token) {
+    public AcceptSharePanel (final String token) {
         initWidget(_binder.createAndBindUi(this));
 
         _datasvc.getShareInfo(token, new MPanelCallback<DataService.ShareInfo>(_loading) {
             public void onSuccess (DataService.ShareInfo info) {
-                gotShareInfo(info);
+                gotShareInfo(token, info);
             }
         });
     }
 
-    protected void gotShareInfo (DataService.ShareInfo info) {
+    protected void gotShareInfo (final String token, final DataService.ShareInfo info) {
         _loading.addStyleName(_styles.hidden());
         _info.removeStyleName(_styles.hidden());
 
         _cortex.setText(info.cortex);
         _nickname.setText(info.nickname);
         _logout.setHref(info.logoutURL);
+
+        new MClickCallback<Void>(_accept) {
+            protected boolean callService () {
+                _datasvc.acceptShareRequest(token, this);
+                return true;
+            }
+            protected boolean gotResult (Void result) {
+                Window.Location.replace("/c/" + info.cortex);
+                return false;
+            }
+        };
     }
 
     protected interface Styles extends CssResource {
