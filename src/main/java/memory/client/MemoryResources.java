@@ -14,6 +14,7 @@ public interface MemoryResources extends ClientBundle
 {
     /** Defines our CSS styles. */
     public interface Styles extends CssResource {
+        String header ();
         String iconButton ();
         String rightIconButton ();
         String floatLeft ();

@@ -93,6 +93,20 @@ class DataServlet extends RemoteServiceServlet with DataService
   }
 
   // from DataService
+  def getShareInfo (token :String) :ShareInfo = {
+    val info = new ShareInfo // TODO
+    info.cortex = "testola"
+    info.nickname = "elvis"
+    info.logoutURL = "/"
+    info
+  }
+
+  // from DataService
+  def acceptShareRequest (token :String) {
+    // TODO
+  }
+
+  // from DataService
   def createDatum (cortexId :String, datum :Datum) = {
     requireWriteAccess(cortexId)
     db.createDatum(cortexId, datum)
