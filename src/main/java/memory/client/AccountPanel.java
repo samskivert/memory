@@ -141,6 +141,7 @@ public class AccountPanel extends Composite
         String none ();
     }
     protected @UiField Styles _styles;
+    protected @UiField MemoryResources _rsrc;
 
     protected @UiField Label _nickname;
     protected @UiField Anchor _logout;

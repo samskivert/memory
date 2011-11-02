@@ -4,6 +4,12 @@ body {
   font-family: Helvetica, Arial, sans-serif;
 }
 
+.header {
+  font-family: "Palatino", "Times New Roman", Times, serif;
+  font-size: 32px;
+  font-weight: bold;
+}
+
 .iconButton {
   margin-right: 3px;
   cursor: pointer;
