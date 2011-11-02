@@ -225,7 +225,7 @@ class DataServlet extends RemoteServiceServlet with DataService
 
     Click the link below to access it:
 
-    http://www.sparecortex.com/account/#STOKEN
+    http://www.sparecortex.com/account#STOKEN
 
     If SENDER didn't tell you what this is all about, feel free to just delete this email.
 
