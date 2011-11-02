@@ -10,6 +10,7 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -58,16 +59,19 @@ public abstract class AccessPopup extends PopupPanel
             }
         });
 
-        FluentTable contents = new FluentTable();
-        contents.add().setText("Public access:").right().setWidget(publicBox);
-
-        // TODO: individual user access
-        contents.add().setText("Sharing with individuals coming soon.").setColSpan(2);
-
+        FlowPanel contents = new FlowPanel();
+        FluentTable pubtab = new FluentTable();
+        pubtab.add().setText("Share with Everyone", _rsrc.styles().textTitle()).setColSpan(2);
+        pubtab.add().setText("Public access:").right().setWidget(publicBox);
+        contents.add(pubtab);
+        addUserAccess(contents);
         setWidget(contents);
     }
 
     protected abstract void updatePublicAccess (Access access, AsyncCallback<Void> callback);
+
+    protected void addUserAccess (FlowPanel contents) {
+    }
 
     protected static final DataServiceAsync _datasvc = GWT.create(DataService.class);
     protected static final MemoryResources _rsrc = GWT.create(MemoryResources.class);
