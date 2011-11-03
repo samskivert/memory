@@ -45,6 +45,9 @@ object MemoryBuild extends Build {
       gaeSdkPath       := Some(Path.userHome + "/ops/appengine-java-sdk-" + gaeVers),
       javacOptions     ++= Seq("-Xlint", "-Xlint:-serial"),
 
+      // give GWT some memory juices
+      javaOptions in Gwt ++= Seq("-mx512M"),
+
       resolvers ++= Seq(
         "Local Maven Repository" at Path.userHome.asURL + ".m2/repository",
         "Objectify repo" at "http://objectify-appengine.googlecode.com/svn/maven"
