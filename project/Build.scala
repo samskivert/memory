@@ -30,7 +30,7 @@ object MemoryBuild extends Build {
       }
     }
 
-  val gaeVers = "1.5.5"
+  val gaeVers = "1.6.0"
   val extSettings = Defaults.defaultSettings ++ webSettings ++ gwtSettings
 
   val memory = Project(
