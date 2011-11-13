@@ -62,6 +62,7 @@ public class MemoryClient implements EntryPoint
             datum.text = elem.getInnerText().trim();
         }
         datum.when = Long.parseLong(elem.getAttribute("x:when"));
+        datum.archived = Boolean.parseBoolean(elem.getAttribute("x:archived"));
         datum.children = parseChildren(elem);
         return datum;
     }

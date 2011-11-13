@@ -15,6 +15,9 @@ import java.util.Set;
  */
 public class Datum implements Serializable
 {
+    /** Used to display a checklist in history mode. */
+    public static final String HISTORY_TAG = "*";
+
     /** The maximum allowed length of a title. */
     public static final int MAX_TITLE_LENGTH = 256;
 

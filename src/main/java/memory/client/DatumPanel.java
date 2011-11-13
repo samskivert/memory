@@ -79,13 +79,9 @@ public abstract class DatumPanel extends FlowPanel
                 }
             }, _rsrc.styles().rightIconButton()));
 
-            Anchor anchor = new Anchor();
-            anchor.setHref("/c/help");
-            anchor.setTitle(_msgs.helpTip());
-            anchor.addStyleName(_rsrc.styles().rightIconButton());
-            anchor.setTarget("_blank");
-            anchor.getElement().appendChild(new Image(_rsrc.helpImage()).getElement());
-            add(anchor);
+            Widget help = createImageAnchor("/c/help", _msgs.helpTip(), _rsrc.helpImage());
+            help.addStyleName(_rsrc.styles().rightIconButton());
+            add(help);
         }
 
         // this is a twisty maze of header logic; beware static analyses
@@ -303,6 +299,15 @@ public abstract class DatumPanel extends FlowPanel
             }
         }.setConfirmText("Please confirm that you wish to delete this item.");
         return delete;
+    }
+
+    protected Anchor createImageAnchor (String url, String tip, ImageResource image) {
+        Anchor anchor = new Anchor();
+        anchor.setHref(url);
+        anchor.setTitle(tip);
+        anchor.setTarget("_blank");
+        anchor.getElement().appendChild(new Image(image).getElement());
+        return anchor;
     }
 
     protected long getParentIdForChild ()

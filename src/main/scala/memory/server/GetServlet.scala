@@ -55,7 +55,7 @@ class GetServlet extends HttpServlet
       // cortexId/parentId/title
       // and may be suffixed by * to indicate history mode
 
-      val historyMode = rawPathInfo.endsWith("*")
+      val historyMode = rawPathInfo.endsWith(Datum.HISTORY_TAG)
       val pathInfo = if (historyMode) rawPathInfo.dropRight(1) else rawPathInfo
       val bits = pathInfo.split("/")
       require(bits.length >= 2, "Missing cortex name.")
@@ -150,7 +150,7 @@ class GetServlet extends HttpServlet
   private def toXML (datum :Datum) :Node = {
     <def id={datum.id.toString} x:parentId={datum.parentId.toString}
          x:type={datum.`type`.toString} x:meta={datum.meta} title={datum.title}
-         x:when={datum.when.toString}>{datum.text}
+         x:when={datum.when.toString} x:archived={datum.archived.toString}>{datum.text}
       {datum.children match {
         case null => Array[Node]()
         case children => children map(toXML)

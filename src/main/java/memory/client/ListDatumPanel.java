@@ -23,7 +23,6 @@ import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
@@ -52,6 +51,7 @@ public class ListDatumPanel extends DatumPanel
     @Override protected void addTitle (FlowPanel header)
     {
         super.addTitle(header);
+
         if (_ctx.canOpenEditor() && autoHideAdd()) {
             addAddIcon(header);
         }
