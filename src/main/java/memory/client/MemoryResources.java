@@ -25,6 +25,7 @@ public interface MemoryResources extends ClientBundle
         String popup ();
         String navigationLink ();
         String title ();
+        String bulleted ();
 
         String editorBox ();
         String editor ();
@@ -37,9 +38,10 @@ public interface MemoryResources extends ClientBundle
         String pageTitle ();
         String pageDatum ();
         String textTitle ();
-        String listItem ();
+        String itemContainer ();
         String unsavedItem ();
         String failedItem ();
+        String itemTag ();
         String stretchBox ();
         String mediaBox ();
         String noitems ();

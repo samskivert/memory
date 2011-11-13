@@ -49,6 +49,9 @@ public class ChecklistDatumPanel extends ListDatumPanel
             return;
         }
 
+        // we're adding a checkbox, so we remove the bullet
+        parent.removeStyleName(_rsrc.styles().bulleted());
+
         final CheckBox box = new CheckBox();
         box.setEnabled(_ctx.canOpenEditor());
         box.addStyleName("inline");
@@ -56,7 +59,6 @@ public class ChecklistDatumPanel extends ListDatumPanel
         parent.add(box);
 
         Widget ilabel = addItemLabel(parent, item);
-        ilabel.addStyleName("inline");
 
         // listen for checklist changes and toggle "done" metadata
         box.addValueChangeHandler(new ValueChangeHandler<Boolean>() {

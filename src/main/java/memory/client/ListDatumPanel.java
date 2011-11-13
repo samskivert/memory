@@ -7,8 +7,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -145,16 +147,16 @@ public class ListDatumPanel extends DatumPanel
     {
         Widget ilabel = addItemLabel(parent, item);
         ilabel.setTitle(""+item.id);
-        ilabel.addStyleName(_rsrc.styles().listItem());
         if (item.id == 0) {
-            ilabel.addStyleName(_rsrc.styles().unsavedItem());
+            parent.addStyleName(_rsrc.styles().unsavedItem());
         }
     }
 
     protected Widget addItemLabel (FlowPanel parent, Datum item)
     {
         // if the item contains tags, extract those into separate right-floating divs
-        String text = item.text;
+        List<String> tags = new ArrayList<String>();
+        String text = item.extractTags(tags);
 
         Widget label;
         switch (item.type) {
@@ -163,6 +165,11 @@ public class ListDatumPanel extends DatumPanel
         default: label = Widgets.newLabel(text); break;
         }
         parent.add(label);
+
+        // now add divs for the tags
+        for (String tag : tags) {
+            parent.add(Widgets.newLabel(tag, _rsrc.styles().itemTag()));
+        }
 
         return label;
     }
@@ -203,12 +210,13 @@ public class ListDatumPanel extends DatumPanel
                 public void onSuccess (Long itemId) {
                     _item.id = itemId;
                     _metamap.put(itemId, _data);
+                    removeStyleName(_rsrc.styles().unsavedItem());
                     displayItem(); // redisplay the item now that it's created
                 }
                 public void onFailure (Throwable cause) {
                     super.onFailure(cause);
-                    getWidget(0).removeStyleName(_rsrc.styles().unsavedItem());
-                    getWidget(0).addStyleName(_rsrc.styles().failedItem());
+                    removeStyleName(_rsrc.styles().unsavedItem());
+                    addStyleName(_rsrc.styles().failedItem());
                     // TODO: display a UI That allows us to reinitiate the save
                 }
             });
@@ -221,6 +229,8 @@ public class ListDatumPanel extends DatumPanel
 
         protected void displayItem () {
             clear();
+            addStyleName(_rsrc.styles().bulleted());
+            addStyleName(_rsrc.styles().itemContainer());
             addItemWidget(this, _item, _data);
             if (_ctx.canOpenEditor() && _item.id != 0) {
                 _dcreg = addDoubleClickHandler(new DoubleClickHandler() {
@@ -246,6 +256,8 @@ public class ListDatumPanel extends DatumPanel
                 }
             });
             clear();
+            removeStyleName(_rsrc.styles().bulleted());
+            removeStyleName(_rsrc.styles().itemContainer());
             add(row);
             row.text.setFocus(true);
         }
