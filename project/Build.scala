@@ -38,7 +38,7 @@ object MemoryBuild extends Build {
       organization     := "com.samskivert",
       name             := "memory",
       version          := "1.1-SNAPSHOT",
-      scalaVersion     := "2.9.0-1",
+      scalaVersion     := "2.9.1",
       scalacOptions    ++= Seq("-unchecked", "-deprecation"),
 
       gwtVersion       := "2.4.0",
