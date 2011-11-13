@@ -26,7 +26,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -142,27 +141,30 @@ public class ListDatumPanel extends DatumPanel
         return iwidget;
     }
 
-    protected Widget createItemWidget (Datum item, MetaData data)
+    protected void addItemWidget (FlowPanel parent, Datum item, MetaData data)
     {
-        Widget ilabel = createItemLabel(item);
+        Widget ilabel = addItemLabel(parent, item);
         ilabel.setTitle(""+item.id);
         ilabel.addStyleName(_rsrc.styles().listItem());
         if (item.id == 0) {
             ilabel.addStyleName(_rsrc.styles().unsavedItem());
         }
-        return ilabel;
     }
 
-    protected Widget createItemLabel (Datum item)
+    protected Widget addItemLabel (FlowPanel parent, Datum item)
     {
+        // if the item contains tags, extract those into separate right-floating divs
+        String text = item.text;
+
+        Widget label;
         switch (item.type) {
-        case WIKI:
-            return Widgets.newHTML(WikiUtil.formatSnippet(_ctx.cortexId, item, item.text));
-        case HTML:
-            return Widgets.newHTML(item.text);
-        default:
-            return Widgets.newLabel(item.text);
+        case WIKI: label = Widgets.newHTML(WikiUtil.formatSnippet(_ctx.cortexId, item, text)); break;
+        case HTML: label = Widgets.newHTML(text); break;
+        default: label = Widgets.newLabel(text); break;
         }
+        parent.add(label);
+
+        return label;
     }
 
     @Override protected void addChildrenEditor (FlowPanel editor)
@@ -187,7 +189,7 @@ public class ListDatumPanel extends DatumPanel
         return true;
     }
 
-    protected class EditableItemLabel extends SimplePanel
+    protected class EditableItemLabel extends FlowPanel
         implements HasDoubleClickHandlers
     {
         public EditableItemLabel (Datum item, MetaData data) {
@@ -205,8 +207,8 @@ public class ListDatumPanel extends DatumPanel
                 }
                 public void onFailure (Throwable cause) {
                     super.onFailure(cause);
-                    getWidget().removeStyleName(_rsrc.styles().unsavedItem());
-                    getWidget().addStyleName(_rsrc.styles().failedItem());
+                    getWidget(0).removeStyleName(_rsrc.styles().unsavedItem());
+                    getWidget(0).addStyleName(_rsrc.styles().failedItem());
                     // TODO: display a UI That allows us to reinitiate the save
                 }
             });
@@ -218,7 +220,8 @@ public class ListDatumPanel extends DatumPanel
         }
 
         protected void displayItem () {
-            setWidget(createItemWidget(_item, _data));
+            clear();
+            addItemWidget(this, _item, _data);
             if (_ctx.canOpenEditor() && _item.id != 0) {
                 _dcreg = addDoubleClickHandler(new DoubleClickHandler() {
                     public void onDoubleClick (DoubleClickEvent event) {
@@ -242,7 +245,8 @@ public class ListDatumPanel extends DatumPanel
                     }
                 }
             });
-            setWidget(row);
+            clear();
+            add(row);
             row.text.setFocus(true);
         }
 

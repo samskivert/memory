@@ -40,22 +40,23 @@ public class ChecklistDatumPanel extends ListDatumPanel
         add(_doneItems);
     }
 
-    @Override protected Widget createItemWidget (final Datum item, final MetaData data)
+    @Override protected void addItemWidget (
+        final FlowPanel parent, final Datum item, final MetaData data)
     {
         // if the item is not yet saved, just display the label
         if (item.id == 0) {
-            return super.createItemWidget(item, data);
+            super.addItemWidget(parent, item, data);
+            return;
         }
 
         final CheckBox box = new CheckBox();
         box.setEnabled(_ctx.canOpenEditor());
         box.addStyleName("inline");
         box.setValue(data.get(MetaData.DONE, false));
+        parent.add(box);
 
-        Widget ilabel = createItemLabel(item);
+        Widget ilabel = addItemLabel(parent, item);
         ilabel.addStyleName("inline");
-
-        final Widget row = Widgets.newFlowPanel(box, ilabel);
 
         // listen for checklist changes and toggle "done" metadata
         box.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
@@ -69,18 +70,16 @@ public class ChecklistDatumPanel extends ListDatumPanel
                         public void onSuccess (Void result) {
                             item.meta = meta;
                             if (isDone) {
-                                _items.remove(row);
-                                _doneItems.add(row);
+                                _items.remove(parent);
+                                _doneItems.add(parent);
                             } else {
-                                _doneItems.remove(row);
-                                _items.add(row);
+                                _doneItems.remove(parent);
+                                _items.add(parent);
                             }
                         }
                     }, box));
             }
         });
-
-        return row;
     }
 
     protected FlowPanel _doneItems;
