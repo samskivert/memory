@@ -158,11 +158,11 @@ object ObjectifyDB extends DB
   }
 
   // from trait DB
-  def loadChildren (cortexId :String, id :Long) :Array[Datum] = {
+  def loadChildren (cortexId :String, id :Long, includeArchived :Boolean) :Array[Datum] = {
     val obj = ObjectifyService.begin
-    val l = obj.query(classOf[DatumRow]).ancestor(cortexKey(cortexId)).filter(
-      "parentId", id).filter("archived", false).list
-    (0 until l.size) map(ii => l.get(ii)) map(toJava) toArray
+    val l1 = obj.query(classOf[DatumRow]).ancestor(cortexKey(cortexId)).filter("parentId", id)
+    val l2 = (if (includeArchived) l1 else l1.filter("archived", false)).list
+    (0 until l2.size) map(ii => l2.get(ii)) map(toJava) toArray
   }
 
   // from trait DB

@@ -61,7 +61,7 @@ trait DB
   def loadDatum (cortexId :String, parentId :Long, title :String) :Option[Datum]
 
   /** Loads the children of the specified datum. */
-  def loadChildren (cortexId :String, id :Long) :Array[Datum]
+  def loadChildren (cortexId :String, id :Long, includeArchived :Boolean = false) :Array[Datum]
 
   /** Loads the children of the specified datum that are of the specified type. */
   def loadChildren (cortexId :String, id :Long, typ :Type) :Array[Datum]

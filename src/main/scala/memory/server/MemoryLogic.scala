@@ -40,26 +40,29 @@ object MemoryLogic
   /** Resolves the children of the supplied datum.
    * @param cortexId the cortex in which the datum exists.
    * @param when the time to use when resolving journal data.
+   * @param historyMode if true, archived list and checklist items will be included in the results.
    * @param root the datum whose children are to be resolved.
    */
-  def resolveChildren (cortexId :String, when :Long)(root :Datum) :Datum = {
+  def resolveChildren (cortexId :String, when :Long, historyMode :Boolean)(root :Datum) :Datum = {
     root.children = new ArrayList[Datum](root.`type` match {
-      case Type.LIST => loadAndResolveChildren(cortexId, root.id, when)
-      case Type.CHECKLIST => loadAndResolveChildren(cortexId, root.id, when)
+      case Type.LIST => loadAndResolveChildren(cortexId, root.id, when, false)
+      case Type.CHECKLIST => loadAndResolveChildren(cortexId, root.id, when, historyMode)
       case Type.JOURNAL => resolveJournalChild(cortexId, root.id, when)
-      case Type.PAGE => loadAndResolveChildren(cortexId, root.id, when)
+      case Type.PAGE => loadAndResolveChildren(cortexId, root.id, when, false)
       case Type.HTML | Type.WIKI => loadMediaChildren(cortexId, root.id)
       case _ => Collections.emptyList
     })
-    if (root.`type` == Type.CHECKLIST) {
+    if (root.`type` == Type.CHECKLIST && !historyMode) {
       archiveExpiredChildren(cortexId, root)
     }
     root
   }
 
   /** Loads and resolves the children of the specified parent. */
-  def loadAndResolveChildren (cortexId :String, parentId :Long, when :Long) =
-    Arrays.asList(db.loadChildren(cortexId, parentId) map(resolveChildren(cortexId, when)) :_*)
+  def loadAndResolveChildren (cortexId :String, parentId :Long, when :Long,
+                              includeArchived :Boolean) =
+    Arrays.asList(db.loadChildren(cortexId, parentId, includeArchived) map(
+      resolveChildren(cortexId, when, false)) :_*)
 
   /** Loads (but does not resolve, as it is not needed) the media children of the parent. */
   def loadMediaChildren (cortexId :String, parentId :Long) =
@@ -72,7 +75,7 @@ object MemoryLogic
   /** Loads and resolves the journal datum for the specified date, creating it if necessary. */
   def resolveJournalDatum (cortexId :String, journalId :Long, when :Long) :Datum = {
     val title = journalTitle(when)
-    resolveChildren(cortexId, when)(db.loadDatum(cortexId, journalId, title) match {
+    resolveChildren(cortexId, when, false)(db.loadDatum(cortexId, journalId, title) match {
       case Some(datum) => datum
       case None => {
         val datum = new Datum
