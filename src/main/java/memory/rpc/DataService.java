@@ -29,8 +29,7 @@ public interface DataService extends RemoteService
     public static final String NO_USER = "<global>";
 
     /** Returned by {@link #loadAccountInfo}. */
-    public static class AccountResult implements IsSerializable
-    {
+    public static class AccountResult implements IsSerializable {
         /** The userId as which the user is logged in. */
         public String userId;
 
@@ -48,13 +47,24 @@ public interface DataService extends RemoteService
     }
 
     /** Returned by {@link #loadAccessInfo}. */
-    public static class AccessResult implements IsSerializable
-    {
+    public static class AccessResult implements IsSerializable {
         /** The public access setting for this datum. */
         public Access publicAccess;
 
         /** A list of users who have custom access. */
         public List<AccessInfo> userAccess;
+    }
+
+    /** Returned by {@link #getShareInfo}. */
+    public static class ShareInfo implements IsSerializable {
+        /** The name of the cortex being shared with the caller. */
+        public String cortex;
+
+        /** The nickname of the account on which the caller is authenticated. */
+        public String nickname;
+
+        /** A URL for logging out. */
+        public String logoutURL;
     }
 
     /** Loads info for the authenticated account. */
@@ -71,16 +81,19 @@ public interface DataService extends RemoteService
     void createCortex (String cortexId) throws ServiceException;
 
     /** Requests to share the specified cortex with the supplied email address. */
-    void shareCortex (String cortexId, String email, Access access)
-        throws ServiceException;
+    void shareCortex (String cortexId, String email, Access access) throws ServiceException;
 
     /** Updates the public access for the specified cortex. */
-    void updateCortexPublicAccess (String cortexId, Access access)
-        throws ServiceException;
+    void updateCortexPublicAccess (String cortexId, Access access) throws ServiceException;
 
     /** Updates the specified existing cortex access record. */
-    void updateCortexAccess (long id, Access access)
-        throws ServiceException;
+    void updateCortexAccess (long id, Access access) throws ServiceException;
+
+    /** Returns info related to a share notification. */
+    ShareInfo getShareInfo (String token) throws ServiceException;
+
+    /** Accepts the specified share request. */
+    void acceptShareRequest (String token) throws ServiceException;
 
     /** Creates a new datum for the calling user.
      * @return the id of the newly created datum. */
@@ -95,18 +108,14 @@ public interface DataService extends RemoteService
         throws ServiceException;
 
     /** Updates public access to the specified datum. */
-    void updatePublicAccess (String cortexId, long datumId, Access access)
-        throws ServiceException;
+    void updatePublicAccess (String cortexId, long datumId, Access access) throws ServiceException;
 
     /** Loads the journal data for the specified date. */
-    Datum loadJournalData (String cortexId, long journalId, long when)
-        throws ServiceException;
+    Datum loadJournalData (String cortexId, long journalId, long when) throws ServiceException;
 
     /** Deletes the specified datum. */
-    void deleteDatum (String cortextId, long id)
-        throws ServiceException;
+    void deleteDatum (String cortextId, long id) throws ServiceException;
 
     /** Returns the URL to which media may be uploaded. */
-    String getUploadURL ()
-        throws ServiceException;
+    String getUploadURL () throws ServiceException;
 }

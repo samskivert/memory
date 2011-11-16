@@ -4,6 +4,12 @@ body {
   font-family: Helvetica, Arial, sans-serif;
 }
 
+.header {
+  font-family: "Palatino", "Times New Roman", Times, serif;
+  font-size: 32px;
+  font-weight: bold;
+}
+
 .iconButton {
   margin-right: 3px;
   cursor: pointer;
@@ -55,6 +61,11 @@ body {
 
 .title {
   display: inline;
+}
+
+.bulleted {
+  margin-left: 20px;
+  display: list-item;
 }
 
 .editor {
@@ -109,9 +120,12 @@ body {
   border-bottom: 1px dashed;
 }
 
-.listItem {
-  margin-left: 20px;
-  display: list-item;
+.itemContainer {
+/*  clear: right; */
+}
+
+.itemContainer div {
+  display: inline;
 }
 
 .unsavedItem {
@@ -120,6 +134,17 @@ body {
 
 .failedItem {
   color: #990000;
+}
+
+.itemTag {
+  font-size: x-small;
+/*  float: right; */
+  background: #CCCCCC;
+  color: #666666;
+  margin-left: 5px;
+  border: 1px solid #666666;
+  border-radius: 5px;
+  padding: 1px 3px;
 }
 
 .width98 {
@@ -225,6 +250,7 @@ body {
 .wiki ul, .wiki ol {
   margin-top: 5px;
   margin-bottom: 5px;
+  padding-left: 20px;
 }
 
 .wiki table {

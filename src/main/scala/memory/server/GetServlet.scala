@@ -46,14 +46,18 @@ class GetServlet extends HttpServlet
 
   override protected def doGet (req :HttpServletRequest, rsp :HttpServletResponse) {
     try {
-      require(req.getPathInfo != null, "Missing path.")
+      val rawPathInfo = req.getPathInfo
+      require(rawPathInfo != null, "Missing path.")
 
       // the path info will be one of:
       // cortexId
       // cortexId/datumId
       // cortexId/parentId/title
+      // and may be suffixed by * to indicate history mode
 
-      val bits = req.getPathInfo.split("/")
+      val historyMode = rawPathInfo.endsWith(Datum.HISTORY_TAG)
+      val pathInfo = if (historyMode) rawPathInfo.dropRight(1) else rawPathInfo
+      val bits = pathInfo.split("/")
       require(bits.length >= 2, "Missing cortex name.")
       val cortexId = bits(1)
 
@@ -66,7 +70,7 @@ class GetServlet extends HttpServlet
         case 3 => db.loadDatum(cortexId, bits(2).toInt)
         case 4 => db.loadDatum(cortexId, bits(2).toInt, bits(3)) getOrElse(
           mkStub(bits(2).toInt, bits(3)))
-        case _ => throw new BadRequestException("Invalid path " + req.getPathInfo)
+        case _ => throw new BadRequestException("Invalid path " + rawPathInfo)
       }
 
       def loadParents (d :Datum) :List[Datum] = {
@@ -98,7 +102,7 @@ class GetServlet extends HttpServlet
       }
       if (access == Access.NONE) user match {
         case None => throw new RedirectException(
-          _usvc.createLoginURL(req.getServletPath + req.getPathInfo))
+          _usvc.createLoginURL(req.getServletPath + rawPathInfo))
         case _ => throw new BadRequestException("You lack access to this data.")
       }
 
@@ -118,9 +122,10 @@ class GetServlet extends HttpServlet
         }</div>
         XML.write(out, pxml, null, false, null)
         out.println
-        val xml = <div style="display: none" id="root" x:cortex={cortexId} x:access={
-          access.toString} x:publicAccess={publicAccess.toString}>{"\n  "}{
-            toXML(MemoryLogic.resolveChildren(cortexId, now)(datum))}{"\n"}</div>
+        val xml = <div style="display: none" id="root" x:cortex={cortexId}
+          x:access={access.toString} x:publicAccess={publicAccess.toString}>{"\n  "}{
+            toXML(MemoryLogic.resolveChildren(cortexId, now, historyMode)(datum))
+          }{"\n"}</div>
         XML.write(out, xml, null, false, null)
         out.println
         out.println(GwitBits)
@@ -145,7 +150,7 @@ class GetServlet extends HttpServlet
   private def toXML (datum :Datum) :Node = {
     <def id={datum.id.toString} x:parentId={datum.parentId.toString}
          x:type={datum.`type`.toString} x:meta={datum.meta} title={datum.title}
-         x:when={datum.when.toString}>{datum.text}
+         x:when={datum.when.toString} x:archived={datum.archived.toString}>{datum.text}
       {datum.children match {
         case null => Array[Node]()
         case children => children map(toXML)

@@ -4,16 +4,30 @@
 package memory.data;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Contains information on a single datum.
  */
 public class Datum implements Serializable
 {
+    /** Used to display a checklist in history mode. */
+    public static final String HISTORY_TAG = "*";
+
     /** The maximum allowed length of a title. */
     public static final int MAX_TITLE_LENGTH = 256;
+
+    /** The characters allowed to occur in tags. */
+    public static Set<Character> TAG_CHARS = new HashSet<Character>();
+    static {
+        for (char c = '0'; c <= '9'; c++) TAG_CHARS.add(c);
+        for (char c = 'a'; c <= 'z'; c++) TAG_CHARS.add(c);
+        for (char c = 'A'; c <= 'Z'; c++) TAG_CHARS.add(c);
+    }
 
     /** A comparator that sorts datum by "when", least to greatest. */
     public static final Comparator<Datum> BY_WHEN = new Comparator<Datum>() {
@@ -57,4 +71,26 @@ public class Datum implements Serializable
 
     /** Descendents of this datum, may be null. */
     public List<Datum> children;
+
+    /**
+     * Extracts the tags in this datum's text into the supplied array.
+     * @return this datum's text with the tags removed.
+     */
+    public String extractTags (Collection<String> tags) {
+        return extractTags(text, tags);
+    }
+
+    protected String extractTags (String text, Collection<String> tags) {
+        int hashIdx = text.lastIndexOf("#");
+        if (hashIdx == -1) return text;
+        // make sure that there are no spaces between the hash and eol
+        for (int ii = hashIdx+1, ll = text.length(); ii < ll; ii++) {
+            if (!TAG_CHARS.contains(text.charAt(ii))) return text;
+        }
+        // check whether there are additional tags to extract
+        String rv = extractTags(text.substring(0, hashIdx).trim(), tags);
+        // add our tag after the recursive check to keep things correctly ordered
+        tags.add(text.substring(hashIdx+1));
+        return rv;
+    }
 }

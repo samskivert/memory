@@ -11,11 +11,9 @@ public class ServiceException extends Exception
     /**
      * Throws an exception with the given message unless the supplied condition is true.
      */
-    public static void unless (boolean condition, String message) throws ServiceException
+    public static void require (boolean condition, String message) throws ServiceException
     {
-        if (!condition) {
-            throw new ServiceException(message);
-        }
+        if (!condition) throw new ServiceException(message);
     }
 
     /**
