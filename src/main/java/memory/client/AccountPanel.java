@@ -109,7 +109,7 @@ public class AccountPanel extends Composite
         _shared.clear();
         if (cortexen != null) {
             for (AccessInfo info : cortexen) {
-                _shared.add(new Anchor("/c/" + info.cortexId.toLowerCase(), info.cortexId));
+                _shared.add(new Anchor(info.cortexId, "/c/" + info.cortexId.toLowerCase()));
             }
         }
         if (_shared.getWidgetCount() == 0) {
