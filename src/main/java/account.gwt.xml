@@ -9,4 +9,8 @@
   <source path="memory/data"/>
   <source path="memory/rpc"/>
   <entry-point class="memory.client.AccountClient"/>
+
+  <!-- we only support standards compliant browers; meh -->
+  <set-property name='user.agent' value='safari'/>
+  <set-configuration-property name="user.agent.runtimeWarning" value="false" />
 </module>

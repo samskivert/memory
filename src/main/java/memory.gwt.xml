@@ -11,4 +11,8 @@
   <public path="memory/css"/>
   <stylesheet src="standard.css"/>
   <entry-point class="memory.client.MemoryClient"/>
+
+  <!-- we only support standards compliant browers; meh -->
+  <set-property name='user.agent' value='safari'/>
+  <set-configuration-property name="user.agent.runtimeWarning" value="false" />
 </module>
