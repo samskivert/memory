@@ -100,7 +100,8 @@ class GetServlet extends HttpServlet
           db.loadAccess(userId, cortexId, datum.id) getOrElse(publicAccess))
         case None => publicAccess
       }
-      if (access == Access.NONE) user match {
+      // TEMP: allow media requests for anyone until we get better hierarchical access controls
+      if (access == Access.NONE && datum.`type` != Type.MEDIA) user match {
         case None => throw new RedirectException(
           _usvc.createLoginURL(req.getServletPath + rawPathInfo))
         case _ => throw new BadRequestException("You lack access to this data.")
