@@ -19,14 +19,8 @@ public class DatumAccess
     /** The user in question. */
     @Parent public Key<UserRow> userId;
 
-    /** The id of this access row. */
-    @Id public Long id;
-
-    /** The cortex in which the datum in question lives. */
-    public String cortexId;
-
-    /** The datum in question. */
-    public long datumId;
+    /** The id of this access row; of the form {@code cortexId:datumId}. */
+    @Id public String id;
 
     /** The user's access to the datum. */
     @Unindexed public Access access;

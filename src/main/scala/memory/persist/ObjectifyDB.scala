@@ -94,8 +94,11 @@ object ObjectifyDB extends DB
   // from trait DB
   def loadAccess (userId :String, cortexId :String, datumId :Long) = {
     val obj = ObjectifyService.begin
-    Option(obj.query(classOf[DatumAccess]).ancestor(userKey(userId)).filter(
-      "cortexId", cortexId).filter("datumId", datumId).get) map(_.access)
+    val key = new Key(userKey(userId), classOf[DatumAccess], cortexId + ":" + datumId)
+    try Some(obj.get(key).access)
+    catch {
+      case e :NotFoundException => None
+    }
   }
 
   // from trait DB
@@ -180,7 +183,7 @@ object ObjectifyDB extends DB
 
   // from trait DB
   def updateDatum (cortexId :String, id :Long, updates :Seq[(Datum.Field, FieldValue)]) {
-    transaction { obj => 
+    transaction { obj =>
       var datum = obj.get(datumKey(cortexId, id))
       updates.foreach { case (f, v) => updateField(datum, f, v) }
       datum.when = System.currentTimeMillis
@@ -288,8 +291,7 @@ object ObjectifyDB extends DB
   private def datumAccess (userId :String, cortexId :String, datumId :Long, access :Access) = {
     val acc = new DatumAccess
     acc.userId = userKey(userId)
-    acc.cortexId = cortexId
-    acc.datumId = datumId
+    acc.id = cortexId + ":" + datumId
     acc.access = access
     acc
   }
