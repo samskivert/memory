@@ -33,48 +33,49 @@ object MemoryBuild extends Build {
   val gaeVers = "1.6.0"
   val extSettings = Defaults.defaultSettings ++ webSettings ++ gwtSettings
 
-  val memory = Project(
-    "memory", file("."), settings = extSettings ++ Seq(
-      organization     := "com.samskivert",
-      name             := "memory",
-      version          := "1.1-SNAPSHOT",
-      scalaVersion     := "2.9.1",
-      scalacOptions    ++= Seq("-unchecked", "-deprecation"),
+  val memory = Project("memory", file("."), settings = extSettings ++ Seq(
+    organization  := "com.samskivert",
+    name          := "memory",
+    version       := "1.1-SNAPSHOT",
+    scalaVersion  := "2.9.1",
+    scalacOptions ++= Seq("-unchecked", "-deprecation"),
 
-      gwtVersion       := "2.4.0",
-      gaeSdkPath       := Some(Path.userHome + "/ops/appengine-java-sdk-" + gaeVers),
-      javacOptions     ++= Seq("-Xlint", "-Xlint:-serial"),
+    gwtVersion    := "2.4.0",
+    gaeSdkPath    := Some(Path.userHome + "/ops/appengine-java-sdk-" + gaeVers),
+    javacOptions  ++= Seq("-Xlint", "-Xlint:-serial"),
 
-      // give GWT some memory juices
-      javaOptions in Gwt ++= Seq("-mx512M"),
+    // give GWT some memory juices
+    javaOptions in Gwt ++= Seq("-mx512M"),
 
-      resolvers ++= Seq(
-        "Local Maven Repository" at Path.userHome.asURL + ".m2/repository",
-        "Objectify repo" at "http://objectify-appengine.googlecode.com/svn/maven"
-      ),
+    resolvers ++= Seq(
+      "Local Maven Repository" at Path.userHome.asURL + ".m2/repository",
+      "Objectify repo" at "http://objectify-appengine.googlecode.com/svn/maven"
+    ),
 
-      autoScalaLibrary := true, // GWT plugin turns this off for some reason
-      libraryDependencies ++= Seq(
-        // we only need these for the GWT build, so we use "provided"
-        "com.threerings" % "gwt-utils" % "1.5" % "provided",
-        "com.allen-sauer.gwt.dnd" % "gwt-dnd" % "3.1.2" % "provided",
+    autoScalaLibrary := true, // GWT plugin turns this off for some reason
+    libraryDependencies ++= Seq(
+      // we only need these for the GWT build, so we use "provided"
+      "com.threerings" % "gwt-utils" % "1.5" % "provided",
+      "com.allen-sauer.gwt.dnd" % "gwt-dnd" % "3.1.2" % "provided",
 
-        // appengine depends
-        "com.google.appengine" % "appengine-api-1.0-sdk" % gaeVers,
-        "com.google.appengine" % "appengine-testing" % gaeVers % "test",
-        "com.google.appengine" % "appengine-api-stubs" % gaeVers % "test",
-        "com.google.appengine" % "appengine-api-labs" % gaeVers % "test",
+      // appengine depends
+      "com.google.appengine" % "appengine-api-1.0-sdk" % gaeVers,
+      "com.google.appengine" % "appengine-testing" % gaeVers % "test",
+      "com.google.appengine" % "appengine-api-stubs" % gaeVers % "test",
+      "com.google.appengine" % "appengine-api-labs" % gaeVers % "test",
 
-        // database depends
-        "com.googlecode.objectify" % "objectify" % "2.2.1",
-        "javax.persistence" % "persistence-api" % "1.0",
+      // database depends
+      "com.googlecode.objectify" % "objectify" % "2.2.1",
+      "javax.persistence" % "persistence-api" % "1.0",
 
-        // test dependencies
-        "org.scalatest" % "scalatest" % "1.2" % "test"
-      ),
+      // needed for xsbt-web-plugin
+      "org.mortbay.jetty" % "jetty" % "6.1.22" % "container",
 
-      asyncGen <<= asyncGenTask,
-      i18nSync <<= i18nSyncTask
-    )
-  )
+      // test dependencies
+      "org.scalatest" % "scalatest" % "1.2" % "test"
+    ),
+
+    asyncGen <<= asyncGenTask,
+    i18nSync <<= i18nSyncTask
+  ))
 }
