@@ -22,7 +22,7 @@ object MemoryBuild extends Build {
 
   val i18nSync = TaskKey[Unit]("i18n-sync", "Generates i18n Messages interfaces from properties")
   private def i18nSyncTask =
-    (streams, sourceDirectory) map {
+    (streams, javaSource in Compile) map {
       (s, sourceDir) => {
         val props = (sourceDir ** "*Messages.properties").get
         s.log.debug("Generating i18n interfaces for: " + props.mkString(", "))
@@ -30,7 +30,7 @@ object MemoryBuild extends Build {
       }
     }
 
-  val gaeVers = "1.6.0"
+  val gaeVers = "1.6.3"
   val extSettings = Defaults.defaultSettings ++ webSettings ++ gwtSettings
 
   val memory = Project("memory", file("."), settings = extSettings ++ Seq(
@@ -42,6 +42,7 @@ object MemoryBuild extends Build {
 
     gwtVersion    := "2.4.0",
     gaeSdkPath    := Some(Path.userHome + "/ops/appengine-java-sdk-" + gaeVers),
+    gwtTemporaryPath <<= (target) { (target) => target / "webapp" },
     javacOptions  ++= Seq("-Xlint", "-Xlint:-serial"),
 
     // give GWT some memory juices
