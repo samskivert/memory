@@ -7,6 +7,7 @@ import java.util.{Arrays, ArrayList, Calendar, Collections, TimeZone}
 
 import memory.data.{Datum, MetaData, Type}
 import memory.persist.DB
+import memory.rpc.ServiceException
 
 /**
  * Contains logic shared by servlets but that doesn't really belong in the database.
@@ -24,8 +25,10 @@ object MemoryLogic
     root.meta = ""
     root.title = cortexId
     root.when = System.currentTimeMillis
+    if (!db.createCortex(cortexId, ownerId, root)) return false
 
     val contents = new Datum
+    contents.parentId = root.id
     contents.`type` = Type.WIKI
     contents.meta = ""
     contents.title = ""
@@ -33,8 +36,29 @@ object MemoryLogic
       "Click the wrench icon up above to edit it. Or check out the " +
       "[[http://www.sparecortex.com/c/help|help and tutorials]]."
     contents.when = System.currentTimeMillis
+    db.createDatum(cortexId, contents)
+    return true
+  }
 
-    db.createCortex(cortexId, ownerId, root, contents)
+  /** Forks a new cortex using the supplied cortex/datum as the root of the new cortex and the
+   * specified name and owner.
+   * @exception ServiceException thrown if the new cortex name is already used, or if the root
+   * datum is not a PAGE.
+   */
+  def forkCortex (cortexId :String, datumId :Long, newCortexId :String, ownerId :String) {
+    val root = db.loadDatum(cortexId, datumId)
+    ServiceException.require(root.`type` == Type.PAGE, "e.must_fork_page")
+
+    val newRoot = new Datum
+    newRoot.`type` = Type.PAGE
+    newRoot.meta = root.meta
+    newRoot.title = root.title
+    newRoot.when = System.currentTimeMillis
+
+    val created = db.createCortex(newCortexId, ownerId, newRoot)
+    ServiceException.require(created, "e.cortex_name_in_use")
+
+    db.cloneChildren(cortexId, root.id, newCortexId, newRoot.id)
   }
 
   /** Resolves the children of the supplied datum.

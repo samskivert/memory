@@ -80,6 +80,9 @@ public interface DataService extends RemoteService
      * @exception ServiceException thrown with `e.name_in_use` if the requested name is used. */
     void createCortex (String cortexId) throws ServiceException;
 
+    /** Forks the specified datum (and all of its children) into a new cortex. */
+    void forkCortex (String cortexId, long datumId, String newCortexId) throws ServiceException;
+
     /** Requests to share the specified cortex with the supplied email address. */
     void shareCortex (String cortexId, String email, Access access) throws ServiceException;
 

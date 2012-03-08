@@ -20,10 +20,10 @@ trait DB
   /** Notes that the user in question has accessed the service. */
   def noteUser (userId :String) :Unit
 
-  /** Creates a cortex, populates it with the supplied root and contents data and grants the
-   * specified owner read/write access.
+  /** Creates a cortex with the supplied root datum and grants the owner read/write access. The id
+   * of the root datum will be filled in if creation succeeds.
    * @returns true if the cortex was created, false if said cortex already exists. */
-  def createCortex (cortexId :String, ownerId :String, root :Datum, contents :Datum) :Boolean
+  def createCortex (cortexId :String, ownerId :String, root :Datum) :Boolean
 
   /** Loads the metadata for the specified cortex. */
   def loadCortex (cortexId: String) :Option[Cortex]
@@ -81,6 +81,10 @@ trait DB
 
   /** Deletes the specified datum. */
   def deleteDatum (cortexId :String, id :Long) :Unit
+
+  /** Clones the children (and grandchildren, and so forth) of `fromId` to `toId`. Used when
+   * forking a datum into a new cortex. */
+  def cloneChildren (fromCortexId :String, fromId :Long, toCortexId :String, toId :Long)
 
   /** Stores a share request with the supplied metadata.
    * @return the id of the share request. */

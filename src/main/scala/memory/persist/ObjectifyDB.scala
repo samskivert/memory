@@ -41,14 +41,12 @@ object ObjectifyDB extends DB
   }
 
   // from trait DB
-  def createCortex (cortexId :String, ownerId :String, root :Datum, contents :Datum) :Boolean = {
+  def createCortex (cortexId :String, ownerId :String, root :Datum) :Boolean = {
     transaction { obj =>
       if (obj.find(cortexKey(cortexId)) != null) {
         return false
       }
       createDatum(cortexId, root)
-      contents.parentId = root.id
-      createDatum(cortexId, contents)
 
       val row = new CortexRow
       row.id = cortexId
@@ -66,8 +64,7 @@ object ObjectifyDB extends DB
 
   // from trait DB
   def loadCortex (cortexId: String) :Option[Cortex] = try {
-    val obj = ObjectifyService.begin
-    val cortex = obj.get(cortexKey(cortexId))
+    val cortex = get(cortexKey(cortexId))
     // TEMP: handle legacy cortices that lack a publicAccess field
     if (cortex.publicAccess == null) {
       cortex.publicAccess = Access.NONE
@@ -85,33 +82,25 @@ object ObjectifyDB extends DB
   }
 
   // from trait DB
-  def loadAccess (userId :String, cortexId :String) = {
-    val obj = ObjectifyService.begin
-    Option(obj.query(classOf[CortexAccess]).ancestor(userKey(userId)).filter(
-      "cortexId", cortexId).get) map(_.access)
-  }
+  def loadAccess (userId :String, cortexId :String) = Option(query[CortexAccess].ancestor(
+    userKey(userId)).filter("cortexId", cortexId).get) map(_.access)
 
   // from trait DB
   def loadAccess (userId :String, cortexId :String, datumId :Long) = {
-    val obj = ObjectifyService.begin
     val key = new Key(userKey(userId), classOf[DatumAccess], cortexId + ":" + datumId)
-    try Some(obj.get(key).access)
+    try Some(get(key).access)
     catch {
       case e :NotFoundException => None
     }
   }
 
   // from trait DB
-  def loadAccessibleCortices (userId :String) :Seq[AccessInfo] = {
-    val obj = ObjectifyService.begin
-    obj.query(classOf[CortexAccess]).ancestor(userKey(userId)).list map(toAccessInfo)
-  }
+  def loadAccessibleCortices (userId :String) :Seq[AccessInfo] =
+    query[CortexAccess].ancestor(userKey(userId)).list.map(toAccessInfo)
 
   // from trait DB
-  def loadCortexAccess (cortexId :String) :Seq[AccessInfo] = {
-    val obj = ObjectifyService.begin
-    obj.query(classOf[CortexAccess]).filter("cortexId", cortexId).list map(toAccessInfo)
-  }
+  def loadCortexAccess (cortexId :String) :Seq[AccessInfo] =
+    query[CortexAccess].filter("cortexId", cortexId).list map(toAccessInfo)
 
   // from trait DB
   def updateCortexPublicAccess (cortexId :String, access :Access) {
@@ -147,39 +136,30 @@ object ObjectifyDB extends DB
   }
 
   // from trait DB
-  def loadDatum (cortexId :String, id :Long) :Datum = {
-    val obj = ObjectifyService.begin
-    toJava(obj.get(datumKey(cortexId, id)))
-  }
+  def loadDatum (cortexId :String, id :Long) :Datum = toJava(get(datumKey(cortexId, id)))
 
   // from trait DB
-  def loadDatum (cortexId :String, parentId :Long, title :String) :Option[Datum] = {
-    val obj = ObjectifyService.begin
-    Option(obj.query(classOf[DatumRow]).ancestor(cortexKey(cortexId)).filter(
-      "parentId", parentId).filter("titleKey", title.toLowerCase).get) map(toJava)
-  }
+  def loadDatum (cortexId :String, parentId :Long, title :String) :Option[Datum] =
+    Option(query[DatumRow].ancestor(cortexKey(cortexId)).filter("parentId", parentId).filter(
+      "titleKey", title.toLowerCase).get) map(toJava)
 
   // from trait DB
   def loadChildren (cortexId :String, id :Long, includeArchived :Boolean) :Array[Datum] = {
-    val obj = ObjectifyService.begin
-    val l1 = obj.query(classOf[DatumRow]).ancestor(cortexKey(cortexId)).filter("parentId", id)
+    val l1 = query[DatumRow].ancestor(cortexKey(cortexId)).filter("parentId", id)
     val l2 = (if (includeArchived) l1 else l1.filter("archived", false)).list
     (0 until l2.size) map(ii => l2.get(ii)) map(toJava) toArray
   }
 
   // from trait DB
   def loadChildren (cortexId :String, id :Long, typ :Type) :Array[Datum] = {
-    val obj = ObjectifyService.begin
-    val l = obj.query(classOf[DatumRow]).ancestor(cortexKey(cortexId)).filter(
+    val l = query[DatumRow].ancestor(cortexKey(cortexId)).filter(
       "parentId", id).filter("archived", false).filter("type", typ.toString).list
     (0 until l.size) map(ii => l.get(ii)) map(toJava) toArray
   }
 
   // from trait DB
-  def loadData (cortexId :String, ids :Set[Long]) :Array[Datum] = {
-    val obj = ObjectifyService.begin
-    obj.get(ids.map(id => datumKey(cortexId, id))).values.map(toJava).toArray
-  }
+  def loadData (cortexId :String, ids :Set[Long]) :Array[Datum] =
+    get(ids.map(id => datumKey(cortexId, id))).values.map(toJava).toArray
 
   // from trait DB
   def updateDatum (cortexId :String, id :Long, updates :Seq[(Datum.Field, FieldValue)]) {
@@ -222,6 +202,36 @@ object ObjectifyDB extends DB
   // from trait DB
   def deleteDatum (cortexId :String, id :Long) {
     transaction { _.delete(datumKey(cortexId, id)) }
+  }
+
+  // from trait DB
+  def cloneChildren (fromCortexId :String, fromId :Long, toCortexId :String, toId :Long) {
+    // duplicate the child data, and compute a list of (oldId, newId) for the duped children
+    val dups = query[DatumRow].ancestor(
+      cortexKey(fromCortexId)).filter("parentId", fromId).map { fromChild =>
+        val toChild = fromChild.clone
+        toChild.cortex = cortexKey(toCortexId)
+        toChild.id = null
+        toChild.parentId = toId
+        val key = transaction { _.put(toChild) :Key[DatumRow] }
+        (fromChild.id.longValue, key.getId)
+      }
+
+    // recursively copy the children's children
+    dups.foreach { case (oldId, newId) => cloneChildren(fromCortexId, oldId, toCortexId, newId) }
+
+    // update the metadata for the parent of the cloned children
+    val dupMap = dups.toMap
+    val parent = get(datumKey(toCortexId, toId))
+    val meta = parent.meta.split(";").filter(_ != "").map(_.split("=").toSeq)
+    val conv = meta.map { case Seq(k,v) => Seq(k, k match {
+      // manually rewrite the child ids in breakN and order metadata
+      case ("break1" | "break2") => dupMap.getOrElse(v.toLong, 0L).toString
+      case "order" => v.split(",").map(_.toLong).filter(dupMap.keySet).map(dupMap).mkString(",")
+      case _ => v
+    })}
+    parent.meta = conv.map(_.mkString("=")).mkString(";")
+    transaction { _.put(parent) :Key[DatumRow] }
   }
 
   // from trait DB
@@ -296,10 +306,8 @@ object ObjectifyDB extends DB
     acc
   }
 
-  private def mapShareInfo[T] (token :String)(f :(ShareRow => T)) :Option[T] = {
-    val obj = ObjectifyService.begin
-    obj.query(classOf[ShareRow]).filter("token", token).list.headOption.map(f)
-  }
+  private def mapShareInfo[T] (token :String)(f :(ShareRow => T)) :Option[T] =
+    query[ShareRow].filter("token", token).list.headOption.map(f)
 
   private def updateField (datum :DatumRow, field :Datum.Field, value :FieldValue) {
     field match {
@@ -344,6 +352,11 @@ object ObjectifyDB extends DB
     datum.archived = row.archived
     datum
   }
+
+  private def get[T] (key :Key[T]) :T = ObjectifyService.begin.get(key)
+  private def get[T] (keys :Iterable[Key[T]]) = ObjectifyService.begin.get(asJavaIterable(keys))
+  private def query[T](implicit m :ClassManifest[T]) =
+    ObjectifyService.begin.query(m.erasure.asInstanceOf[Class[T]])
 
   private def userKey (userId :String) = new Key(classOf[UserRow], userId)
   private def cortexKey (cortexId :String) = new Key(classOf[CortexRow], cortexId)

@@ -28,7 +28,7 @@ import memory.rpc.DataServiceAsync;
 /**
  * Displays an interface for editing access controls.
  */
-public abstract class AccessPopup extends PopupPanel
+public abstract class AccessPopup extends HeaderPopup
 {
     public static Image createAccessIcon (ClickHandler onClick, String... styleNames)
     {
@@ -42,9 +42,6 @@ public abstract class AccessPopup extends PopupPanel
 
     protected AccessPopup (DataService.AccessResult info)
     {
-        super(true);
-        addStyleName(_rsrc.styles().popup());
-
         final EnumListBox<Access> publicBox = new EnumListBox<Access>(
             Access.class, EnumSet.complementOf(EnumSet.of(Access.DEMO)));
         publicBox.setSelectedValue(info.publicAccess);
@@ -74,6 +71,5 @@ public abstract class AccessPopup extends PopupPanel
     }
 
     protected static final DataServiceAsync _datasvc = GWT.create(DataService.class);
-    protected static final MemoryResources _rsrc = GWT.create(MemoryResources.class);
     protected static final MemoryMessages _msgs = GWT.create(MemoryMessages.class);
 }

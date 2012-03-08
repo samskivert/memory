@@ -81,6 +81,9 @@ public interface MemoryResources extends ClientBundle
     @Source("access.png")
     ImageResource accessImage ();
 
+    @Source("fork.png")
+    ImageResource forkImage ();
+
     @Source("pickdate.png")
     ImageResource pickdateImage ();
 

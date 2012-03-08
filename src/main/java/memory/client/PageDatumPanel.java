@@ -12,6 +12,8 @@ import java.util.Map;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Window;
@@ -78,6 +80,20 @@ public class PageDatumPanel extends DatumPanel
                 column = null;
                 col++;
             }
+        }
+    }
+
+    protected void addHeaderButtons ()
+    {
+        super.addHeaderButtons();
+
+        // if we're not already the root, and we have write access, show the fork icon
+        if (_datum.parentId != 0 && _ctx.canWrite()) {
+            add(ForkPopup.createIcon(new ClickHandler() {
+                public void onClick (ClickEvent event) {
+                    new ForkPopup(_ctx, _datum).showNear((Widget)event.getSource());
+                }
+            }, _rsrc.styles().rightIconButton()));
         }
     }
 

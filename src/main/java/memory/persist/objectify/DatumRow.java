@@ -15,6 +15,7 @@ import memory.data.Type;
  * Represents a single datum in the Objectify store.
  */
 public class DatumRow
+    implements Cloneable
 {
     /** The cortex to which this datum belongs. */
     @Parent public Key<CortexRow> cortex;
@@ -46,6 +47,15 @@ public class DatumRow
 
     /** True if this datum is archived, false otherwise. */
     public boolean archived;
+
+    @Override
+    public DatumRow clone () {
+        try {
+            return (DatumRow)super.clone();
+        } catch (CloneNotSupportedException cnse) {
+            throw new AssertionError(cnse);
+        }
+    }
 
     @Override // from Object
     public String toString ()

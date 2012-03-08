@@ -7,13 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
-import com.google.gwt.http.client.URL;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -47,23 +42,14 @@ public class AccountPanel extends Composite
         _nickname.setTitle(data.userId);
         _logout.setHref(data.logoutURL);
 
-        _name.addKeyUpHandler(new KeyUpHandler() {
-            public void onKeyUp (KeyUpEvent event) {
-                processName();
-            }
-        });
-        _name.addChangeHandler(new ChangeHandler() {
-            public void onChange (ChangeEvent event) {
-                processName();
-            }
-        });
+        _helper = new CortexNameHelper(_name, _urltip, _create);
 
         addOwnedLinks(data.owned);
         addSharedLinks(data.shared);
 
         new MClickCallback<Void>(_create, _name) {
             protected boolean callService () {
-                if (!processName()) {
+                if (!_helper.processName()) {
                     return false;
                 }
                 _nname = _name.getText().trim();
@@ -76,12 +62,11 @@ public class AccountPanel extends Composite
                 Popups.infoBelow(
                     "Cortex created! Click the link above to start using it.", getPopupNear());
                 _name.setText("");
-                processName();
+                _helper.processName();
                 return false;
             }
             protected String _nname;
         };
-        _create.setEnabled(false);
     }
 
     protected void addOwnedLinks (List<String> cortexen)
@@ -117,25 +102,6 @@ public class AccountPanel extends Composite
         }
     }
 
-    protected boolean processName ()
-    {
-        String cid = _name.getText().trim().toLowerCase().replace(
-            ' ', '-').replaceAll("[&\\?]", "");
-        _name.setText(cid);
-        _create.setEnabled(cid.length() >= 4);
-        if (cid.length() == 0) {
-            _urltip.setText("");
-            return false;
-        } else if (cid.length() < 4) {
-            _urltip.setText("The name must be at least 4 characters long.");
-            return false;
-        } else {
-            _urltip.setHTML("Your cortex URL will be:<br/>\n" +
-                            "http://www.sparecortex.com/c/" + URL.encode(cid));
-            return true;
-        }
-    }
-
     protected interface Styles extends CssResource
     {
         String none ();
@@ -151,6 +117,8 @@ public class AccountPanel extends Composite
 
     protected @UiField TextBox _name;
     protected @UiField Button _create;
+
+    protected final CortexNameHelper _helper;
 
     protected interface Binder extends UiBinder<Widget, AccountPanel> {}
     protected static final Binder _binder = GWT.create(Binder.class);

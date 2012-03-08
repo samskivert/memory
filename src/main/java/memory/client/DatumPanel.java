@@ -71,17 +71,9 @@ public abstract class DatumPanel extends FlowPanel
         removeStyleName(_rsrc.styles().editor());
         addStyleName(_rsrc.styles().view());
 
-        // if we're top-level and a writer, add access control and help icons
-        if (_ctx.topLevel && _ctx.canWrite()) {
-            add(AccessPopup.createAccessIcon(new ClickHandler() {
-                public void onClick (ClickEvent event) {
-                    DatumAccessPopup.show(_ctx, _datum, (Widget)event.getSource());
-                }
-            }, _rsrc.styles().rightIconButton()));
-
-            Widget help = createImageAnchor("/c/help", _msgs.helpTip(), _rsrc.helpImage());
-            help.addStyleName(_rsrc.styles().rightIconButton());
-            add(help);
+        // if we're at the top-level add our header buttons (access control, help, etc.)
+        if (_ctx.topLevel) {
+            addHeaderButtons();
         }
 
         // this is a twisty maze of header logic; beware static analyses
@@ -105,6 +97,23 @@ public abstract class DatumPanel extends FlowPanel
             add(Widgets.newLabel(e.toString()));
             GWT.log("Error generating UI for " + _datum.id, e);
         }
+    }
+
+    protected void addHeaderButtons ()
+    {
+        // if we're top-level and a writer, add access control
+        if (_ctx.canWrite()) {
+            add(AccessPopup.createAccessIcon(new ClickHandler() {
+                public void onClick (ClickEvent event) {
+                    DatumAccessPopup.show(_ctx, _datum, (Widget)event.getSource());
+                }
+            }, _rsrc.styles().rightIconButton()));
+        }
+
+        // add a help button
+        Widget help = createImageAnchor("/c/help", _msgs.helpTip(), _rsrc.helpImage());
+        help.addStyleName(_rsrc.styles().rightIconButton());
+        add(help);
     }
 
     protected void showEditor ()
