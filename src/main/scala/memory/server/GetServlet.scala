@@ -7,7 +7,6 @@ import scala.collection.JavaConversions._
 import scala.xml.{Node, NodeSeq, XML}
 
 import java.util.TimeZone
-import java.util.logging.Level
 import javax.servlet.ServletConfig
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
@@ -137,7 +136,7 @@ class GetServlet extends HttpServlet
       case re :RedirectException => rsp.sendRedirect(re.getMessage)
       case e => {
         if (!e.isInstanceOf[BadRequestException]) {
-          _log.log(Level.WARNING, "Unexpected error [uri=" + req.getRequestURI + "]", e)
+          _log.warning("Unexpected error", "uri", req.getRequestURI, e)
         }
         rsp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage)
       }
@@ -171,7 +170,7 @@ class GetServlet extends HttpServlet
 
   private val _usvc = UserServiceFactory.getUserService
   private val _bssvc = BlobstoreServiceFactory.getBlobstoreService
-  private val _log = java.util.logging.Logger.getLogger("GetServlet")
+  private val _log = new Logger("GetServlet")
 
   private val GwitBits = """
   |<div id="client"></div>

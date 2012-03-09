@@ -56,7 +56,7 @@ class UploadServlet extends HttpServlet
       case t :Throwable => {
         t match {
           case se :ServiceException => _log.warning(se.getMessage)
-          case _ => _log.log(Level.WARNING, t.getMessage, t) // log the whole stack trace
+          case _ => _log.warning(t.getMessage, t) // log the whole stack trace
         }
         // delete any uploaded blobs
         blobs.values.map(bkey => _bssvc.delete(bkey))
@@ -78,5 +78,5 @@ class UploadServlet extends HttpServlet
   }
 
   private val _bssvc = BlobstoreServiceFactory.getBlobstoreService
-  private val _log = java.util.logging.Logger.getLogger("UploadServlet")
+  private val _log = new Logger("UploadServlet")
 }
