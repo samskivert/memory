@@ -73,7 +73,7 @@ object MemoryBuild extends Build {
       "org.mortbay.jetty" % "jetty" % "6.1.22" % "container",
 
       // test dependencies
-      "org.scalatest" % "scalatest" % "1.2" % "test"
+      "com.novocode" % "junit-interface" % "0.7" % "test->default"
     ),
 
     asyncGen <<= asyncGenTask,
