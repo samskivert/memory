@@ -73,12 +73,12 @@ public interface DataServiceAsync
     /**
      * The async version of {@link DataService#updateDatum}.
      */
-    void updateDatum (String cortexId, long id, Datum.Field field, FieldValue value, AsyncCallback<Void> callback);
+    void updateDatum (String cortexId, long id, Map<Datum.Field, FieldValue> field, AsyncCallback<Void> callback);
 
     /**
      * The async version of {@link DataService#updateDatum}.
      */
-    void updateDatum (String cortexId, long id, Map<Datum.Field, FieldValue> field, AsyncCallback<Void> callback);
+    void updateDatum (String cortexId, long id, Datum.Field field, FieldValue value, AsyncCallback<Void> callback);
 
     /**
      * The async version of {@link DataService#updatePublicAccess}.
@@ -99,4 +99,9 @@ public interface DataServiceAsync
      * The async version of {@link DataService#getUploadURL}.
      */
     void getUploadURL (AsyncCallback<String> callback);
+
+    /**
+     * The async version of {@link DataService#deleteCortex}.
+     */
+    void deleteCortex (String cortexId, AsyncCallback<Void> callback);
 }

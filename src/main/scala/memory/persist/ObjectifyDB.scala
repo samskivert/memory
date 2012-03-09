@@ -5,6 +5,7 @@ package memory.persist
 package objectify
 
 import java.io.{InputStream, OutputStream}
+import java.util.{List => JList}
 import scala.collection.JavaConversions._
 
 import com.googlecode.objectify.{Key, NotFoundException, Objectify, ObjectifyService}
@@ -60,6 +61,30 @@ object ObjectifyDB extends DB
       _.put(cortexAccess(ownerId, cortexId, "", Access.WRITE)) :Key[CortexAccess]
     }
     true
+  }
+
+  // from trait DB
+  def deleteCortex (cortexId :String) {
+    // load up all of the access records for this cortex
+    val cortexAccess = query[CortexAccess].filter("cortexId", cortexId).list
+
+    // load the keys for all data in this cortex
+    val dataKeys = query[DatumRow].ancestor(cortexKey(cortexId)).listKeys
+
+    // load the data access rows (TODO: this is heinously inefficient, but there are only 24 data
+    // acess rows in existence at the moment)
+    val dataAccess :JList[DatumAccess] = query[DatumAccess].list.filter(_.id.startsWith(cortexId+":"))
+
+    // first delete the bits with CortexRow ancestor
+    transaction { obj =>
+      obj.delete(dataKeys)
+      obj.delete(cortexKey(cortexId))
+    }
+    // next delete the bits with UserRow ancestor
+    transaction { obj =>
+      obj.delete(dataAccess)
+      obj.delete(cortexAccess)
+    }
   }
 
   // from trait DB

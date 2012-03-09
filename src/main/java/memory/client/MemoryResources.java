@@ -23,6 +23,7 @@ public interface MemoryResources extends ClientBundle
         String textCenter ();
         String blockCenter ();
         String popup ();
+        String destroyPopup ();
         String navigationLink ();
         String title ();
         String bulleted ();

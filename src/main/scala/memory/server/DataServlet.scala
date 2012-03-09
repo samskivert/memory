@@ -72,6 +72,12 @@ class DataServlet extends RemoteServiceServlet with DataService
   }
 
   // from DataService
+  def deleteCortex (cortexId :String) {
+    requireOwnedCortex(cortexId, requireUser.getUserId)
+    db.deleteCortex(cortexId)
+  }
+
+  // from DataService
   def forkCortex (cortexId :String, datumId :Long, newCortexId :String) {
     val userId = requireUser.getUserId
     requireOwnedCortex(cortexId, userId)

@@ -25,6 +25,9 @@ trait DB
    * @returns true if the cortex was created, false if said cortex already exists. */
   def createCortex (cortexId :String, ownerId :String, root :Datum) :Boolean
 
+  /** Deletes the specified cortex and all of its associated data. */
+  def deleteCortex (cortexId :String) :Unit
+
   /** Loads the metadata for the specified cortex. */
   def loadCortex (cortexId: String) :Option[Cortex]
 

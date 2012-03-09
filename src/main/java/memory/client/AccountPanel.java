@@ -75,6 +75,7 @@ public class AccountPanel extends Composite
         if (cortexen != null) {
             for (final String cortex : cortexen) {
                 FlowPanel bits = new FlowPanel();
+                bits.add(DestroyPopup.createIcon(cortex, bits));
                 bits.add(AccessPopup.createAccessIcon(new ClickHandler() {
                     public void onClick (ClickEvent event) {
                         CortexAccessPopup.show(cortex, (Widget)event.getSource());
