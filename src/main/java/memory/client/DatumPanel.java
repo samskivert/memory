@@ -116,7 +116,7 @@ public abstract class DatumPanel extends FlowPanel
         add(help);
     }
 
-    protected void showEditor ()
+    protected void showEditor (boolean advanced)
     {
         clear();
         removeStyleName(_rsrc.styles().view());
@@ -136,7 +136,7 @@ public abstract class DatumPanel extends FlowPanel
         add(link);
 
         FlowPanel editor = Widgets.newFlowPanel(_rsrc.styles().editorBox());
-        addEditor(editor);
+        addEditor(editor, advanced);
         add(editor);
     }
 
@@ -150,7 +150,7 @@ public abstract class DatumPanel extends FlowPanel
         Image button = Widgets.newImage(_rsrc.editImage(), _rsrc.styles().iconButton());
         Widgets.makeActionImage(button, _msgs.editTip(), new ClickHandler() {
             public void onClick (ClickEvent event) {
-                showEditor();
+                showEditor(event.isShiftKeyDown());
             }
         });
         if (header == null) {
@@ -191,7 +191,7 @@ public abstract class DatumPanel extends FlowPanel
         }
     }
 
-    protected void addEditor (FlowPanel editor)
+    protected void addEditor (FlowPanel editor, boolean advanced)
     {
         final TextBox title = Widgets.newTextBox(_datum.title, Datum.MAX_TITLE_LENGTH, 30);
         _updaters.add(new BitsUpdater() {
@@ -206,8 +206,33 @@ public abstract class DatumPanel extends FlowPanel
             protected String _title;
         });
 
-        FluentTable bits = new FluentTable(0, 1);
-        bits.add().setWidget(title);
+        FlowPanel bits = new FlowPanel();
+        bits.add(title);
+        if (advanced) {
+            final EnumListBox<Type> type = createTypeListBox();
+            type.setSelectedValue(_datum.type);
+            final NumberTextBox parentId = NumberTextBox.newIntBox(10);
+            parentId.setNumber(_datum.parentId);
+
+            bits.add(type);
+            bits.add(Widgets.newInlineLabel("Parent:", _rsrc.styles().editorLabel()));
+            bits.add(parentId);
+
+            _updaters.add(new BitsUpdater() {
+                public void addUpdates (Map<Datum.Field, FieldValue> updates) {
+                    _type = type.getSelectedValue();
+                    updates.put(Datum.Field.TYPE, FieldValue.of(_type));
+                    _parentId = parentId.getNumber().longValue();
+                    updates.put(Datum.Field.PARENT_ID, FieldValue.of(_parentId));
+                }
+                public void applyUpdates () {
+                    _datum.parentId = _parentId;
+                    _datum.type = _type;
+                }
+                protected Type _type;
+                protected long _parentId;
+            });
+        }
         editor.add(bits);
 
         addContentEditors(editor);
@@ -234,7 +259,7 @@ public abstract class DatumPanel extends FlowPanel
         };
 
         if (editor.getWidgetCount() == 1) {
-            bits.at(0, bits.getCellCount(0)).setWidget(update);
+            bits.add(update);
         } else {
             update.addStyleName(_rsrc.styles().editorUpdateButton());
             editor.add(update);
@@ -246,32 +271,6 @@ public abstract class DatumPanel extends FlowPanel
     protected void addContentEditors (FlowPanel editor)
     {
         // nada
-    }
-
-    protected void addTypeParentEditor (FluentTable bits)
-    {
-        final EnumListBox<Type> type = createTypeListBox();
-        type.setSelectedValue(_datum.type);
-        final NumberTextBox parentId = NumberTextBox.newIntBox(10);
-        parentId.addStyleName(_rsrc.styles().width100());
-        parentId.setNumber(_datum.parentId);
-        bits.add().setText("Type:", _rsrc.styles().editorLabel()).right().setWidget(type).
-            right().setText("Parent:", _rsrc.styles().editorLabel()).right().setWidget(parentId);
-
-        _updaters.add(new BitsUpdater() {
-            public void addUpdates (Map<Datum.Field, FieldValue> updates) {
-                _type = type.getSelectedValue();
-                updates.put(Datum.Field.TYPE, FieldValue.of(_type));
-                _parentId = parentId.getNumber().longValue();
-                updates.put(Datum.Field.PARENT_ID, FieldValue.of(_parentId));
-            }
-            public void applyUpdates () {
-                _datum.parentId = _parentId;
-                _datum.type = _type;
-            }
-            protected Type _type;
-            protected long _parentId;
-        });
     }
 
     protected void addChildrenEditor (FlowPanel editor)
