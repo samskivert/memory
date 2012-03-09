@@ -11,6 +11,7 @@ import scala.collection.JavaConversions._
 import com.googlecode.objectify.{Key, NotFoundException, Objectify, ObjectifyService}
 
 import memory.data.{Access, AccessInfo, Cortex, Datum, FieldValue, Type}
+import memory.server.Logger
 
 /**
  * Implements the database via Objectify (which builds on GAE Data Store).
@@ -149,10 +150,8 @@ object ObjectifyDB extends DB
       }
     }
   } catch {
-    case e :NotFoundException => {
-      _log.info("Requested to update non-existent access [id=" + id + ", access=" + access + "]")
-      false
-    }
+    case e :NotFoundException =>
+      _log.info("Requested to update non-existent access", "id", id, "access", access) ; false
   }
 
   // from trait DB
@@ -249,14 +248,21 @@ object ObjectifyDB extends DB
     val dupMap = dups.toMap
     val parent = get(datumKey(toCortexId, toId))
     val meta = parent.meta.split(";").filter(_ != "").map(_.split("=").toSeq)
-    val conv = meta.map { case Seq(k,v) => Seq(k, k match {
-      // manually rewrite the child ids in breakN and order metadata
-      case ("break1" | "break2") => dupMap.getOrElse(v.toLong, 0L).toString
-      case "order" => v.split(",").map(_.toLong).filter(dupMap.keySet).map(dupMap).mkString(",")
-      case _ => v
-    })}
-    parent.meta = conv.map(_.mkString("=")).mkString(";")
-    transaction { _.put(parent) :Key[DatumRow] }
+    try {
+      val conv = meta.map {
+        case Seq(k,v) => Seq(k, k match {
+          // manually rewrite the child ids in breakN and order metadata
+          case ("break1" | "break2") => dupMap.getOrElse(v.toLong, 0L).toString
+          case "order" => v.split(",").map(_.toLong).filter(dupMap.keySet).map(dupMap).mkString(",")
+          case _ => v
+        })
+        case v => _log.warning("Weird metadata value: " + v, "parent", parent.title); v
+      }
+      parent.meta = conv.map(_.mkString("=")).mkString(";")
+      transaction { _.put(parent) :Key[DatumRow] }
+    } catch {
+      case e => _log.warning("Failed to convert metadata", "meta", parent.meta, "mmap", meta, e)
+    }
   }
 
   // from trait DB
@@ -407,5 +413,5 @@ object ObjectifyDB extends DB
   }
 
   private[this] var _txobj :Objectify = _
-  private val _log = java.util.logging.Logger.getLogger("objdb")
+  private val _log = new Logger("objdb")
 }
