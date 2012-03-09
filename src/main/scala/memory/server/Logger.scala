@@ -57,10 +57,11 @@ class Logger (name :String)
 
   protected def getexn (msgobj :Any, args :Seq[Any]) = msgobj match {
     case ex :Throwable => ex
-    case _ => args.last match {
-      case ex :Throwable if (args.size % 2 == 1) => ex
+    case _ if (args.size % 2 == 1) => args.last match {
+      case ex :Throwable => ex
       case _ => null
     }
+    case _ => null
   }
 
   private[this] val _impl = java.util.logging.Logger.getLogger(name)
