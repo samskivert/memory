@@ -163,7 +163,10 @@ public abstract class TextDatumPanel extends DatumPanel
         file.addChangeHandler(new ChangeHandler() {
             public void onChange (ChangeEvent event) {
                 if (name.getText().trim().length() == 0) {
-                    name.setText(file.getFilename());
+                    String fname = file.getFilename();
+                    // work around weird WebKit? bug
+                    if (fname.startsWith("C:\\fakepath\\")) fname = fname.substring(12);
+                    name.setText(fname);
                 }
             }
         });
@@ -203,6 +206,9 @@ public abstract class TextDatumPanel extends DatumPanel
 
                     // and prepare for another upload
                     refreshUploadURL(form, upload);
+                    // these get cleared during the upload process, so fill them back in
+                    cortexId.setText(_ctx.cortexId);
+                    parentId.setText(""+_datum.id);
 
                 } catch (Exception e) {
                     // cope with various random fucking Google weirdness
