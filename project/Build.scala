@@ -30,7 +30,7 @@ object MemoryBuild extends Build {
       }
     }
 
-  val gaeVers = "1.6.3"
+  val gaeVers = "1.6.4"
   val extSettings = Defaults.defaultSettings ++ webSettings ++ gwtSettings
 
   val memory = Project("memory", file("."), settings = extSettings ++ Seq(
@@ -41,7 +41,7 @@ object MemoryBuild extends Build {
     scalacOptions ++= Seq("-unchecked", "-deprecation"),
 
     gwtVersion    := "2.4.0",
-    gaeSdkPath    := Some(Path.userHome + "/ops/appengine-java-sdk-" + gaeVers),
+    gaeSdkPath    := Some(Path.userHome + "/ops/appengine-java-sdk"),
     gwtTemporaryPath <<= (target) { (target) => target / "webapp" },
     javacOptions  ++= Seq("-Xlint", "-Xlint:-serial"),
 
