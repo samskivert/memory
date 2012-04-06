@@ -13,11 +13,11 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.DoubleClickEvent;
-import com.google.gwt.event.dom.client.DoubleClickHandler;
-import com.google.gwt.event.dom.client.HasDoubleClickHandlers;
+import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
@@ -86,6 +86,18 @@ public class ListDatumPanel extends DatumPanel
 
         if (_ctx.canOpenEditor()) {
             _itext = Widgets.newTextBox("", -1, 20);
+            _itext.addKeyDownHandler(new KeyDownHandler() {
+                public void onKeyDown (KeyDownEvent event) {
+                    if (event.getNativeKeyCode() == KeyCodes.KEY_ESCAPE) {
+                        maybeHideAddUI();
+                    }
+                }
+            });
+            _itext.addBlurHandler(new BlurHandler() {
+                public void onBlur (BlurEvent event) {
+                    maybeHideAddUI();
+                }
+            });
             _itext.addStyleName(_rsrc.styles().width99());
             final Button add = new Button("Add");
             _addui = new StretchBox(0, _itext, add).gaps(8);
@@ -107,8 +119,14 @@ public class ListDatumPanel extends DatumPanel
                     // add the UI row and instruct it to create the item
                     Datum item = createChildDatum(Type.WIKI, "", text);
                     getChildData().add(item);
-                    EditableItemLabel row = addItem(_items, item, new MetaData(item.meta));
+                    EditableItemLabel row;
+                    if (_beforeIdx >= 0) {
+                        row = addItemAt(_items, item, new MetaData(item.meta), _beforeIdx);
+                    } else {
+                        row = addItem(_items, item, new MetaData(item.meta));
+                    }
                     row.createItem();
+                    _itext.setFocus(true);
                 }
             };
             add.addClickHandler(onAdd);
@@ -123,8 +141,26 @@ public class ListDatumPanel extends DatumPanel
 
     protected void maybeHideAddUI ()
     {
-        if (autoHideAdd() && _itext.getText().trim().length() == 0) {
+        if (autoHideAdd() && _itext.getText().trim().length() == 0 && !getChildData().isEmpty()) {
             _addui.setVisible(false);
+        }
+    }
+
+    protected void showAddUIBefore (long itemId, FlowPanel item)
+    {
+        _addui.removeFromParent();
+        int idx = _items.getWidgetIndex(item);
+        if (_beforeItemId != itemId && idx >= 0) {
+            _items.insert(_addui, idx);
+            _beforeItemId = itemId;
+            _beforeIdx = idx;
+            _addui.setVisible(true);
+            _itext.setFocus(true);
+        } else {
+            _addui.setVisible(_beforeItemId != itemId);
+            _beforeItemId = 0;
+            _beforeIdx = -1;
+            add(_addui);
         }
     }
 
@@ -137,8 +173,13 @@ public class ListDatumPanel extends DatumPanel
 
     protected EditableItemLabel addItem (FlowPanel items, Datum item, MetaData data)
     {
+        return addItemAt(items, item, data, items.getWidgetCount());
+    }
+
+    protected EditableItemLabel addItemAt (FlowPanel items, Datum item, MetaData data, int idx)
+    {
         EditableItemLabel iwidget = new EditableItemLabel(item, data);
-        items.add(iwidget);
+        items.insert(iwidget, idx);
         _noitems.setVisible(false);
         return iwidget;
     }
@@ -191,13 +232,22 @@ public class ListDatumPanel extends DatumPanel
         }
     }
 
+    protected void flushChildOrder ()
+    {
+        List<Long> ids = new ArrayList<Long>();
+        for (Widget w : _items) {
+            if (w instanceof EditableItemLabel) ids.add(((EditableItemLabel)w).id());
+        }
+        childOrderUpdated(ids, null);
+    }
+
     protected boolean allowChildReorder ()
     {
         return true;
     }
 
     protected class EditableItemLabel extends FlowPanel
-        implements HasDoubleClickHandlers
+        implements HasClickHandlers
     {
         public EditableItemLabel (Datum item, MetaData data) {
             _item = item;
@@ -205,11 +255,18 @@ public class ListDatumPanel extends DatumPanel
             displayItem();
         }
 
+        public long id () {
+            return _item.id;
+        }
+
         public void createItem () {
+            final long beforeId = _beforeItemId;
             _datasvc.createDatum(_ctx.cortexId, _item, new MPopupCallback<Long>(this) {
                 public void onSuccess (Long itemId) {
                     _item.id = itemId;
                     _metamap.put(itemId, _data);
+                    // if we inserted this item before an existing item, update our order
+                    if (beforeId > 0) flushChildOrder();
                     removeStyleName(_rsrc.styles().unsavedItem());
                     displayItem(); // redisplay the item now that it's created
                 }
@@ -222,9 +279,9 @@ public class ListDatumPanel extends DatumPanel
             });
         }
 
-        // from interface HasDoubleClickHandlers
-        public HandlerRegistration addDoubleClickHandler (DoubleClickHandler handler) {
-            return addDomHandler(handler, DoubleClickEvent.getType());
+        // from interface HasClickHandlers
+        public HandlerRegistration addClickHandler (ClickHandler handler) {
+            return addDomHandler(handler, ClickEvent.getType());
         }
 
         protected void displayItem () {
@@ -233,16 +290,22 @@ public class ListDatumPanel extends DatumPanel
             addStyleName(_rsrc.styles().itemContainer());
             addItemWidget(this, _item, _data);
             if (_ctx.canOpenEditor() && _item.id != 0) {
-                _dcreg = addDoubleClickHandler(new DoubleClickHandler() {
-                    public void onDoubleClick (DoubleClickEvent event) {
-                        displayEditor();
+                _creg = addClickHandler(new ClickHandler() {
+                    public void onClick (ClickEvent event) {
+                        if (event.isShiftKeyDown()) displayEditor();
+                        else if (event.isAltKeyDown()) ; // nada
+                        else if (event.isMetaKeyDown()) ; // nada
+                        else if (event.isControlKeyDown()) ; // nada
+                        else if (allowChildReorder()) {
+                            showAddUIBefore(_item.id, EditableItemLabel.this);
+                        }
                     }
                 });
             }
         }
 
         protected void displayEditor () {
-            _dcreg.removeHandler();
+            _creg.removeHandler();
             ItemEditor row = new ItemEditor(_item) {
                 protected void onUpdated () {
                     displayItem();
@@ -264,7 +327,7 @@ public class ListDatumPanel extends DatumPanel
 
         protected Datum _item;
         protected MetaData _data;
-        protected HandlerRegistration _dcreg;
+        protected HandlerRegistration _creg;
     }
 
     protected class ItemEditor extends StretchBox
@@ -315,4 +378,7 @@ public class ListDatumPanel extends DatumPanel
     protected Widget _addui;
     protected FlowPanel _items;
     protected Map<Long, MetaData> _metamap = new HashMap<Long, MetaData>();
+
+    protected long _beforeItemId;
+    protected int _beforeIdx = -1;
 }

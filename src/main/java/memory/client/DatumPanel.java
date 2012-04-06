@@ -390,7 +390,7 @@ public abstract class DatumPanel extends FlowPanel
             _ctx.cortexId, _datum.id, Datum.Field.META, FieldValue.of(_meta.toMetaString()),
             new MPopupCallback<Void>(this) {
                 public void onSuccess (Void result) {
-                    Popups.infoBelow("Order updated.", trigger);
+                    if (trigger != null) Popups.infoBelow("Order updated.", trigger);
                 }
             });
     }
