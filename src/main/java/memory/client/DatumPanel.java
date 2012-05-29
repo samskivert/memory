@@ -22,7 +22,6 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 import com.threerings.gwt.ui.EnumListBox;
-import com.threerings.gwt.ui.FluentTable;
 import com.threerings.gwt.ui.NumberTextBox;
 import com.threerings.gwt.ui.Popups;
 import com.threerings.gwt.ui.Widgets;

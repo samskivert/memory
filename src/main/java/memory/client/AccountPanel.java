@@ -3,7 +3,6 @@
 
 package memory.client;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
@@ -24,7 +23,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.threerings.gwt.ui.Popups;
 import com.threerings.gwt.ui.Widgets;
 
-import memory.data.Access;
 import memory.data.AccessInfo;
 import memory.rpc.DataService;
 import memory.rpc.DataServiceAsync;

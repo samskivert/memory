@@ -12,8 +12,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.Widget;
 
 import com.threerings.gwt.ui.EnumListBox;
 import com.threerings.gwt.ui.FluentTable;
@@ -21,7 +19,6 @@ import com.threerings.gwt.ui.Popups;
 import com.threerings.gwt.ui.Widgets;
 
 import memory.data.Access;
-import memory.data.Datum;
 import memory.rpc.DataService;
 import memory.rpc.DataServiceAsync;
 

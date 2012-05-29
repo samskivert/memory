@@ -14,8 +14,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-import com.threerings.gwt.ui.Widgets;
-
 import memory.data.Access;
 import memory.data.Datum;
 import memory.data.DatumId;

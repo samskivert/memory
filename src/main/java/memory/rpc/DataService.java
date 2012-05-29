@@ -14,7 +14,6 @@ import memory.data.Access;
 import memory.data.AccessInfo;
 import memory.data.Datum;
 import memory.data.FieldValue;
-import memory.data.Type;
 
 /**
  * Provides GWT services.

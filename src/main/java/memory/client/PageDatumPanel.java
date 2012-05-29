@@ -4,14 +4,9 @@
 package memory.client;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -25,12 +20,10 @@ import com.google.gwt.user.client.ui.Widget;
 
 import com.threerings.gwt.ui.EnumListBox;
 import com.threerings.gwt.ui.FluentTable;
-import com.threerings.gwt.ui.NumberTextBox;
 import com.threerings.gwt.ui.Popups;
 import com.threerings.gwt.ui.Widgets;
 
 import memory.data.Datum;
-import memory.data.FieldValue;
 import memory.data.Type;
 
 /**
