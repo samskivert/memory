@@ -14,11 +14,15 @@ import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.HasClickHandlers;
+import com.google.gwt.event.dom.client.HasMouseDownHandlers;
+import com.google.gwt.event.dom.client.HasTouchStartHandlers;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
+import com.google.gwt.event.dom.client.TouchStartEvent;
+import com.google.gwt.event.dom.client.TouchStartHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
@@ -233,7 +237,7 @@ public class ListDatumPanel extends DatumPanel
     }
 
     protected class EditableItemLabel extends FlowPanel
-        implements HasClickHandlers
+        implements HasClickHandlers, HasMouseDownHandlers, HasTouchStartHandlers
     {
         public EditableItemLabel (Datum item, MetaData data) {
             _item = item;
@@ -270,6 +274,11 @@ public class ListDatumPanel extends DatumPanel
             return addDomHandler(handler, MouseDownEvent.getType());
         }
 
+        // from interface HasTouchStartHandlers
+        public HandlerRegistration addTouchStartHandler (TouchStartHandler handler) {
+            return addDomHandler(handler, TouchStartEvent.getType());
+        }
+
         // from interface HasClickHandlers
         public HandlerRegistration addClickHandler (ClickHandler handler) {
             return addDomHandler(handler, ClickEvent.getType());
@@ -281,31 +290,33 @@ public class ListDatumPanel extends DatumPanel
             addStyleName(_rsrc.styles().itemContainer());
             addItemWidget(this, _item, _data);
             if (_ctx.canOpenEditor() && _item.id != 0) {
-                _mdreg = addMouseDownHandler(new MouseDownHandler() {
-                    public void onMouseDown(MouseDownEvent event) {
-                        if (!allowChildReorder()) return;
-                        if (_editTimer == null) {
-                            _editTimer = new Timer() { public void run () {
-                                showAddUIBefore(_item.id, EditableItemLabel.this);
-                            }};
+                if (allowChildReorder()) {
+                    _regs.add(addMouseDownHandler(new MouseDownHandler() {
+                        public void onMouseDown(MouseDownEvent event) {
+                            editTimer().schedule(500);
                         }
-                        _editTimer.schedule(500);
-                    }
-                });
-                _creg = addClickHandler(new ClickHandler() {
+                    }));
+                    _regs.add(addTouchStartHandler(new TouchStartHandler() {
+                        public void onTouchStart(TouchStartEvent event) {
+                            editTimer().schedule(500);
+                        }
+                    }));
+                }
+                _regs.add(addClickHandler(new ClickHandler() {
                     public void onClick (ClickEvent event) {
                         // cancel our long-press show-add-box interaction
                         if (_editTimer != null) _editTimer.cancel();
                         // if they shift-clicked, show the editor
                         if (event.isShiftKeyDown()) displayEditor();
                     }
-                });
+                }));
             }
         }
 
         protected void displayEditor () {
-            _creg.removeHandler();
-            _mdreg.removeHandler();
+            for (HandlerRegistration reg : _regs) reg.removeHandler();
+            _regs.clear();
+
             ItemEditor row = new ItemEditor(_item) {
                 protected void onUpdated () {
                     displayItem();
@@ -325,10 +336,19 @@ public class ListDatumPanel extends DatumPanel
             row.text.setFocus(true);
         }
 
+        protected Timer editTimer () {
+            if (_editTimer == null) {
+                _editTimer = new Timer() { public void run () {
+                    showAddUIBefore(_item.id, EditableItemLabel.this);
+                }};
+            }
+            return _editTimer;
+        }
+
         protected Datum _item;
         protected MetaData _data;
         protected Timer _editTimer;
-        protected HandlerRegistration _creg, _mdreg;
+        protected List<HandlerRegistration> _regs = new ArrayList<HandlerRegistration>();
     }
 
     protected class ItemEditor extends StretchBox
