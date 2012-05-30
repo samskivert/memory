@@ -9,20 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.event.dom.client.BlurEvent;
-import com.google.gwt.event.dom.client.BlurHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.HasClickHandlers;
-import com.google.gwt.event.dom.client.HasMouseDownHandlers;
-import com.google.gwt.event.dom.client.HasTouchStartHandlers;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyDownHandler;
-import com.google.gwt.event.dom.client.MouseDownEvent;
-import com.google.gwt.event.dom.client.MouseDownHandler;
-import com.google.gwt.event.dom.client.TouchStartEvent;
-import com.google.gwt.event.dom.client.TouchStartHandler;
+import com.google.gwt.event.dom.client.*; // myriad FooEvent and FooHandler
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
@@ -237,7 +224,6 @@ public class ListDatumPanel extends DatumPanel
     }
 
     protected class EditableItemLabel extends FlowPanel
-        implements HasClickHandlers, HasMouseDownHandlers, HasTouchStartHandlers
     {
         public EditableItemLabel (Datum item, MetaData data) {
             _item = item;
@@ -269,21 +255,6 @@ public class ListDatumPanel extends DatumPanel
             });
         }
 
-        // from interface HasMouseDownHandlers
-        public HandlerRegistration addMouseDownHandler (MouseDownHandler handler) {
-            return addDomHandler(handler, MouseDownEvent.getType());
-        }
-
-        // from interface HasTouchStartHandlers
-        public HandlerRegistration addTouchStartHandler (TouchStartHandler handler) {
-            return addDomHandler(handler, TouchStartEvent.getType());
-        }
-
-        // from interface HasClickHandlers
-        public HandlerRegistration addClickHandler (ClickHandler handler) {
-            return addDomHandler(handler, ClickEvent.getType());
-        }
-
         protected void displayItem () {
             clear();
             addStyleName(_rsrc.styles().bulleted());
@@ -291,25 +262,29 @@ public class ListDatumPanel extends DatumPanel
             addItemWidget(this, _item, _data);
             if (_ctx.canOpenEditor() && _item.id != 0) {
                 if (allowChildReorder()) {
-                    _regs.add(addMouseDownHandler(new MouseDownHandler() {
-                        public void onMouseDown(MouseDownEvent event) {
-                            editTimer().schedule(500);
-                        }
-                    }));
-                    _regs.add(addTouchStartHandler(new TouchStartHandler() {
-                        public void onTouchStart(TouchStartEvent event) {
-                            editTimer().schedule(500);
-                        }
-                    }));
+                    _regs.add(addDomHandler(new MouseDownHandler() {
+                        public void onMouseDown(MouseDownEvent event) { startEditTimer(); }
+                    }, MouseDownEvent.getType()));
+                    _regs.add(addDomHandler(new TouchStartHandler() {
+                        public void onTouchStart(TouchStartEvent event) { startEditTimer(); }
+                    }, TouchStartEvent.getType()));
+                    _regs.add(addDomHandler(new TouchEndHandler() {
+                        public void onTouchEnd(TouchEndEvent event) { cancelEditTimer(); }
+                    }, TouchEndEvent.getType()));
+                    _regs.add(addDomHandler(new TouchCancelHandler() {
+                        public void onTouchCancel(TouchCancelEvent event) { cancelEditTimer(); }
+                    }, TouchCancelEvent.getType()));
+                    _regs.add(addDomHandler(new MouseOutHandler() {
+                        public void onMouseOut(MouseOutEvent event) { cancelEditTimer(); }
+                    }, MouseOutEvent.getType()));
                 }
-                _regs.add(addClickHandler(new ClickHandler() {
+                _regs.add(addDomHandler(new ClickHandler() {
                     public void onClick (ClickEvent event) {
-                        // cancel our long-press show-add-box interaction
-                        if (_editTimer != null) _editTimer.cancel();
+                        cancelEditTimer();
                         // if they shift-clicked, show the editor
                         if (event.isShiftKeyDown()) displayEditor();
                     }
-                }));
+                }, ClickEvent.getType()));
             }
         }
 
@@ -336,13 +311,17 @@ public class ListDatumPanel extends DatumPanel
             row.text.setFocus(true);
         }
 
-        protected Timer editTimer () {
+        protected void startEditTimer () {
             if (_editTimer == null) {
                 _editTimer = new Timer() { public void run () {
                     showAddUIBefore(_item.id, EditableItemLabel.this);
                 }};
             }
-            return _editTimer;
+            _editTimer.schedule(500);
+        }
+
+        protected void cancelEditTimer () {
+            if (_editTimer != null) _editTimer.cancel();
         }
 
         protected Datum _item;
