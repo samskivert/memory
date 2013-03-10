@@ -6,6 +6,7 @@ package memory.server
 import scala.collection.JavaConversions._
 import scala.xml.{Node, NodeSeq, XML}
 
+import java.io.{PrintWriter, StringWriter}
 import java.util.TimeZone
 import javax.servlet.ServletConfig
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
@@ -45,6 +46,9 @@ class GetServlet extends HttpServlet
 
   override protected def doGet (req :HttpServletRequest, rsp :HttpServletResponse) {
     try {
+      // make sure our output content type is properly set
+      rsp.setContentType("text/html; charset=UTF-8")
+
       val rawPathInfo = req.getPathInfo
       require(rawPathInfo != null, "Missing path.")
 
@@ -115,7 +119,8 @@ class GetServlet extends HttpServlet
         _bssvc.serve(new BlobKey(datum.meta), rsp)
 
       } else {
-        val out = rsp.getWriter
+        val buf = new StringWriter
+        val out = new PrintWriter(buf)
         out.println(ServletUtil.htmlHeader(datum.title + " (" + cortexId + ")"))
         val pxml = <div style="display:none" id="path">{
           path.map(p => <div x:parentId={p.parentId.toString} x:title={p.title}/>)
@@ -130,6 +135,10 @@ class GetServlet extends HttpServlet
         out.println
         out.println(GwitBits)
         out.println(ServletUtil.htmlFooter)
+
+        // this is less efficient than just calling rsp.toWriter, but GAE doesn't do the right
+        // thing with UTF8 if we do that (even if we set content-type before calling getWriter)
+        rsp.getOutputStream.write(buf.toString.getBytes("UTF8"))
       }
 
     } catch {
