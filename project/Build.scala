@@ -40,7 +40,7 @@ object MemoryBuild extends Build {
     scalaVersion  := "2.9.1",
     scalacOptions ++= Seq("-unchecked", "-deprecation"),
 
-    gwtVersion    := "2.4.0",
+    gwtVersion    := "2.5.0",
     gaeSdkPath    := Some(Path.userHome + "/ops/appengine-java-sdk"),
     gwtTemporaryPath <<= (target) { (target) => target / "webapp" },
     javacOptions  ++= Seq("-Xlint", "-Xlint:-serial"),
@@ -56,7 +56,7 @@ object MemoryBuild extends Build {
     autoScalaLibrary := true, // GWT plugin turns this off for some reason
     libraryDependencies ++= Seq(
       // we only need these for the GWT build, so we use "provided"
-      "com.threerings" % "gwt-utils" % "1.5" % "provided",
+      "com.threerings" % "gwt-utils" % "1.6-SNAPSHOT" % "provided",
       "com.allen-sauer.gwt.dnd" % "gwt-dnd" % "3.1.2" % "provided",
 
       // appengine depends
