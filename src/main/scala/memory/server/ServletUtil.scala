@@ -8,7 +8,7 @@ package memory.server
  */
 object ServletUtil
 {
-  def htmlHeader (title :String) = Header replace("TITLE", title)
+  def htmlHeader (title :String) = Header replaceAll("TITLE", title)
 
   def htmlFooter = Footer
 

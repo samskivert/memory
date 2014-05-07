@@ -40,7 +40,7 @@ class GetServlet extends HttpServlet
       }
 
     } catch {
-      case e => println("Failed to init db " + e)
+      case e :Exception => println("Failed to init db " + e)
     }
   }
 
@@ -143,12 +143,11 @@ class GetServlet extends HttpServlet
 
     } catch {
       case re :RedirectException => rsp.sendRedirect(re.getMessage)
-      case e => {
+      case e :Exception =>
         if (!e.isInstanceOf[BadRequestException]) {
           _log.warning("Unexpected error", "uri", req.getRequestURI, e)
         }
         rsp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage)
-      }
     }
   }
 

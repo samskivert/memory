@@ -97,10 +97,9 @@ class DataServlet extends RemoteServiceServlet with DataService
       sendEmail(user.getEmail, email, SHARE_SUBJECT, body)
     } catch {
       // clean up after ourselves if we fail to send the email
-      case e => {
+      case e :Exception =>
         db.deleteShareRequest(shareId)
         throw new ServiceException(e.getMessage)
-      }
     }
   }
 

@@ -20,8 +20,14 @@ object ObjectifyDB extends DB
 {
   // from trait DB
   def init {
-    List(classOf[UserRow], classOf[DatumRow], classOf[CortexRow], classOf[ShareRow],
-         classOf[CortexAccess], classOf[DatumAccess]) map(ObjectifyService.register)
+    List[Class[_]](
+      classOf[UserRow],
+      classOf[DatumRow],
+      classOf[CortexRow],
+      classOf[ShareRow],
+      classOf[CortexAccess],
+      classOf[DatumAccess]
+    ) foreach(ObjectifyService.register)
   }
 
   // from trait DB
@@ -261,7 +267,8 @@ object ObjectifyDB extends DB
       parent.meta = conv.map(_.mkString("=")).mkString(";")
       transaction { _.put(parent) :Key[DatumRow] }
     } catch {
-      case e => _log.warning("Failed to convert metadata", "meta", parent.meta, "mmap", meta, e)
+      case e :Exception =>
+        _log.warning("Failed to convert metadata", "meta", parent.meta, "mmap", meta, e)
     }
   }
 

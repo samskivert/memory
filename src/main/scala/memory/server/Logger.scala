@@ -47,7 +47,7 @@ class Logger (name :String)
       if (_impl.isLoggable(level))
         _impl.log(level, format(msgobj, args), getexn(msgobj, args))
     } catch {
-      case e => _impl.log(Level.WARNING, "Failure generating log message", e)
+      case e :Exception => _impl.log(Level.WARNING, "Failure generating log message", e)
     }
   }
 
