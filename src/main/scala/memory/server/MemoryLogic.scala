@@ -93,8 +93,13 @@ object MemoryLogic
     Arrays.asList(db.loadChildren(cortexId, parentId, Type.MEDIA) :_*)
 
   /** Resolves today's child of the supplied journal parent. */
-  def resolveJournalChild (cortexId :String, id :Long, when :Long) =
+  def resolveJournalChild (cortexId :String, id :Long, when :Long) = try {
     Arrays.asList(resolveJournalDatum(cortexId, id, when))
+  } catch {
+    case e :Exception =>
+      _log.warning("Failed to resolve journal child", "cortex", cortexId, "id", id, "when", when, e)
+      Collections.emptyList
+  }
 
   /** Loads and resolves the journal datum for the specified date, creating it if necessary. */
   def resolveJournalDatum (cortexId :String, journalId :Long, when :Long) :Datum = {
@@ -138,6 +143,7 @@ object MemoryLogic
     }
   }
 
+  private val _log = new Logger("MemoryLogic")
   private final val UTC = TimeZone.getTimeZone("GMT")
   private final val DEFAULT_EXPIRY_TIME = 2 * 24*60*60*1000L
 }
