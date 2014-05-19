@@ -122,8 +122,8 @@ class GetServlet extends HttpServlet
         val buf = new StringWriter
         val out = new PrintWriter(buf)
         out.println(ServletUtil.htmlHeader(datum.title + " (" + cortexId + ")"))
-        val pxml = <div style="display:none" id="path">{
-          path.map(p => <div x:parentId={p.parentId.toString} x:title={p.title}/>)
+        val pxml = <div style="display: none" id="path">{
+          path.map(p => <div x:parentId={p.parentId.toString} x:title={p.title}></div>)
         }</div>
         XML.write(out, pxml, null, false, null)
         out.println
