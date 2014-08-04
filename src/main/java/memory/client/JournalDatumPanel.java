@@ -6,17 +6,17 @@ package memory.client;
 import java.util.Date;
 import java.util.List;
 
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.datepicker.client.DatePicker;
 
 import com.threerings.gwt.ui.Popups;
 import com.threerings.gwt.ui.Widgets;
@@ -113,30 +113,22 @@ public class JournalDatumPanel extends ListDatumPanel
                 if (_popup == null) {
                     _popup = new PopupPanel(true);
                     _popup.addStyleName(_rsrc.styles().popup());
-                    _popup.setWidget(createDatePicker(_popup));
+                    final TextBox date = new TextBox();
+                    date.getElement().setAttribute("type", "date");
+                    date.setText(_pfmt.format(_curdate));
+                    date.addChangeHandler(new ChangeHandler() {
+                        public void onChange (ChangeEvent event) {
+                            changeDate(_pfmt.parse(date.getText()).getTime());
+                        }
+                    });
+                    _popup.setWidget(date);
                 }
-                if (_popup.isShowing()) {
-                    _popup.hide();
-                } else {
-                    Popups.showBelow(_popup, popper);
-                }
+                if (_popup.isShowing()) _popup.hide();
+                else Popups.showBelow(_popup, popper);
             }
             protected PopupPanel _popup;
         });
         return popper;
-    }
-
-    protected DatePicker createDatePicker (final PopupPanel popup)
-    {
-        DatePicker picker = new DatePicker();
-        picker.setValue(_curdate, true);
-        picker.addValueChangeHandler(new ValueChangeHandler<Date>() {
-            public void onValueChange (ValueChangeEvent<Date> event) {
-                changeDate(event.getValue().getTime());
-                popup.hide();
-            }
-        });
-        return picker;
     }
 
     protected Datum _today;
@@ -145,4 +137,5 @@ public class JournalDatumPanel extends ListDatumPanel
     protected Widget _popper;
 
     protected static final DateTimeFormat _yfmt = DateTimeFormat.getFormat("MMM dd, yyyy");
+    protected static final DateTimeFormat _pfmt = DateTimeFormat.getFormat("yyyy-MM-dd");
 }
