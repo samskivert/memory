@@ -262,30 +262,39 @@ public class ListDatumPanel extends DatumPanel
             addItemWidget(this, _item, _data);
             if (_ctx.canOpenEditor() && _item.id != 0) {
                 if (allowChildReorder()) {
-                    _regs.add(addDomHandler(new MouseDownHandler() {
-                        public void onMouseDown(MouseDownEvent event) { startEditTimer(); }
-                    }, MouseDownEvent.getType()));
+                    // _regs.add(addDomHandler(new MouseDownHandler() {
+                    //     public void onMouseDown(MouseDownEvent event) { startEditTimer(); }
+                    // }, MouseDownEvent.getType()));
                     _regs.add(addDomHandler(new TouchStartHandler() {
-                        public void onTouchStart(TouchStartEvent event) { startEditTimer(); }
+                        public void onTouchStart (TouchStartEvent event) {
+                            if (event.getTargetTouches().length() > 1) insertBefore();
+                        }
                     }, TouchStartEvent.getType()));
-                    _regs.add(addDomHandler(new TouchEndHandler() {
-                        public void onTouchEnd(TouchEndEvent event) { cancelEditTimer(); }
-                    }, TouchEndEvent.getType()));
-                    _regs.add(addDomHandler(new TouchCancelHandler() {
-                        public void onTouchCancel(TouchCancelEvent event) { cancelEditTimer(); }
-                    }, TouchCancelEvent.getType()));
-                    _regs.add(addDomHandler(new MouseOutHandler() {
-                        public void onMouseOut(MouseOutEvent event) { cancelEditTimer(); }
-                    }, MouseOutEvent.getType()));
+                    // _regs.add(addDomHandler(new TouchEndHandler() {
+                    //     public void onTouchEnd(TouchEndEvent event) { cancelEditTimer(); }
+                    // }, TouchEndEvent.getType()));
+                    // _regs.add(addDomHandler(new TouchCancelHandler() {
+                    //     public void onTouchCancel(TouchCancelEvent event) { cancelEditTimer(); }
+                    // }, TouchCancelEvent.getType()));
+                    // _regs.add(addDomHandler(new MouseOutHandler() {
+                    //     public void onMouseOut(MouseOutEvent event) { cancelEditTimer(); }
+                    // }, MouseOutEvent.getType()));
                 }
                 _regs.add(addDomHandler(new ClickHandler() {
                     public void onClick (ClickEvent event) {
-                        cancelEditTimer();
                         // if they shift-clicked, show the editor
                         if (event.isShiftKeyDown()) displayEditor();
+                        // if they command-clicked (and it's allowed) insert a new item here
+                        else if (event.isMetaKeyDown() && allowChildReorder()) {
+                            insertBefore();
+                        }
                     }
                 }, ClickEvent.getType()));
             }
+        }
+
+        protected void insertBefore () {
+            showAddUIBefore(_item.id, this);
         }
 
         protected void displayEditor () {
@@ -311,22 +320,22 @@ public class ListDatumPanel extends DatumPanel
             row.text.setFocus(true);
         }
 
-        protected void startEditTimer () {
-            if (_editTimer == null) {
-                _editTimer = new Timer() { public void run () {
-                    showAddUIBefore(_item.id, EditableItemLabel.this);
-                }};
-            }
-            _editTimer.schedule(500);
-        }
+        // protected void startEditTimer () {
+        //     if (_editTimer == null) {
+        //         _editTimer = new Timer() { public void run () {
+        //             showAddUIBefore(_item.id, EditableItemLabel.this);
+        //         }};
+        //     }
+        //     _editTimer.schedule(500);
+        // }
 
-        protected void cancelEditTimer () {
-            if (_editTimer != null) _editTimer.cancel();
-        }
+        // protected void cancelEditTimer () {
+        //     if (_editTimer != null) _editTimer.cancel();
+        // }
 
         protected Datum _item;
         protected MetaData _data;
-        protected Timer _editTimer;
+        // protected Timer _editTimer;
         protected List<HandlerRegistration> _regs = new ArrayList<HandlerRegistration>();
     }
 
