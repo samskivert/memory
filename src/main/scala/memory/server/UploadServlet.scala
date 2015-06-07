@@ -34,7 +34,7 @@ class UploadServlet extends HttpServlet
         val parentId = requireParam(req, "parentId")
         val name = requireParam(req, "name")
 
-        val parent = db.loadDatum(cortexId, parentId.toInt)
+        val parent = db.loadDatum(cortexId, parentId.toLong)
         // TODO: require write access to cortex or parent datum
 
         // create a new datum to reference this blob

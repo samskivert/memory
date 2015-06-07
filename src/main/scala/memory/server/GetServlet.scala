@@ -70,9 +70,9 @@ class GetServlet extends HttpServlet
 
       val datum = bits.length match {
         case 2 => root
-        case 3 => db.loadDatum(cortexId, bits(2).toInt)
-        case 4 => db.loadDatum(cortexId, bits(2).toInt, bits(3)) getOrElse(
-          mkStub(bits(2).toInt, bits(3)))
+        case 3 => db.loadDatum(cortexId, bits(2).toLong)
+        case 4 => db.loadDatum(cortexId, bits(2).toLong, bits(3)) getOrElse(
+          mkStub(bits(2).toLong, bits(3)))
         case _ => throw new BadRequestException("Invalid path " + rawPathInfo)
       }
 
@@ -166,7 +166,7 @@ class GetServlet extends HttpServlet
     </def>
   }
 
-  private def mkStub (parentId :Int, title :String) = {
+  private def mkStub (parentId :Long, title :String) = {
     val datum = new Datum
     datum.parentId = parentId
     datum.meta = ""
