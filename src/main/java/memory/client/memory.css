@@ -6,7 +6,7 @@ body {
 
 .header {
   font-family: "Palatino", "Times New Roman", Times, serif;
-  font-size: 32px;
+  font-size: 1.5em;
   font-weight: bold;
 }
 
@@ -91,7 +91,7 @@ body {
   display: inline;
   float: right;
   padding-right: 5px;
-  font-size: 14px;
+  font-size: 1.1em;
 }
 
 .editorLabel {
@@ -108,11 +108,11 @@ body {
 }
 
 .view {
-  font-size: 12pt;
+  font-size: 1em;
 }
 
 .pageTitle {
-  font-size: large;
+  font-size: 1.5em;
   border-bottom: 1px solid;
 }
 
