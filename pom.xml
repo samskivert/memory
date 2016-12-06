@@ -37,8 +37,8 @@
 
   <repositories>
     <repository>
-      <id>objectify-repo</id>
-      <url>http://objectify-appengine.googlecode.com/svn/maven</url>
+      <id>objectify-appengine</id>
+      <url>file://objectify-maven-legacy</url>
     </repository>
   </repositories>
 
@@ -91,7 +91,7 @@
     <dependency>
       <groupId>com.threerings</groupId>
       <artifactId>gwt-utils</artifactId>
-      <version>1.8-SNAPSHOT</version>
+      <version>1.8</version>
       <scope>provided</scope>
     </dependency>
     <dependency>

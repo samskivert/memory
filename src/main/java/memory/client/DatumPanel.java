@@ -219,7 +219,7 @@ public abstract class DatumPanel extends FlowPanel
 
             _updaters.add(new BitsUpdater() {
                 public void addUpdates (Map<Datum.Field, FieldValue> updates) {
-                    _type = type.getSelectedValue();
+                    _type = type.getSelectedEnum();
                     updates.put(Datum.Field.TYPE, FieldValue.of(_type));
                     _parentId = parentId.getNumber().longValue();
                     updates.put(Datum.Field.PARENT_ID, FieldValue.of(_parentId));

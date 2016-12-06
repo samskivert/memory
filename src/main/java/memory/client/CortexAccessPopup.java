@@ -58,7 +58,7 @@ public class CortexAccessPopup extends AccessPopup
             protected boolean callService () {
                 String addr = email.getText().trim();
                 if (addr.length() == 0) return false;
-                _datasvc.shareCortex(_cortexId, addr, accessBox.getSelectedValue(), this);
+                _datasvc.shareCortex(_cortexId, addr, accessBox.getSelectedEnum(), this);
                 return true;
             }
             protected boolean gotResult (Void result) {

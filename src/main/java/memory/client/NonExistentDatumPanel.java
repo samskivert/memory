@@ -34,7 +34,7 @@ public class NonExistentDatumPanel extends DatumPanel
 
         new MClickCallback<Long>(create) {
             protected boolean callService () {
-                _datum.type = type.getSelectedValue();
+                _datum.type = type.getSelectedEnum();
                 if (_datum.type.hasText()) {
                     _datum.text = "Click the button above to edit this item.";
                 }

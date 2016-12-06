@@ -45,7 +45,7 @@ public abstract class AccessPopup extends HeaderPopup
         publicBox.addChangeHandler(new ChangeHandler() {
             public void onChange (ChangeEvent event) {
                 updatePublicAccess(
-                    publicBox.getSelectedValue(), new MPopupCallback<Void>(publicBox) {
+                    publicBox.getSelectedEnum(), new MPopupCallback<Void>(publicBox) {
                     public void onSuccess (Void result) {
                         Popups.infoBelow("Access updated.", publicBox);
                     }
