@@ -17,3 +17,23 @@ You can use it at [http://www.sparecortex.com/](http://www.sparecortex.com/).
 
 You can discuss it and get in touch with its author at the
 [Spare Cortex Google Group](http://groups.google.com/group/spare-cortex).
+
+# Building
+
+We build with Maven. For testing:
+
+```
+mvn appengine:devserver
+```
+
+Running superdevmode (in parallel with above command):
+
+```
+mvn gwt:run-codeserver
+```
+
+For deployment:
+
+```
+mvn appengine:update
+```
