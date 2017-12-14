@@ -3,17 +3,15 @@
 
 package memory.persist.objectify;
 
-import javax.persistence.Id;
-
 import com.googlecode.objectify.Key;
-import com.googlecode.objectify.annotation.Parent;
-import com.googlecode.objectify.annotation.Unindexed;
+import com.googlecode.objectify.annotation.*;
 
 import memory.data.Access;
 
 /**
  * Contains access control information for a datum.
  */
+@Entity
 public class DatumAccess
 {
     /** The user in question. */
@@ -23,5 +21,5 @@ public class DatumAccess
     @Id public String id;
 
     /** The user's access to the datum. */
-    @Unindexed public Access access;
+    public Access access;
 }

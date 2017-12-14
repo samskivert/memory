@@ -12,7 +12,7 @@ import memory.data.{Access, AccessInfo, Cortex, Datum, FieldValue, Type}
 trait DB
 {
   /** Initializes the database component. */
-  def init :Unit
+  def init (extra :Runnable) :Unit
 
   /** Shuts down the database component. */
   def shutdown :Unit

@@ -3,17 +3,15 @@
 
 package memory.persist.objectify;
 
-import javax.persistence.Id;
-
 import com.googlecode.objectify.Key;
-import com.googlecode.objectify.annotation.Parent;
-import com.googlecode.objectify.annotation.Unindexed;
+import com.googlecode.objectify.annotation.*;
 
 import memory.data.Access;
 
 /**
  * Contains access control information for a cortex.
  */
+@Entity
 public class CortexAccess
 {
     /** The user in question. */
@@ -23,13 +21,13 @@ public class CortexAccess
     @Id public Long id;
 
     /** The cortex in question. */
-    public String cortexId;
+    @Index public String cortexId;
 
     /** The email used to grant the user access. */
-    @Unindexed public String email;
+    public String email;
 
     /** The user's access to the datum. */
-    @Unindexed public Access access;
+    public Access access;
 
     @Override // from Object
     public String toString ()

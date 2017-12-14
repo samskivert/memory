@@ -3,28 +3,27 @@
 
 package memory.persist.objectify;
 
-import javax.persistence.Id;
-
-import com.googlecode.objectify.annotation.Unindexed;
+import com.googlecode.objectify.annotation.*;
 
 import memory.data.Access;
 
 /**
  * Contains the data for a share request.
  */
+@Entity
 public class ShareRow
 {
     /** The id of this share request. */
     @Id public Long id;
 
     /** The randomly generated token for this share request. */
-    public String token;
+    @Index public String token;
 
     /** The cortex being shared. */
-    @Unindexed public String cortexId;
+    public String cortexId;
 
     /** The access to be granted to the sharee. */
-    @Unindexed public Access access;
+    public Access access;
 
     @Override // from Object
     public String toString () {

@@ -18,7 +18,7 @@ class ObjectifyDBTest
 
   @Before def beforeAll {
     helper.setUp
-    db.init
+    db.init(() => {})
   }
 
   @After def afterAll {

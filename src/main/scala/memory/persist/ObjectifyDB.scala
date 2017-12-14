@@ -8,7 +8,7 @@ import java.io.{InputStream, OutputStream}
 import java.util.{List => JList}
 import scala.collection.JavaConversions._
 
-import com.googlecode.objectify.{Key, NotFoundException, Objectify, ObjectifyService}
+import com.googlecode.objectify.{Key, NotFoundException, ObjectifyService}
 
 import memory.data.{Access, AccessInfo, Cortex, Datum, FieldValue, Type}
 import memory.server.Logger
@@ -18,16 +18,18 @@ import memory.server.Logger
  */
 object ObjectifyDB extends DB
 {
+  import ObjectifyService.{ofy, run, register}
+
+  val entities = List[Class[_]](
+    classOf[UserRow], classOf[DatumRow], classOf[CortexRow], classOf[ShareRow],
+    classOf[CortexAccess], classOf[DatumAccess])
+
   // from trait DB
-  def init {
-    List[Class[_]](
-      classOf[UserRow],
-      classOf[DatumRow],
-      classOf[CortexRow],
-      classOf[ShareRow],
-      classOf[CortexAccess],
-      classOf[DatumAccess]
-    ) foreach(ObjectifyService.register)
+  def init (extra :Runnable) {
+    run { () =>
+      entities foreach register
+      extra.run()
+    }
   }
 
   // from trait DB
@@ -37,21 +39,21 @@ object ObjectifyDB extends DB
 
   // from trait DB
   def noteUser (userId :String) {
-    transaction { obj =>
-      val row = obj.find(userKey(userId))
+    ofy.transact { () =>
+      val row = find(userKey(userId))
       if (row == null) {
         val nrow = new UserRow
         nrow.id = userId
         nrow.firstSession = System.currentTimeMillis
-        obj.put(nrow) :Key[UserRow]
+        put(nrow)
       }
     }
   }
 
   // from trait DB
   def createCortex (cortexId :String, ownerId :String, root :Datum) :Boolean = {
-    transaction { obj =>
-      if (obj.find(cortexKey(cortexId)) != null) {
+    ofy.transact { () =>
+      if (find(cortexKey(cortexId)) != null) {
         return false
       }
       createDatum(cortexId, root)
@@ -61,12 +63,9 @@ object ObjectifyDB extends DB
       row.rootId = root.id
       row.ownerId = ownerId
       row.publicAccess = Access.NONE
-      obj.put(row) :Key[CortexRow]
+      put(row)
     }
-    transaction {
-      // we have to force the return type below to resolve pesky overload of put()
-      _.put(cortexAccess(ownerId, cortexId, "", Access.WRITE)) :Key[CortexAccess]
-    }
+    ofy.transact { () => put(cortexAccess(ownerId, cortexId, "", Access.WRITE)) }
     true
   }
 
@@ -76,21 +75,21 @@ object ObjectifyDB extends DB
     val cortexAccess = query[CortexAccess].filter("cortexId", cortexId).list
 
     // load the keys for all data in this cortex
-    val dataKeys = query[DatumRow].ancestor(cortexKey(cortexId)).listKeys
+    val dataKeys = query[DatumRow].ancestor(cortexKey(cortexId)).keys
 
     // load the data access rows (TODO: this is heinously inefficient, but there are only 24 data
     // acess rows in existence at the moment)
     val dataAccess :JList[DatumAccess] = query[DatumAccess].list.filter(_.id.startsWith(cortexId+":"))
 
     // first delete the bits with CortexRow ancestor
-    transaction { obj =>
-      obj.delete(dataKeys)
-      obj.delete(cortexKey(cortexId))
+    ofy.transact { () =>
+      ofy.delete.keys(dataKeys)
+      ofy.delete.key(cortexKey(cortexId))
     }
     // next delete the bits with UserRow ancestor
-    transaction { obj =>
-      obj.delete(dataAccess)
-      obj.delete(cortexAccess)
+    ofy.transact { () =>
+      ofy.delete.entities(dataAccess)
+      ofy.delete.entities(cortexAccess)
     }
   }
 
@@ -100,7 +99,7 @@ object ObjectifyDB extends DB
     // TEMP: handle legacy cortices that lack a publicAccess field
     if (cortex.publicAccess == null) {
       cortex.publicAccess = Access.NONE
-      transaction { _.put(cortex) :Key[CortexRow] }
+      ofy.transact { () => put(cortex) }
     }
     Some(toJava(cortex))
   } catch {
@@ -109,17 +108,16 @@ object ObjectifyDB extends DB
 
   // from trait DB
   def loadRoot (cortexId: String) :Option[Datum] = {
-    val obj = ObjectifyService.begin
-    Option(obj.find(cortexKey(cortexId))) map(c => obj.get(datumKey(cortexId, c.rootId))) map(toJava)
+    Option(get(cortexKey(cortexId))).map(c => get(datumKey(cortexId, c.rootId))).map(toJava)
   }
 
   // from trait DB
-  def loadAccess (userId :String, cortexId :String) = Option(query[CortexAccess].ancestor(
-    userKey(userId)).filter("cortexId", cortexId).get) map(_.access)
+  def loadAccess (userId :String, cortexId :String) = Option(query[CortexAccess].
+    ancestor(userKey(userId)).filter("cortexId", cortexId).first.now) map(_.access)
 
   // from trait DB
   def loadAccess (userId :String, cortexId :String, datumId :Long) = {
-    val key = new Key(userKey(userId), classOf[DatumAccess], cortexId + ":" + datumId)
+    val key = Key.create(userKey(userId), classOf[DatumAccess], cortexId + ":" + datumId)
     try Some(get(key).access)
     catch {
       case e :NotFoundException => None
@@ -136,22 +134,22 @@ object ObjectifyDB extends DB
 
   // from trait DB
   def updateCortexPublicAccess (cortexId :String, access :Access) {
-    transaction { obj =>
-      val ctx = obj.get(cortexKey(cortexId))
+    ofy.transact { () =>
+      val ctx = get(cortexKey(cortexId))
       ctx.publicAccess = access
-      obj.put(ctx) :Key[CortexRow]
+      put(ctx)
     }
   }
 
   // from trait DB
   def updateCortexAccess (id :Long, callerId :String, access :Access) = try {
-    transaction { obj =>
-      val arow :CortexAccess = obj.get(classOf[CortexAccess], id)
+    ofy.transact { () =>
+      val arow :CortexAccess = get(Key.create(classOf[CortexAccess], id))
       if (loadCortex(arow.cortexId).map(_.ownerId).getOrElse("") != callerId) false
       else {
         // TODO: if access == NONE, remove it
         arow.access = access
-        obj.put(arow) :Key[CortexAccess]
+        put(arow)
         true
       }
     }
@@ -162,7 +160,8 @@ object ObjectifyDB extends DB
 
   // from trait DB
   def updateDatumAccess (userId :String, cortexId :String, datumId :Long, access :Access) {
-    transaction { _.put(datumAccess(userId, cortexId, datumId, access)) :Key[DatumAccess] }
+    val da = datumAccess(userId, cortexId, datumId, access)
+    ofy.transact { () => put(da) }
   }
 
   // from trait DB
@@ -170,8 +169,8 @@ object ObjectifyDB extends DB
 
   // from trait DB
   def loadDatum (cortexId :String, parentId :Long, title :String) :Option[Datum] =
-    Option(query[DatumRow].ancestor(cortexKey(cortexId)).filter("parentId", parentId).filter(
-      "titleKey", title.toLowerCase).get) map(toJava)
+    Option(query[DatumRow].ancestor(cortexKey(cortexId)).filter("parentId", parentId).
+      filter("titleKey", title.toLowerCase).first.now) map(toJava)
 
   // from trait DB
   def loadChildren (cortexId :String, id :Long, includeArchived :Boolean) :Array[Datum] = {
@@ -193,21 +192,21 @@ object ObjectifyDB extends DB
 
   // from trait DB
   def updateDatum (cortexId :String, id :Long, updates :Seq[(Datum.Field, FieldValue)]) {
-    transaction { obj =>
-      var datum = obj.get(datumKey(cortexId, id))
+    ofy.transact { () =>
+      var datum = get(datumKey(cortexId, id))
       updates.foreach { case (f, v) => updateField(datum, f, v) }
       datum.when = System.currentTimeMillis
-      obj.put(datum) :Key[DatumRow]
+      put(datum)
     }
   }
 
   // from trait DB
   def archiveDatum (cortexId :String, id :Long) {
-    transaction { obj =>
-      var datum = obj.get(datumKey(cortexId, id))
+    ofy.transact { () =>
+      var datum = get(datumKey(cortexId, id))
       datum.archived = true
       // we don't update "when" when archiving a datum
-      obj.put(datum) :Key[DatumRow]
+      put(datum)
     }
   }
 
@@ -224,14 +223,14 @@ object ObjectifyDB extends DB
     row.when = d.when
     // row.archived = false
 
-    val key = transaction { _.put(row) :Key[DatumRow] }
+    val key = ofy.transact { () => put(row) }
     d.id = key.getId
     d.id
   }
 
   // from trait DB
   def deleteDatum (cortexId :String, id :Long) {
-    transaction { _.delete(datumKey(cortexId, id)) }
+    ofy.transact { () => ofy.delete.key(datumKey(cortexId, id)) }
   }
 
   // from trait DB
@@ -243,7 +242,7 @@ object ObjectifyDB extends DB
         toChild.cortex = cortexKey(toCortexId)
         toChild.id = null
         toChild.parentId = toId
-        val key = transaction { _.put(toChild) :Key[DatumRow] }
+        val key = ofy.transact { () => put(toChild) }
         (fromChild.id.longValue, key.getId)
       }
 
@@ -265,7 +264,7 @@ object ObjectifyDB extends DB
         case v => _log.warning("Weird metadata value: " + v, "parent", parent.title); v
       }
       parent.meta = conv.map(_.mkString("=")).mkString(";")
-      transaction { _.put(parent) :Key[DatumRow] }
+      ofy.transact { () => put(parent) }
     } catch {
       case e :Exception =>
         _log.warning("Failed to convert metadata", "meta", parent.meta, "mmap", meta, e)
@@ -278,7 +277,7 @@ object ObjectifyDB extends DB
     row.token = token
     row.cortexId = cortexId
     row.access = access
-    transaction { _.put(row) :Key[ShareRow] } getId
+    ofy.transact { () => put(row) } getId
   }
 
   // from trait DB
@@ -288,18 +287,18 @@ object ObjectifyDB extends DB
   def acceptShareRequest (token :String, userId :String, email :String) = mapShareInfo(token) {
     info =>
       deleteShareRequest(info.id)
-      transaction { obj =>
+      ofy.transact { () =>
         // delete any previous cortex access rows for this user+cortex
-        obj.query(classOf[CortexAccess]).ancestor(userKey(userId)).filter(
-          "cortexId", info.cortexId).list foreach obj.delete
+        query[CortexAccess].ancestor(userKey(userId)).filter(
+          "cortexId", info.cortexId).list foreach ofy.delete.entity
         // store their new access
-        obj.put(cortexAccess(userId, info.cortexId, email, info.access)) :Key[CortexAccess]
+        put(cortexAccess(userId, info.cortexId, email, info.access))
       }
   } isDefined
 
   // from trait DB
   def deleteShareRequest (shareId :Long) {
-    transaction { _.delete(new Key(classOf[ShareRow], shareId)) }
+    ofy.transact { () => ofy.delete.key(Key.create(classOf[ShareRow], shareId)) }
   }
 
   // from trait DB
@@ -307,7 +306,7 @@ object ObjectifyDB extends DB
     // // TODO
     // import java.io._
     // val dout = new DataOutputStream(new BufferedOutputStream(out))
-    // transaction { obj =>
+    // ofy.transact { () =>
     //   // first dump the cortex rows
     //   val iter = obj.query(classOf[CortexRow])
     //   while (iter.hasNext) {
@@ -391,34 +390,19 @@ object ObjectifyDB extends DB
     datum
   }
 
-  private def get[T] (key :Key[T]) :T = ObjectifyService.begin.get(key)
-  private def get[T] (keys :Iterable[Key[T]]) = ObjectifyService.begin.get(asJavaIterable(keys))
+  private def get[T] (key :Key[T]) :T = ofy.load.key(key).safe
+  private def get[T] (keys :Iterable[Key[T]]) = ofy.load.keys(asJavaIterable(keys))
+  private def find[T] (key :Key[T]) :T = ofy.load.key(key).now
+  private def put[T] (entity :T) :Key[T] = ofy.save.entity(entity).now
   private def query[T](implicit m :ClassManifest[T]) =
-    ObjectifyService.begin.query(m.erasure.asInstanceOf[Class[T]])
+    ofy.load.`type`(m.erasure.asInstanceOf[Class[T]])
 
-  private def userKey (userId :String) = new Key(classOf[UserRow], userId)
-  private def cortexKey (cortexId :String) = new Key(classOf[CortexRow], cortexId)
+  private def userKey (userId :String) = Key.create(classOf[UserRow], userId)
+  private def cortexKey (cortexId :String) = Key.create(classOf[CortexRow], cortexId)
   private def datumKey (cortexId :String, datumId :Long) =
-    new Key(cortexKey(cortexId), classOf[DatumRow], datumId)
+    Key.create(cortexKey(cortexId), classOf[DatumRow], datumId)
   private def toAccessInfo (ca :CortexAccess) =
     new AccessInfo(ca.id.longValue, ca.cortexId, ca.email, ca.access)
 
-  private def transaction[T] (action :Objectify => T) = {
-    if (_txobj != null) {
-      action(_txobj) // execute action in "nested" transaction
-    } else {
-      _txobj = ObjectifyService.beginTransaction
-      try {
-        val result = action(_txobj)
-        _txobj.getTxn.commit
-        result
-      } finally {
-        if (_txobj.getTxn.isActive) _txobj.getTxn.rollback
-        _txobj = null
-      }
-    }
-  }
-
-  private[this] var _txobj :Objectify = _
   private val _log = new Logger("objdb")
 }
