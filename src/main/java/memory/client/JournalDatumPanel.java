@@ -86,6 +86,12 @@ public class JournalDatumPanel extends ListDatumPanel
         return false;
     }
 
+    @Override protected void onItemEdited (Datum item) {
+        super.onItemEdited(item);
+        // reshow contents to resort items based on last-edited time
+        showContents();
+    }
+
     protected void changeDate (long when)
     {
         _datasvc.loadJournalData(_ctx.cortexId, _datum.id, when,

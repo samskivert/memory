@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.*; // myriad FooEvent and FooHandler
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Timer;
@@ -223,6 +224,10 @@ public class ListDatumPanel extends DatumPanel
         return true;
     }
 
+    protected void onItemEdited (Datum item) {
+        // nothing by default; subclasses hook in here
+    }
+
     protected class EditableItemLabel extends FlowPanel
     {
         public EditableItemLabel (Datum item, MetaData data) {
@@ -304,6 +309,7 @@ public class ListDatumPanel extends DatumPanel
             ItemEditor row = new ItemEditor(_item) {
                 protected void onUpdated () {
                     displayItem();
+                    onItemEdited(_item);
                 }
             };
             row.text.addKeyDownHandler(new KeyDownHandler() {
@@ -363,6 +369,7 @@ public class ListDatumPanel extends DatumPanel
                 }
                 protected boolean gotResult (Void result) {
                     item.text = _text;
+                    item.when = System.currentTimeMillis();
                     onUpdated();
                     return true;
                 }
