@@ -71,7 +71,8 @@ object MemoryLogic
     root.children = new ArrayList[Datum](root.`type` match {
       case Type.LIST => loadAndResolveChildren(cortexId, root.id, when, false)
       case Type.CHECKLIST => loadAndResolveChildren(cortexId, root.id, when, historyMode)
-      case Type.JOURNAL => resolveJournalChild(cortexId, root.id, when)
+      case Type.JOURNAL => if (!historyMode) resolveJournalChild(cortexId, root.id, when)
+                           else Arrays.asList(db.loadChildren(cortexId, root.id, true) :_*)
       case Type.PAGE => loadAndResolveChildren(cortexId, root.id, when, false)
       case Type.HTML | Type.WIKI => loadMediaChildren(cortexId, root.id)
       case _ => Collections.emptyList
